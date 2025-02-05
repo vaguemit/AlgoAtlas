@@ -10,12 +10,8 @@
 
 AlgoAtlas supercharges your Codeforces practice with AI-powered recommendations, themed contests, and structured learning paths.
 
-[Getting Started](#getting-started) • 
-[Features](#features) • 
-[Contribute](#contributing) • 
-[Roadmap](#roadmap)
 
-![Demo Banner Placeholder](https://via.placeholder.com/800x400?text=AlgoAtlas+Platform+Preview)
+
 
 </div>
 
