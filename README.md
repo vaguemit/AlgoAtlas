@@ -1,12 +1,43 @@
-# CodeAtlas 🚀
+<div align="center">
 
-A competitive programming training platform (currently in development) designed to help you train for Codeforces with themed contests, AI assistance, and curated problem sets.
+# 🚀 AlgoAtlas
 
-## Project Status 🏗️
+[![Status](https://img.shields.io/badge/status-in%20development-yellow)](https://github.com/yourusername/algoatlas)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-CodeAtlas is currently under active development. Many features are being built and refined. We welcome developers who'd like to contribute to this project!
+### Train Smarter for Competitive Programming
 
-## Planned Features ✨
+AlgoAtlas supercharges your Codeforces practice with AI-powered recommendations, themed contests, and structured learning paths.
+
+[Getting Started](#getting-started) • 
+[Features](#features) • 
+[Contribute](#contributing) • 
+[Roadmap](#roadmap)
+
+![Demo Banner Placeholder](https://via.placeholder.com/800x400?text=AlgoAtlas+Platform+Preview)
+
+</div>
+
+---
+
+## ⚡ Quick Overview
+
+```bash
+git clone https://github.com/yourusername/algoatlas.git
+cd algoatlas
+npm install
+npm run dev
+```
+
+## 🎯 Why AlgoAtlas?
+
+- 🤖 **AI-Powered Learning** - Personalized recommendations using locally hosted models
+- 🏆 **Themed Contests** - Practice with purpose through focused competition tracks
+- 📚 **Smart Resources** - Curated problems and guides for systematic improvement
+- 🤝 **Community Driven** - Learn and grow with fellow competitive programmers
+
+## 🌟 Features
 
 ### Smart Training Assistant
 - Personalized problem recommendations using locally hosted AI
@@ -15,67 +46,59 @@ CodeAtlas is currently under active development. Many features are being built a
 - Custom training paths tailored to your goals
 
 ### Themed Contests
-- Themed competitions focusing on specific algorithms and techniques
+- Weekly themed competitions focusing on specific algorithms
 - Virtual contests using past Codeforces problems
+- Collaborative team contests
 - Custom contest creation for practice
 
 ### Problem Repository
 - Carefully curated collection of Codeforces problems
 - Advanced filtering by topic, difficulty, and contest source
+- Detailed solutions and explanations
 - User-contributed editorials and approaches
 
-### Learning Resources
-- Comprehensive guides for common algorithms and data structures
-- Video tutorials and interactive lessons
-- Code templates and example implementations
-- Tips and tricks from experienced competitive programmers
+## 🛠️ Tech Stack
 
-## Tech Stack 🛠️
+### Frontend
+- Next.js
+- Tailwind CSS
+- Modern UI components
+- Shadcn UI
 
-- Frontend: 
-  - Next.js
-  - Tailwind CSS
-  - Modern UI components
-  - Shadcn UI
-- Backend: 
-  - Supabase for database and authentication
-  - Edge Functions for serverless computing
-- AI Integration: 
-  - Locally hosted fine-tuned models
-  - Custom training pipeline for competitive programming data
+### Backend
+- Supabase for database and authentication
+- Edge Functions for serverless computing
 
-## Contributing 🤝
+### AI Integration
+- Locally hosted fine-tuned models
+- Custom training pipeline for competitive programming
 
-We're excited to welcome contributors to help build CodeTlas! Here's how you can help:
+## 💻 Development Setup
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Local Development 💻
-
+1. **Clone and Install**
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/codetlas.git
-
-# Install dependencies
-cd codetlas
+git clone https://github.com/yourusername/algoatlas.git
+cd algoatlas
 npm install
+```
 
-# Set up environment variables
+2. **Environment Setup**
+```bash
 cp .env.example .env
-# Add your Supabase credentials and model paths to .env
+# Configure your environment variables
+```
 
-# Start development server
+3. **Start Development Server**
+```bash
 npm run dev
+```
 
-# Download and set up the AI models (separate script)
+4. **Setup AI Models**
+```bash
 npm run setup-models
 ```
 
-## Environment Variables
+## 📋 Environment Variables
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -83,51 +106,61 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 MODEL_PATH=path_to_your_finetuned_model
 ```
 
-## Roadmap 🗺️
+## 🗺️ Roadmap
 
-1. Phase 1: Core Features
-   - User authentication with Supabase
-   - Problem repository setup
-   - Initial UI implementation
+### Phase 1: Foundation
+- [ ] User authentication with Supabase
+- [ ] Problem repository setup
+- [ ] Initial UI implementation
 
-2. Phase 2: Contest System
-   - Themed contest creation
-   - Virtual contest support
-   - Leaderboard implementation
+### Phase 2: Contest System
+- [ ] Themed contest creation
+- [ ] Virtual contest support
+- [ ] Leaderboard implementation
 
-3. Phase 3: AI Assistant
-   - Model fine-tuning on competitive programming data
-   - Local model deployment and optimization
-   - Integration of AI features:
-     - Problem recommendations
-     - Hint generation
-     - Solution analysis
-     - Performance prediction
+### Phase 3: AI Integration
+- [ ] Model fine-tuning
+- [ ] Local model deployment
+- [ ] AI features integration
 
-## AI Model Development 🤖
+## 🤖 AI Model Development
 
-The AI capabilities in CodeTlas are powered by locally hosted models fine-tuned specifically for competitive programming tasks. Key aspects include:
+Our AI capabilities are powered by locally hosted models specifically fine-tuned for competitive programming:
 
-- Custom training data from competitive programming solutions and editorials
-- Fine-tuning pipeline optimized for coding assistance
-- Local deployment for better privacy and control
-- Continuous model improvements based on user interactions
+- Custom training data from competitive programming solutions
+- Optimized fine-tuning pipeline
+- Local deployment for privacy
+- Continuous model improvements
 
-## License 📝
+## 🤝 Contributing
+
+We welcome contributions! See our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact 📧
+## 📬 Contact
 
-- GitHub Issues: Feel free to create issues for bugs, feature requests, or questions
-- GitHub Discussions: Join our discussions for longer conversations and ideas
+- GitHub Issues: Bug reports and feature requests
+- GitHub Discussions: Questions and ideas
 
-## Acknowledgments 🙏
+## 🙏 Acknowledgments
 
-- Thanks to Codeforces for providing the competitive programming platform
+- Thanks to Codeforces for the competitive programming platform
 - Thanks to Supabase for the backend infrastructure
-- Inspired by the competitive programming community's need for structured training
+- Inspired by the competitive programming community
 
 ---
 
+<div align="center">
 Made with ❤️ by competitive programmers, for competitive programmers
+
+[⬆ Back to Top](#-algoatlas)
+</div>
