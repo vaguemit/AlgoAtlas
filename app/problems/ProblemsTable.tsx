@@ -8,47 +8,42 @@ import { Button } from "@/components/ui/button"
 import { FilterOptions } from "./FilterOptions"
 import { ArrowUpDown } from "lucide-react"
 import type { CodeforcesProblem } from "@/types/codeforces"
-import { motion } from "framer-motion"
 
 type SortField = "time" | "difficulty"
 
 const getDifficultyInfo = (difficulty: number) => {
-  if (difficulty <= 1000) return { variant: "success", category: "Easy" }
-  if (difficulty <= 1500) return { variant: "warning", category: "Medium" }
+  if (difficulty <= 1000) return { variant: "outline", category: "Easy" }
+  if (difficulty <= 1500) return { variant: "secondary", category: "Medium" }
   if (difficulty <= 2000) return { variant: "destructive", category: "Hard" }
   return { variant: "default", category: "Very Hard" }
 }
 
 const ITEMS_PER_PAGE = 20
+const MAX_VISIBLE_PAGES = 5
 
 interface ProblemsTableProps {
   initialProblems: CodeforcesProblem[]
 }
 
 export default function ProblemsTable({ initialProblems }: ProblemsTableProps) {
-  const [problems, setProblems] = useState<CodeforcesProblem[]>(initialProblems)
   const [filteredProblems, setFilteredProblems] = useState<CodeforcesProblem[]>(initialProblems)
   const [currentPage, setCurrentPage] = useState(1)
   const [sortField, setSortField] = useState<SortField>("time")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
 
   const tags = useMemo(() => {
-    return Array.from(new Set(problems.flatMap((problem) => problem.tags)))
-  }, [problems])
+    return Array.from(new Set(initialProblems.flatMap((problem) => problem.tags)))
+  }, [initialProblems])
 
   const handleFilterChange = (minDifficulty: number, maxDifficulty: number, selectedTags: string[]) => {
-    try {
-      const filtered = problems.filter(
-        (problem) =>
-          problem.rating! >= minDifficulty &&
-          problem.rating! <= maxDifficulty &&
-          (selectedTags.length === 0 || selectedTags.some((tag) => problem.tags.includes(tag))),
-      )
-      setFilteredProblems(filtered)
-      setCurrentPage(1)
-    } catch (error) {
-      console.error("Error applying filters:", error)
-    }
+    const filtered = initialProblems.filter(
+      (problem) =>
+        (problem.rating === null || problem.rating === undefined || 
+         (problem.rating >= minDifficulty && problem.rating <= maxDifficulty)) &&
+        (selectedTags.length === 0 || selectedTags.some((tag) => problem.tags.includes(tag))),
+    )
+    setFilteredProblems(filtered)
+    setCurrentPage(1)
   }
 
   const sortProblems = useMemo(
@@ -76,8 +71,32 @@ export default function ProblemsTable({ initialProblems }: ProblemsTableProps) {
     return sortProblems(filteredProblems).slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
   }, [filteredProblems, currentPage, sortProblems])
 
-  if (problems.length === 0) {
-    return <div>No problems available. Please try again later.</div>
+  const getPageNumbers = (current: number, total: number) => {
+    const pages = []
+    const halfVisible = Math.floor(MAX_VISIBLE_PAGES / 2)
+    
+    let start = Math.max(1, current - halfVisible)
+    let end = Math.min(total, start + MAX_VISIBLE_PAGES - 1)
+    
+    if (end - start + 1 < MAX_VISIBLE_PAGES) {
+      start = Math.max(1, end - MAX_VISIBLE_PAGES + 1)
+    }
+    
+    if (start > 1) {
+      pages.push(1)
+      if (start > 2) pages.push('...')
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+    
+    if (end < total) {
+      if (end < total - 1) pages.push('...')
+      pages.push(total)
+    }
+    
+    return pages
   }
 
   return (
@@ -102,13 +121,7 @@ export default function ProblemsTable({ initialProblems }: ProblemsTableProps) {
           {currentProblems.map((problem) => {
             const { variant, category } = getDifficultyInfo(problem.rating || 0)
             return (
-              <motion.tr
-                key={`${problem.contestId}${problem.index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="hover:bg-accent transition-colors duration-200"
-              >
+              <TableRow key={`${problem.contestId}${problem.index}`}>
                 <TableCell>
                   {problem.contestId}
                   {problem.index}
@@ -124,53 +137,50 @@ export default function ProblemsTable({ initialProblems }: ProblemsTableProps) {
                   </Link>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={variant}>{problem.rating || "N/A"}</Badge>
+                  <Badge variant={variant as "default" | "destructive" | "outline" | "secondary"}>
+                    {problem.rating || "N/A"}
+                  </Badge>
                 </TableCell>
                 <TableCell>{category}</TableCell>
                 <TableCell>{problem.tags.join(", ")}</TableCell>
-              </motion.tr>
+              </TableRow>
             )
           })}
         </TableBody>
       </Table>
       <div className="flex items-center justify-center gap-2 mt-4">
-        <motion.button
-          className="px-4 py-2 border rounded hover:bg-accent transition-colors duration-200"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <Button
+          variant="outline"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
         >
-          ←
-        </motion.button>
-        {Array.from({ length: pageCount }, (_, i) => i + 1).map((page) => {
-          if (page === 1 || page === pageCount || (page >= currentPage - 2 && page <= currentPage + 2)) {
-            return (
-              <motion.button
+          Previous
+        </Button>
+        
+        <div className="flex gap-1">
+          {getPageNumbers(currentPage, pageCount).map((page, index) => (
+            page === '...' ? (
+              <span key={`ellipsis-${index}`} className="px-2">...</span>
+            ) : (
+              <Button
                 key={page}
-                onClick={() => setCurrentPage(page)}
                 variant={currentPage === page ? "default" : "outline"}
-                className="min-w-[40px] px-4 py-2 border rounded hover:bg-accent transition-colors duration-200"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="min-w-[40px]"
+                onClick={() => typeof page === 'number' && setCurrentPage(page)}
               >
                 {page}
-              </motion.button>
+              </Button>
             )
-          } else if (page === currentPage - 3 || page === currentPage + 3) {
-            return <span key={page}>...</span>
-          }
-          return null
-        })}
-        <motion.button
-          className="px-4 py-2 border rounded hover:bg-accent transition-colors duration-200"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          ))}
+        </div>
+
+        <Button
+          variant="outline"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, pageCount))}
           disabled={currentPage === pageCount}
         >
-          →
-        </motion.button>
+          Next
+        </Button>
       </div>
     </div>
   )
