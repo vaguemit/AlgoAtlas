@@ -3,14 +3,11 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/Navbar"
 import { Toaster } from "@/components/ui/toaster"
-import { ErrorBoundary } from "@/components/ErrorBoundary"
+import { ErrorBoundary, ErrorToast } from "@/components/ErrorBoundary"
+import { AuthProvider } from "@/contexts/auth-context"
+import { AnimatePresence } from "framer-motion"
 
 const inter = Inter({ subsets: ["latin"] })
-
-export const metadata = {
-  title: "The Codeforces Arena - Learn Competitive Programming",
-  description: "A comprehensive platform for learning algorithms and competitive programming",
-}
 
 export default function RootLayout({
   children,
@@ -18,18 +15,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ErrorBoundary>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-grow">{children}</main>
-              <footer className="py-6 text-center border-t">© 2023 AlgoMaster. All rights reserved.</footer>
-            </div>
-          </ErrorBoundary>
-          <Toaster />
-        </ThemeProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <div className="flex flex-col min-h-screen">
+                <Navbar />
+                <AnimatePresence mode="wait">
+                  <main className="flex-grow">{children}</main>
+                </AnimatePresence>
+                <footer className="py-6 text-center border-t">© 2024 AlgoAtlas. All rights reserved.</footer>
+              </div>
+              <Toaster />
+              <ErrorToast />
+            </ThemeProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

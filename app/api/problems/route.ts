@@ -1,28 +1,21 @@
 import { NextResponse } from "next/server"
-
-interface Problem {
-  contestId: number
-  index: string
-  name: string
-  type: string
-  points: number
-  rating: number
-  tags: string[]
-}
+import type { CodeforcesProblem } from "@/types/codeforces"
 
 export async function GET() {
   try {
     const response = await fetch("https://codeforces.com/api/problemset.problems")
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
     const data = await response.json()
 
     if (data.status !== "OK") {
       throw new Error("Failed to fetch problems from Codeforces")
     }
 
-    const problems: Problem[] = data.result.problems
-      .filter((problem: Problem) => problem.rating !== undefined)
-      .sort((a: Problem, b: Problem) => a.rating - b.rating)
-      .slice(0, 100) // Limit to 100 problems for performance
+    const problems: CodeforcesProblem[] = data.result.problems
+      .filter((problem: CodeforcesProblem) => problem.rating !== undefined)
+      .sort((a: CodeforcesProblem, b: CodeforcesProblem) => a.rating! - b.rating!)
 
     return NextResponse.json(problems)
   } catch (error) {
