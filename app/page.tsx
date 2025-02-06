@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 export default function Home() {
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold mb-6">Welcome to AlgoMaster</h1>
+      <h1 className="text-4xl font-bold mb-6">Welcome to The Codeforces Arena</h1>
       <p className="text-xl mb-8">
         Master competitive programming, algorithms, and computer science concepts with our comprehensive learning
         platform.

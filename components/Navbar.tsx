@@ -7,7 +7,7 @@ export default function Navbar() {
     <nav className="border-b">
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold">
-          AlgoMaster
+          The Codeforces Arena
         </Link>
         <div className="flex items-center space-x-4">
           <Link href="/learning-paths">Learning Paths</Link>
