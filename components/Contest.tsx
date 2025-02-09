@@ -14,19 +14,33 @@ interface Problem {
   difficulty: number
   solved: boolean
   url?: string
+  platform: string
+  tags: string[]
 }
 
 interface ContestProps {
-  level: number
-  problems: Problem[]
-  isRandom?: boolean
+  level: string | string[]
+  problems: {
+    id: string
+    title: string
+    difficulty: number
+    url: string
+    platform: string
+    tags: string[]
+    type: string
+    solved: boolean
+  }[]
 }
 
-export function Contest({ level, problems: initialProblems, isRandom = false }: ContestProps) {
-  const [problems, setProblems] = useState<Problem[]>(initialProblems)
+export function Contest({ level, problems = [] }: ContestProps) {
+  const [contestProblems, setContestProblems] = useState<Problem[]>(problems || [])
   const [timeLeft, setTimeLeft] = useState(7200) // 2 hours in seconds
   const { toast } = useToast()
   const router = useRouter()
+
+  useEffect(() => {
+    setContestProblems(problems || [])
+  }, [problems])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,7 +71,7 @@ export function Contest({ level, problems: initialProblems, isRandom = false }: 
   }
 
   const handleSubmit = (problemId: string) => {
-    setProblems((prevProblems) =>
+    setContestProblems((prevProblems) =>
       prevProblems.map((problem) => (problem.id === problemId ? { ...problem, solved: true } : problem)),
     )
     toast({
@@ -66,7 +80,7 @@ export function Contest({ level, problems: initialProblems, isRandom = false }: 
     })
   }
 
-  const solvedCount = problems.filter((p) => p.solved).length
+  const solvedCount = contestProblems.filter((p) => p.solved).length
 
   if (timeLeft === 0) {
     router.push("/dashboard")
@@ -77,7 +91,7 @@ export function Contest({ level, problems: initialProblems, isRandom = false }: 
     <Card className="max-w-4xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>
-          Level {level} Contest {isRandom ? "(Random Codeforces Problems)" : ""}
+          Level {level} Contest
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -86,30 +100,44 @@ export function Contest({ level, problems: initialProblems, isRandom = false }: 
             <p className="text-lg font-semibold">Time Remaining: {formatTime(timeLeft)}</p>
             <Progress value={(7200 - timeLeft) / 72} className="mt-2" />
           </div>
-          {isRandom ? (
-            <RandomProblems count={4} minRating={level * 100} maxRating={level * 100 + 600} />
-          ) : (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Problems</h3>
-              {problems.map((problem) => (
-                <div key={problem.id} className="flex justify-between items-center mb-2 p-2 border rounded">
-                  <span>
-                    {problem.title} (Difficulty: {problem.difficulty})
+          <div className="grid gap-4">
+            {(contestProblems || []).map((problem) => (
+              <div 
+                key={problem.id} 
+                className="p-4 border rounded-lg hover:bg-secondary/10"
+              >
+                <a 
+                  href={problem.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-lg font-semibold hover:text-primary"
+                >
+                  {problem.title}
+                </a>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Difficulty: {problem.difficulty}
                   </span>
-                  <div>
-                    {problem.solved ? (
-                      <span className="text-green-500">Solved ✅</span>
-                    ) : (
-                      <Button onClick={() => handleSubmit(problem.id)}>Submit</Button>
-                    )}
+                  <span className="text-sm text-muted-foreground">
+                    Platform: {problem.platform}
+                  </span>
+                  <div className="flex gap-1">
+                    {(problem.tags || []).map((tag) => (
+                      <span 
+                        key={tag}
+                        className="px-2 py-1 text-xs bg-primary/10 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
           <div>
             <p>
-              Solved: {solvedCount} / {problems.length}
+              Solved: {solvedCount} / {contestProblems?.length || 0}
             </p>
           </div>
           <Button onClick={handleRefresh}>Refresh</Button>
