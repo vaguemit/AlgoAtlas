@@ -83,6 +83,10 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         } else {
           throw new Error(ratingData.comment || "Failed to fetch rating history")
         }
+
+        // Fetch ThemeCP contest data
+        const themeCPContests = await fetchThemeCPContests(params.handle)
+        setContests((prevContests) => [...prevContests, ...themeCPContests])
       } catch (error) {
         console.error("Error fetching user data:", error)
         setError(error instanceof Error ? error.message : "An unknown error occurred")
@@ -198,6 +202,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
               <TabsTrigger value="submissions">Submissions</TabsTrigger>
               <TabsTrigger value="unsolved">Unsolved Problems</TabsTrigger>
               <TabsTrigger value="contests">Contests</TabsTrigger>
+              <TabsTrigger value="themecp">ThemeCP Performance</TabsTrigger>
             </TabsList>
 
             <TabsContent value="rating">
@@ -214,9 +219,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                           tickFormatter={(unixTime) => format(new Date(unixTime * 1000), "MMM yyyy")}
                         />
                         <YAxis />
-                        <Tooltip
-                          labelFormatter={(unixTime) => format(new Date(unixTime * 1000), "MMM dd, yyyy")}
-                        />
+                        <Tooltip labelFormatter={(unixTime) => format(new Date(unixTime * 1000), "MMM dd, yyyy")} />
                         <Line type="monotone" dataKey="newRating" stroke="#8884d8" />
                       </LineChart>
                     </ResponsiveContainer>
@@ -314,13 +317,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                             {format(new Date(contest.ratingUpdateTimeSeconds * 1000), "MMM dd, yyyy")}
                           </p>
                         </div>
-                        <div className="flex items-center<cut_off_point>
-p>
-                        </div>
-                        <div className="flex items-center
-</cut_off_point>
-
- space-x-2">
+                        <div className="flex items-center space-x-2">
                           <Badge variant={contest.newRating > contest.oldRating ? "success" : "destructive"}>
                             {contest.newRating - contest.oldRating > 0 ? "+" : ""}
                             {contest.newRating - contest.oldRating}
@@ -333,10 +330,84 @@ p>
                 </CardContent>
               </Card>
             </TabsContent>
+            <TabsContent value="themecp">
+              <Card>
+                <CardHeader>
+                  <CardTitle>ThemeCP Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={ratingData}>
+                        <XAxis
+                          dataKey="ratingUpdateTimeSeconds"
+                          tickFormatter={(unixTime) => format(new Date(unixTime * 1000), "MMM yyyy")}
+                        />
+                        <YAxis />
+                        <Tooltip labelFormatter={(unixTime) => format(new Date(unixTime * 1000), "MMM dd, yyyy")} />
+                        <Line type="monotone" dataKey="newRating" stroke="#8884d8" name="ThemeCP Rating" />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 space-y-4">
+                    {contests
+                      .filter((contest) => contest.type === "THEMECP")
+                      .map((contest) => (
+                        <div
+                          key={contest.id}
+                          className="flex items-center justify-between p-2 hover:bg-accent rounded-md"
+                        >
+                          <div>
+                            <p className="font-medium">ThemeCP Contest {contest.id}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(contest.startTimeSeconds * 1000), "MMM dd, yyyy")}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge variant={contest.rank <= 4 ? "success" : "destructive"}>
+                              {contest.rank}/4 solved
+                            </Badge>
+                            <span>New Rating: {contest.newRating}</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
       </div>
-  </div>
+    </div>
   )
+}
+
+async function fetchThemeCPContests(handle: string): Promise<CodeforcesContest[]> {
+  // In a real application, you'd fetch this data from your backend
+  // This is a mock implementation
+  return [
+    {
+      id: 1,
+      name: "ThemeCP Contest 1",
+      type: "THEMECP",
+      phase: "FINISHED",
+      frozen: false,
+      durationSeconds: 7200,
+      startTimeSeconds: Date.now() / 1000 - 86400,
+      relativeTimeSeconds: -86400,
+      preparedBy: "ThemeCP",
+      websiteUrl: "",
+      description: "",
+      difficulty: 2,
+      kind: "Training",
+      icpcRegion: "",
+      country: "",
+      city: "",
+      season: "",
+      rank: 1,
+      newRating: 1500,
+    },
+    // Add more mock ThemeCP contests as needed
+  ]
 }
 

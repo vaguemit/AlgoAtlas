@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { motion } from "framer-motion"
+import { Send } from "lucide-react"
 
 interface Message {
   role: "user" | "assistant"
@@ -50,27 +51,32 @@ export default function AIAssistant() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <Card className="w-full max-w-2xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-2xl mx-auto"
+    >
+      <Card>
         <CardHeader>
           <CardTitle>AI Assistant</CardTitle>
           <CardDescription>Ask questions about algorithms, data structures, or coding problems</CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="h-[400px] pr-4 custom-scrollbar">
             {messages.map((message, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`mb-4 ${message.role === "assistant" ? "text-blue-600" : "text-green-600"}`}
+                className={`mb-4 p-3 rounded-lg ${message.role === "assistant" ? "bg-primary/10" : "bg-secondary/50"}`}
               >
                 <strong>{message.role === "assistant" ? "AI: " : "You: "}</strong>
                 {message.content}
               </motion.div>
             ))}
-            {isLoading && <div className="text-gray-500">AI is thinking...</div>}
+            {isLoading && <div className="text-muted-foreground animate-pulse">AI is thinking...</div>}
           </ScrollArea>
         </CardContent>
         <CardFooter>
@@ -80,8 +86,15 @@ export default function AIAssistant() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message here..."
               className="flex-grow"
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
             />
             <Button onClick={sendMessage} disabled={isLoading}>
+              <Send className="h-4 w-4 mr-2" />
               Send
             </Button>
           </div>

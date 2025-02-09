@@ -1,21 +1,46 @@
 'use client'
 
 import { motion } from "framer-motion"
+import type { FC, ReactNode } from "react"
 
-interface AnimatedPageProps {
-  children: React.ReactNode
+const pageVariants = {
+  initial: {
+    opacity: 0,
+    x: "-100vw",
+  },
+  in: {
+    opacity: 1,
+    x: 0,
+  },
+  out: {
+    opacity: 0,
+    x: "100vw",
+  },
 }
 
-export function AnimatedPage({ children }: AnimatedPageProps) {
+const pageTransition = {
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.5,
+}
+
+interface AnimatedPageProps {
+  children: ReactNode
+}
+
+const AnimatedPage: FC<AnimatedPageProps> = ({ children }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ duration: 0.3 }}
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
     >
       {children}
     </motion.div>
   )
 }
+
+export default AnimatedPage
 

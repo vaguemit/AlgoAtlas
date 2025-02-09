@@ -1,6 +1,8 @@
+'use client'
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { AnimatedPage } from "@/components/AnimatedPage"
+import AnimatedPage from "@/components/AnimatedPage"
 
 export default function Home() {
   return (

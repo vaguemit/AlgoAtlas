@@ -1,13 +1,12 @@
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { GeistMono } from "geist/font/mono"
 import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/Navbar"
 import { Toaster } from "@/components/ui/toaster"
 import { ErrorBoundary, ErrorToast } from "@/components/ErrorBoundary"
 import { AuthProvider } from "@/contexts/auth-context"
 import { AnimatePresence } from "framer-motion"
-
-const inter = Inter({ subsets: ["latin"] })
+import type React from "react" // Added import for React
 
 export default function RootLayout({
   children,
@@ -15,8 +14,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning className={GeistMono.className}>
+      <body>
         <ErrorBoundary>
           <AuthProvider>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -25,7 +24,6 @@ export default function RootLayout({
                 <AnimatePresence mode="wait">
                   <main className="flex-grow">{children}</main>
                 </AnimatePresence>
-                <footer className="py-6 text-center border-t">© 2024 AlgoAtlas. All rights reserved.</footer>
               </div>
               <Toaster />
               <ErrorToast />
