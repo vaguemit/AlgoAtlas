@@ -20,21 +20,16 @@ interface Problem {
 
 interface ContestProps {
   level: string | string[]
-  problems: {
-    id: string
-    title: string
-    difficulty: number
-    url: string
-    platform: string
-    tags: string[]
-    type: string
-    solved: boolean
-  }[]
+  problems: Problem[]
+  onReroll: () => void
 }
 
-export function Contest({ level, problems = [] }: ContestProps) {
+export function Contest({ level, problems = [], onReroll }: ContestProps) {
   const [contestProblems, setContestProblems] = useState<Problem[]>(problems || [])
-  const [timeLeft, setTimeLeft] = useState(7200) // 2 hours in seconds
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const savedTime = localStorage.getItem(`contest-time-${level}`)
+    return savedTime ? parseInt(savedTime) : 7200
+  })
   const { toast } = useToast()
   const router = useRouter()
 
@@ -56,6 +51,16 @@ export function Contest({ level, problems = [] }: ContestProps) {
     return () => clearInterval(timer)
   }, [])
 
+  // Save time to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(`contest-time-${level}`, timeLeft.toString())
+  }, [timeLeft, level])
+
+  // Reset timer when level changes
+  useEffect(() => {
+    setTimeLeft(7200)
+  }, [level])
+
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -70,14 +75,33 @@ export function Contest({ level, problems = [] }: ContestProps) {
     })
   }
 
-  const handleSubmit = (problemId: string) => {
-    setContestProblems((prevProblems) =>
-      prevProblems.map((problem) => (problem.id === problemId ? { ...problem, solved: true } : problem)),
-    )
+  // Add reroll functionality
+  const handleReroll = () => {
+    const newProblems = [...problems]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4)
+    setContestProblems(newProblems)
     toast({
-      title: "Submitted",
-      description: "Your solution has been submitted successfully.",
+      title: "Problems Rerolled",
+      description: "New set of problems has been generated.",
     })
+  }
+
+  // Enhance handleSubmit with confirmation
+  const handleSubmit = (problemId: string) => {
+    const confirmed = window.confirm("Are you sure you want to mark this problem as solved?")
+    if (confirmed) {
+      setContestProblems((prevProblems) =>
+        prevProblems.map((problem) => 
+          problem.id === problemId ? { ...problem, solved: true } : problem
+        )
+      )
+      toast({
+        title: "Problem Solved!",
+        description: "Your progress has been updated.",
+        variant: "default"
+      })
+    }
   }
 
   const solvedCount = contestProblems.filter((p) => p.solved).length
@@ -89,17 +113,24 @@ export function Contest({ level, problems = [] }: ContestProps) {
 
   return (
     <Card className="max-w-4xl mx-auto mt-8">
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle>
           Level {level} Contest
         </CardTitle>
+        <Button onClick={handleReroll} variant="outline">
+          Reroll Problems
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div>
+          <div className="flex justify-between items-center">
             <p className="text-lg font-semibold">Time Remaining: {formatTime(timeLeft)}</p>
-            <Progress value={(7200 - timeLeft) / 72} className="mt-2" />
+            <p className="text-lg font-semibold">Progress: {solvedCount}/{contestProblems.length}</p>
           </div>
+          <Progress 
+            value={(7200 - timeLeft) / 72} 
+            className={`mt-2 ${timeLeft < 1800 ? "bg-red-500" : ""}`}
+          />
           <div className="grid gap-4">
             {(contestProblems || []).map((problem) => (
               <div 
