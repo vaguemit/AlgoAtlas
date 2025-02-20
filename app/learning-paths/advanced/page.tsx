@@ -1,3 +1,5 @@
+"use client";
+
 import { DivisionDetails } from "@/components/DivisionDetails"
 
 const advancedTopics = [
@@ -249,4 +251,3 @@ export default function AdvancedPage() {
     />
   )
 }
-

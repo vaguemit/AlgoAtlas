@@ -1,3 +1,5 @@
+"use client";
+
 import { DivisionDetails } from "@/components/DivisionDetails"
 
 const sapphireTopics = [
@@ -119,4 +121,3 @@ export default function SapphirePage() {
     />
   )
 }
-
