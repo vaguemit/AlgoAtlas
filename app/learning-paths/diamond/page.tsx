@@ -1,3 +1,5 @@
+"use client";
+
 import { DivisionDetails } from "@/components/DivisionDetails"
 
 const diamondTopics = [
@@ -139,4 +141,3 @@ export default function DiamondPage() {
     />
   )
 }
-

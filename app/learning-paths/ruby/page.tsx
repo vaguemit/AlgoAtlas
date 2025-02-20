@@ -1,3 +1,5 @@
+"use client";
+
 import { DivisionDetails } from "@/components/DivisionDetails"
 
 const rubyTopics = [
