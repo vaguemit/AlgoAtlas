@@ -76,6 +76,7 @@ interface DivisionDetailsProps {
   description: string
   topics: Topic[]
   progress: number
+  onProgressUpdate?: (topicId: string, subtopicId: string | null, status: Status) => void
 }
 
 function StatusBadge({ status }: { status: Status }) {
@@ -127,35 +128,34 @@ function StatusDropdown({ status, onStatusChange }: { status: Status; onStatusCh
   )
 }
 
-export function DivisionDetails({ name, color, description, topics, progress: initialProgress }: DivisionDetailsProps) {
+export function DivisionDetails({ 
+  name, 
+  color, 
+  description, 
+  topics, 
+  progress: initialProgress,
+  onProgressUpdate 
+}: DivisionDetailsProps) {
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({})
   const [topicProgress, setTopicProgress] = useState<Record<string, Status>>({})
   const [subtopicProgress, setSubtopicProgress] = useState<Record<string, Status>>({})
   const [progress, setProgress] = useState(initialProgress)
 
   useEffect(() => {
-    // Load progress from localStorage
-    if (typeof window !== "undefined") {
+    // Load progress from localStorage only if onProgressUpdate is not provided
+    if (typeof window !== "undefined" && !onProgressUpdate) {
       const savedTopicProgress = localStorage.getItem(`${name.toLowerCase()}-topic-progress`)
       const savedSubtopicProgress = localStorage.getItem(`${name.toLowerCase()}-subtopic-progress`)
       
       if (savedTopicProgress) {
-        try {
-          setTopicProgress(JSON.parse(savedTopicProgress))
-        } catch (e) {
-          console.error("Failed to parse topic progress", e)
-        }
+        setTopicProgress(JSON.parse(savedTopicProgress))
       }
       
       if (savedSubtopicProgress) {
-        try {
-          setSubtopicProgress(JSON.parse(savedSubtopicProgress))
-        } catch (e) {
-          console.error("Failed to parse subtopic progress", e)
-        }
+        setSubtopicProgress(JSON.parse(savedSubtopicProgress))
       }
     }
-  }, [name])
+  }, [name, onProgressUpdate])
 
   // Update topic status based on subtopics
   const updateTopicStatus = useCallback(() => {
@@ -180,7 +180,9 @@ export function DivisionDetails({ name, color, description, topics, progress: in
 
     if (hasChanges) {
       setTopicProgress(newTopicProgress);
-      localStorage.setItem(`${name.toLowerCase()}-topic-progress`, JSON.stringify(newTopicProgress));
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`${name.toLowerCase()}-topic-progress`, JSON.stringify(newTopicProgress));
+      }
     }
   }, [subtopicProgress, topicProgress, topics, name]);
 
@@ -223,12 +225,62 @@ export function DivisionDetails({ name, color, description, topics, progress: in
     }))
   }
 
-  const updateSubtopicProgress = (subtopicTitle: string, newStatus: Status, topicTitle: string) => {
-    setSubtopicProgress((prev) => {
-      const updated = { ...prev, [subtopicTitle]: newStatus }
-      localStorage.setItem(`${name.toLowerCase()}-subtopic-progress`, JSON.stringify(updated))
-      return updated
-    })
+  const updateTopicProgress = (topicTitle: string, status: Status) => {
+    if (onProgressUpdate) {
+      // Use the callback if provided
+      onProgressUpdate(topicTitle, null, status)
+      
+      // Update local state to reflect the change immediately
+      setTopicProgress(prev => ({
+        ...prev,
+        [topicTitle]: status
+      }))
+    } else {
+      // Fallback to localStorage
+      const newProgress = {
+        ...topicProgress,
+        [topicTitle]: status,
+      }
+      
+      setTopicProgress(newProgress)
+      
+      // Save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`${name.toLowerCase()}-topic-progress`, JSON.stringify(newProgress))
+      }
+      
+      // Update overall progress
+      setProgress(calculateProgress())
+    }
+  }
+
+  const updateSubtopicProgress = (subtopicTitle: string, status: Status, topicTitle: string) => {
+    if (onProgressUpdate) {
+      // Use the callback if provided
+      onProgressUpdate(topicTitle, subtopicTitle, status)
+      
+      // Update local state to reflect the change immediately
+      setSubtopicProgress(prev => ({
+        ...prev,
+        [subtopicTitle]: status
+      }))
+    } else {
+      // Fallback to localStorage
+      const newProgress = {
+        ...subtopicProgress,
+        [subtopicTitle]: status,
+      }
+      
+      setSubtopicProgress(newProgress)
+      
+      // Save to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`${name.toLowerCase()}-subtopic-progress`, JSON.stringify(newProgress))
+      }
+      
+      // Update overall progress
+      setProgress(calculateProgress())
+    }
   }
 
   const getSubtopicStatus = (subtopic: Subtopic): Status => {

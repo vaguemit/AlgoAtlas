@@ -1,6 +1,7 @@
 "use client"
 import { DivisionDetails } from "../../../components/DivisionDetails"
 import { useState, useEffect } from "react"
+import { useLearningProgress, ProgressStatus } from "@/hooks/use-learning-progress"
 
 type Status = "not-started" | "reading" | "practicing" | "complete" | "skipped" | "ignored"
 
@@ -194,46 +195,35 @@ const sapphireTopics = [
 ]
 
 export default function SapphirePage() {
-  const [progress, setProgress] = useState(0)
+  const { completionPercentage, updateProgress, getStatusFor } = useLearningProgress({
+    pathId: "sapphire",
+    fallbackToLocalStorage: true
+  })
 
-  useEffect(() => {
-    // Calculate initial progress from localStorage
-    if (typeof window !== "undefined") {
-      const topicProgress = localStorage.getItem("sapphire-topic-progress")
-      const subtopicProgress = localStorage.getItem("sapphire-subtopic-progress")
-      
-      let total = 0
-      let completed = 0
-      
-      if (topicProgress) {
-        const topics = JSON.parse(topicProgress) as Record<string, Status>
-        Object.values(topics).forEach((status) => {
-          total++
-          if (status === "complete") completed++
-        })
-      }
-      
-      if (subtopicProgress) {
-        const subtopics = JSON.parse(subtopicProgress) as Record<string, Status>
-        Object.values(subtopics).forEach((status) => {
-          total++
-          if (status === "complete") completed++
-        })
-      }
-      
-      if (total > 0) {
-        setProgress(Math.round((completed / total) * 100))
-      }
+  // Update topic status in the sapphireTopics data structure
+  const updatedTopics = sapphireTopics.map(topic => {
+    // Update the status of each subtopic
+    const updatedSubtopics = topic.subtopics.map(subtopic => ({
+      ...subtopic,
+      progress: getStatusFor(topic.title, subtopic.title) as Status
+    }))
+    
+    return {
+      ...topic,
+      subtopics: updatedSubtopics
     }
-  }, [])
+  })
 
   return (
     <DivisionDetails
       name="Sapphire"
       color="bg-blue-500"
       description="Intermediate algorithms and data structures for competitive programming."
-      topics={sapphireTopics}
-      progress={progress}
+      topics={updatedTopics}
+      progress={completionPercentage}
+      onProgressUpdate={(topicId, subtopicId, status) => {
+        updateProgress(topicId, subtopicId, status as ProgressStatus)
+      }}
     />
   )
 } 

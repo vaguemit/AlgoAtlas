@@ -1,6 +1,7 @@
 "use client"
 import { DivisionDetails } from "../../../components/DivisionDetails"
 import { useState, useEffect } from "react"
+import { useLearningProgress, ProgressStatus } from "@/hooks/use-learning-progress"
 
 type Status = "not-started" | "reading" | "practicing" | "complete" | "skipped" | "ignored"
 
@@ -120,50 +121,35 @@ const emeraldTopics = [
 ]
 
 export default function EmeraldPage() {
-  const [progress, setProgress] = useState(0)
+  const { completionPercentage, updateProgress, getStatusFor } = useLearningProgress({
+    pathId: "emerald",
+    fallbackToLocalStorage: true
+  })
 
-  useEffect(() => {
-    // Calculate initial progress from localStorage
-    if (typeof window !== "undefined") {
-      const topicProgress = localStorage.getItem("emerald-topic-progress")
-      const subtopicProgress = localStorage.getItem("emerald-subtopic-progress")
-      
-      let total = 0
-      let completed = 0
-      
-      // Count total topics and subtopics
-      emeraldTopics.forEach(topic => {
-        total++ // Count the topic
-        total += topic.subtopics.length // Count its subtopics
-      })
-      
-      if (topicProgress) {
-        const topics = JSON.parse(topicProgress) as Record<string, Status>
-        Object.values(topics).forEach((status) => {
-          if (status === "complete") completed++
-        })
-      }
-      
-      if (subtopicProgress) {
-        const subtopics = JSON.parse(subtopicProgress) as Record<string, Status>
-        Object.values(subtopics).forEach((status) => {
-          if (status === "complete") completed++
-        })
-      }
-      
-      if (total > 0) {
-        setProgress(Math.round((completed / total) * 100))
-      }
+  // Update topic status in the emeraldTopics data structure
+  const updatedTopics = emeraldTopics.map(topic => {
+    // Update the status of each subtopic
+    const updatedSubtopics = topic.subtopics.map(subtopic => ({
+      ...subtopic,
+      progress: getStatusFor(topic.title, subtopic.title) as Status
+    }))
+    
+    return {
+      ...topic,
+      subtopics: updatedSubtopics
     }
-  }, [])
+  })
 
   return (
     <DivisionDetails
       name="Emerald"
       color="bg-green-500"
       description="Introduction to competitive programming with fundamental algorithms and data structures."
-      topics={emeraldTopics}
-      progress={progress}
+      topics={updatedTopics}
+      progress={completionPercentage}
+      onProgressUpdate={(topicId, subtopicId, status) => {
+        updateProgress(topicId, subtopicId, status as ProgressStatus)
+      }}
     />
   )
 } 

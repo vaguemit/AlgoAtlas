@@ -83,7 +83,7 @@ export default function ProfilePage() {
   const [cfHistory, setCfHistory] = useState<RatingChange[]>([]);
   const [showCharts, setShowCharts] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
-  
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -551,7 +551,7 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="absolute bottom-4 right-8 flex items-center">
               <Link href="/settings" className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-md border border-white/10 transition duration-200 text-sm font-medium flex items-center mr-2 shadow-lg backdrop-blur-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -775,7 +775,7 @@ export default function ProfilePage() {
                         <p className="text-sm text-white/70 mb-6">Link your Codeforces profile to track your competitive programming progress and visualize your rating history.</p>
                         
                         <div className="space-y-4">
-                          <div>
+            <div>
                             <label className="block text-sm font-medium mb-2 text-white/80">Codeforces Handle</label>
                             <div className="relative">
                               <input
@@ -935,9 +935,9 @@ export default function ProfilePage() {
                     </ul>
                     <p className="mt-2">Each table has a foreign key relationship to your user ID. CP data is stored separately from login data for better database organization and security.</p>
                   </div>
-                </div>
-                
-                <div>
+            </div>
+
+            <div>
                   <h3 className="text-sm font-medium text-white/70 mb-2">User Identifier</h3>
                   <p className="bg-black/50 p-3 rounded-md text-xs text-white/60 break-all">{user.id}</p>
                   <p className="text-xs text-white/50 mt-1">This UUID connects all your data across different tables</p>

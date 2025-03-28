@@ -6,6 +6,7 @@ import { Diamond, Gem, Award, Star, Zap, Clock, BookOpen, Code } from "lucide-re
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { useLearningProgress } from "@/hooks/use-learning-progress"
 
 // Define the learning path data structure
 interface LearningPath {
@@ -81,13 +82,20 @@ const learningPaths: LearningPath[] = [
 
 function PathCard({ path }: { path: LearningPath }) {
   const [isHovered, setIsHovered] = useState(false)
+  const { completionPercentage } = useLearningProgress({
+    pathId: path.id,
+    fallbackToLocalStorage: true
+  })
 
   return (
-    <Link href={`/learning-paths/${path.id}`}>
+    <Link
+      href={`/learning-paths/${path.id}`}
+      className="block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <motion.div
         className="relative h-full"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         whileHover={{ scale: 1.03 }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -137,12 +145,12 @@ function PathCard({ path }: { path: LearningPath }) {
           <div className="mb-6">
             <div className="flex justify-between text-xs text-white/70 mb-1">
               <span>Progress</span>
-              <span>{path.progress || 0}%</span>
+              <span>{completionPercentage}%</span>
             </div>
             <div className="h-2 bg-navy-800/50 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full bg-gradient-to-r ${path.color}`}
-                style={{ width: `${path.progress || 0}%` }}
+                style={{ width: `${completionPercentage}%` }}
               ></div>
             </div>
           </div>
