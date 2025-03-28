@@ -153,13 +153,13 @@ export function CursorFollowingCharacter() {
   }
 
   return (
-    <div className="w-full h-[500px] overflow-hidden">
+    <div className="w-full h-[400px] overflow-hidden rounded-lg">
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
         <Scene />
       </Canvas>
 
       {/* Instructions overlay */}
-      <div className="absolute bottom-4 left-0 right-0 text-center text-white/70 text-sm pointer-events-none">
+      <div className="absolute bottom-3 left-0 right-0 text-center text-white/70 text-sm pointer-events-none">
         Move your cursor to interact with the model
       </div>
     </div>

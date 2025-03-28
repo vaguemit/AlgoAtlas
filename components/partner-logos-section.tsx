@@ -8,21 +8,21 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 
 interface LogoItemProps {
   name: string
-  logo: string // Changed from ReactNode to string for image path
+  logo: string 
 }
 
 const logos: LogoItemProps[] = [
   {
     name: "Codeforces",
-    logo: "/logos/codeforces.png", // Add your logo file here
+    logo: "/logos/codeforces.png",
   },
   {
     name: "AtCoder",
-    logo: "/logos/atcoder.png", // Add your logo file here
+    logo: "/logos/atcoder.png",
   },
   {
     name: "CodeChef",
-    logo: "/logos/codechef.png", // Add your logo file here
+    logo: "/logos/codechef.png",
   },
 ]
 
@@ -32,21 +32,28 @@ const duplicatedLogos = [...logos, ...logos, ...logos, ...logos]
 function LogoItem({ name, logo }: LogoItemProps) {
   return (
     <motion.div
-      className="flex flex-col items-center justify-center p-4 sm:p-6 mx-6 sm:mx-10 md:mx-16"
-      whileHover={{ scale: 1.1 }}
+      className="flex flex-col items-center justify-center p-2 sm:p-3 mx-4 sm:mx-6 md:mx-10"
+      whileHover={{ scale: 1.12, y: -5 }}
       whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 300, damping: 15 }}
     >
       {/* Logo */}
-      <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 opacity-70 hover:opacity-100 transition-opacity duration-300 relative">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 opacity-70 hover:opacity-100 transition-opacity duration-300 relative group">
+        <motion.div 
+          className="absolute inset-0 -z-10 bg-purple-500/10 rounded-full blur-lg"
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileHover={{ opacity: 1, scale: 1.2 }}
+          transition={{ duration: 0.3 }}
+        />
         <Image
           src={logo}
           alt={`${name} logo`}
           fill
           className="object-contain"
-          sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 96px"
+          sizes="(max-width: 640px) 56px, (max-width: 1024px) 72px, 80px"
         />
       </div>
-      <span className="mt-2 text-sm sm:text-base text-white/70 font-medium">{name}</span>
+      <span className="mt-2 text-sm sm:text-base text-white/70 font-medium group-hover:text-white transition-colors duration-300">{name}</span>
     </motion.div>
   )
 }
@@ -61,20 +68,19 @@ export function PartnerLogosSection() {
 
   // Calculate the total width of the carousel items based on screen size
   const getItemWidth = () => {
-    if (isSmallScreen) return 120 // Smaller on mobile
-    if (isMediumScreen) return 160 // Medium on tablets
-    return 200 // Default for desktop
+    if (isSmallScreen) return 110 // Smaller on mobile
+    if (isMediumScreen) return 140 // Medium on tablets
+    return 180 // Default for desktop
   }
 
   const itemWidth = getItemWidth()
   const totalWidth = duplicatedLogos.length * itemWidth
 
   // Animation duration based on the number of logos and screen size
-  // Faster animation for all screen sizes
   const getAnimationDuration = () => {
-    if (isSmallScreen) return duplicatedLogos.length * 2 // Reduced from 4
-    if (isMediumScreen) return duplicatedLogos.length * 1.5 // Reduced from 3.5
-    return duplicatedLogos.length * 1 // Reduced from 3
+    if (isSmallScreen) return duplicatedLogos.length * 1.5
+    if (isMediumScreen) return duplicatedLogos.length * 1.1
+    return duplicatedLogos.length * 0.8
   }
 
   const animationDuration = getAnimationDuration()
@@ -94,8 +100,8 @@ export function PartnerLogosSection() {
             repeat: Number.POSITIVE_INFINITY,
             repeatType: "loop",
             duration: animationDuration,
-            ease: [0.4, 0, 0.2, 1], // Custom easing for smoother motion
-            times: [0, 1], // Explicit timing
+            ease: "linear",
+            times: [0, 1],
           },
         },
       })
@@ -120,7 +126,13 @@ export function PartnerLogosSection() {
   }
 
   return (
-    <section className="relative py-12 sm:py-16 overflow-hidden">
+    <motion.section 
+      className="relative py-8 sm:py-12 overflow-hidden"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.8 }}
+    >
       {/* Top divider */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
 
@@ -128,14 +140,20 @@ export function PartnerLogosSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#2E0854]/80 to-[#4B0082]/80 pointer-events-none"></div>
 
       <div className="container mx-auto px-fluid-2 relative z-10">
-        <div className="text-center mb-6 sm:mb-10">
+        <motion.div 
+          className="text-center mb-4 sm:mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
           <h2 className="text-fluid-2xl sm:text-fluid-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
             Practice Across Top Platforms
           </h2>
-          <p className="mt-3 text-fluid-base text-white/70 max-w-2xl mx-auto">
+          <p className="mt-2 text-fluid-base text-white/70 max-w-2xl mx-auto">
             AlgoAtlas helps you prepare for challenges on all major competitive programming platforms
           </p>
-        </div>
+        </motion.div>
 
         {/* Logo carousel */}
         <div
@@ -162,7 +180,7 @@ export function PartnerLogosSection() {
 
       {/* Bottom divider */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-    </section>
+    </motion.section>
   )
 }
 
