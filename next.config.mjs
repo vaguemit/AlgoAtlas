@@ -21,6 +21,7 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  transpilePackages: ['chart.js', 'react-chartjs-2'],
 }
 
 mergeConfig(nextConfig, userConfig)
