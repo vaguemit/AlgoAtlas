@@ -3,17 +3,18 @@ import { LearningPathsSection } from "@/components/learning-paths-section"
 
 export default function LearningPathsPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto mb-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-12 text-center px-6 pt-12">
+        <h1 className="text-4xl font-bold text-white mb-4">
           Learning Paths
         </h1>
-        <p className="text-lg text-white/80">
-          Structured learning tracks to help you master competitive programming at your own pace. Choose a path that
-          matches your skill level and start your journey to becoming a better programmer.
+        <div className="h-px w-64 mx-auto mb-6 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
+        <p className="text-xl text-white/80 max-w-3xl mx-auto">
+          Structured learning tracks designed to help you master competitive programming.
+          Choose a path that matches your skill level.
         </p>
       </div>
-
+      
       <LearningPathsSection />
     </div>
   )

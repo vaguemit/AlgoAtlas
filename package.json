@@ -59,7 +59,7 @@
     "expo-asset": "latest",
     "expo-file-system": "latest",
     "expo-gl": "latest",
-    "framer-motion": "^12.5.0",
+    "framer-motion": "^12.6.2",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "monaco-editor": "latest",
