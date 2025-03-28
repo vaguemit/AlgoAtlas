@@ -9,12 +9,15 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SearchBar } from "./search-bar"
 import { UserMenu } from "./user-menu"
+import { useAuth } from "@/contexts/AuthContext"
+import { supabase } from "@/lib/supabase"
 
 export function Navbar() {
   const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const { user, loading } = useAuth()
 
   // Navigation links
   const navLinks = [
@@ -42,6 +45,10 @@ export function Navbar() {
       window.removeEventListener("scroll", handleScroll)
     }
   }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   // Only render animations after component has mounted on client
   if (!isMounted) {

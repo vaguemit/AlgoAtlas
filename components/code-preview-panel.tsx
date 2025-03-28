@@ -1,22 +1,20 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
-import { VSCodeEditor } from "./vscode-editor"
-import { useMediaQuery } from "@/hooks/use-media-query"
+import { useState, useEffect } from "react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+import { VSCodeEditor } from "./vscode-editor";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 // Sample code snippets
 const codeSnippets = {
   cpp: `#include <bits/stdc++.h>
 using namespace std;
 
-
 void fastIO() {
   ios_base.sync_with_stdio(false);
   cin.tie(NULL);
 }
-
 
 int binarySearch(vector<int>& arr, int target) {
   int left = 0, right = arr.size() - 1;
@@ -63,32 +61,26 @@ int main() {
   
   return 0;
 }`,
-
   python: `# AtCoder - Dynamic Programming Solution
 def solve():
     n = int(input())
     heights = list(map(int, input().split()))
     
-    
     dp = [float('inf')] * n
     dp[0] = 0
-    
     
     for i in range(1, n):
         # Option 1: Jump from i-1
         dp[i] = min(dp[i], dp[i-1] + abs(heights[i] - heights[i-1]))
-        
         
         if i > 1:
             dp[i] = min(dp[i], dp[i-2] + abs(heights[i] - heights[i-2]))
     
     print(dp[n-1])
 
-
 t = int(input())
 for _ in range(t):
     solve()`,
-
   java: `import java.util.*;
 
 public class GraphAlgorithm {
@@ -139,7 +131,6 @@ public class GraphAlgorithm {
                 }
             }
             
-            
             for (int i = 0; i < V; i++) {
                 System.out.println("Distance from " + src + " to " + i + " is " + dist[i]);
             }
@@ -162,33 +153,33 @@ public class GraphAlgorithm {
         
         g.shortestPath(0);
     }
-}`,
-}
+}`
+};
 
 export function CodePreviewPanel() {
-  const [activeTab, setActiveTab] = useState("cpp")
-  const [projectTitle, setProjectTitle] = useState("Binary Search - Codeforces")
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const [activeTab, setActiveTab] = useState("cpp");
+  const [projectTitle, setProjectTitle] = useState("Binary Search - Codeforces");
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Update project title based on active tab
   useEffect(() => {
     switch (activeTab) {
       case "cpp":
-        setProjectTitle("Binary Search - Codeforces")
-        break
+        setProjectTitle("Binary Search - Codeforces");
+        break;
       case "python":
-        setProjectTitle("Frog Jump - AtCoder")
-        break
+        setProjectTitle("Frog Jump - AtCoder");
+        break;
       case "java":
-        setProjectTitle("Dijkstra's Algorithm - ICPC")
-        break
+        setProjectTitle("Dijkstra's Algorithm - ICPC");
+        break;
       default:
-        setProjectTitle("Competitive Programming")
+        setProjectTitle("Competitive Programming");
     }
-  }, [activeTab])
+  }, [activeTab]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden border border-purple-500/40 shadow-xl bg-[#1e1e1e]/80 backdrop-blur-sm my-4 sm:my-0 cosmic-border">
+    <div className="h-full w-full relative overflow-hidden flex flex-col bg-navy-950 rounded-lg">
       {/* VS Code-like header with window controls */}
       <div className="flex items-center bg-[#252526] border-b border-[#3c3c3c]">
         <div className="flex items-center space-x-2 px-3 py-1">
@@ -205,7 +196,7 @@ export function CodePreviewPanel() {
                 className={cn(
                   "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                   "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-purple-500",
-                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]",
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
                 )}
               >
                 codeforces.cpp
@@ -215,7 +206,7 @@ export function CodePreviewPanel() {
                 className={cn(
                   "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                   "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-purple-500",
-                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]",
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
                 )}
               >
                 atcoder.py
@@ -225,7 +216,7 @@ export function CodePreviewPanel() {
                 className={cn(
                   "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                   "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-purple-500",
-                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]",
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
                 )}
               >
                 icpc.java
@@ -271,6 +262,5 @@ export function CodePreviewPanel() {
         </div>
       </div>
     </div>
-  )
-}
-
+  );
+} 

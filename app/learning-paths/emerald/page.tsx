@@ -30,6 +30,12 @@ const emeraldTopics = [
     url: "https://www.geeksforgeeks.org/sorting-algorithms/",
     subtopics: [
       {
+        title: "Basic Sorting Algorithms",
+        description: "Understanding fundamental sorting algorithms and their implementations.",
+        url: "https://www.geeksforgeeks.org/sorting-algorithms/",
+        progress: "not-started" as Status
+      },
+      {
         title: "Binary Search",
         description: "Finding elements in sorted arrays efficiently.",
         url: "https://www.geeksforgeeks.org/binary-search/",
@@ -41,6 +47,36 @@ const emeraldTopics = [
         url: "https://www.geeksforgeeks.org/two-pointers-technique/",
         progress: "not-started" as Status
       },
+      {
+        title: "Sorting Applications",
+        description: "Common applications and variations of sorting algorithms.",
+        url: "https://www.geeksforgeeks.org/applications-of-sorting/",
+        progress: "not-started" as Status
+      },
+      {
+        title: "Custom Sorting",
+        description: "Implementing custom sorting criteria and comparators.",
+        url: "https://www.geeksforgeeks.org/custom-comparator-in-cpp/",
+        progress: "not-started" as Status
+      },
+      {
+        title: "Searching in Rotated Arrays",
+        description: "Binary search in rotated and sorted arrays.",
+        url: "https://www.geeksforgeeks.org/search-an-element-in-a-sorted-and-pivoted-array/",
+        progress: "not-started" as Status
+      },
+      {
+        title: "Ternary Search",
+        description: "Searching in unimodal functions and arrays.",
+        url: "https://www.geeksforgeeks.org/ternary-search/",
+        progress: "not-started" as Status
+      },
+      {
+        title: "Lower and Upper Bound",
+        description: "Finding the first and last positions of elements in sorted arrays.",
+        url: "https://www.geeksforgeeks.org/lower_bound-in-cpp/",
+        progress: "not-started" as Status
+      }
     ],
   },
   {

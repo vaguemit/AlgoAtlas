@@ -6,6 +6,7 @@ import { Navbar } from "@/components/navbar"
 import { FloatingChatBubble } from "@/components/floating-chat-bubble"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/contexts/AuthContext"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,16 +36,18 @@ export default function RootLayout({
       <body
         className={`${inter.className} ${inter.variable} bg-gradient-to-b from-[#0D0D0D] via-[#2E0854] to-[#4B0082] min-h-screen text-white antialiased`}
       >
-        <ThemeProvider>
-          <div className="relative overflow-hidden">
-            <div className="relative z-10 flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-grow pt-16 pb-16">{children}</main>
-              <Footer />
-              <FloatingChatBubble />
+        <AuthProvider>
+          <ThemeProvider>
+            <div className="relative overflow-hidden">
+              <div className="relative z-10 flex flex-col min-h-screen">
+                <Navbar />
+                <main className="flex-grow pt-16 pb-16">{children}</main>
+                <Footer />
+                <FloatingChatBubble />
+              </div>
             </div>
-          </div>
-        </ThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )
