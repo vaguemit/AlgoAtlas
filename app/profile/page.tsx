@@ -83,6 +83,7 @@ export default function ProfilePage() {
   const [cfHistory, setCfHistory] = useState<RatingChange[]>([]);
   const [showCharts, setShowCharts] = useState(false);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'history' | 'contests'>('history');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -520,29 +521,29 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white pt-16 pb-16">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-transparent backdrop-blur-sm text-white pt-10 pb-20">
+      <div className="container mx-auto px-3 sm:px-4 py-8">
+        <div className="max-w-7xl mx-auto">
           {/* Profile Header - Enhanced */}
-          <div className="relative mb-12">
-            <div className="h-52 bg-gradient-to-r from-purple-900/60 via-blue-900/40 to-indigo-900/60 rounded-xl overflow-hidden">
-              <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-30"></div>
-              <div className="absolute inset-0 bg-gradient-radial from-purple-600/20 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black to-transparent"></div>
+          <div className="relative mb-20 md:mb-24">
+            <div className="h-40 sm:h-52 bg-gradient-to-r from-purple-900/40 via-blue-900/30 to-indigo-900/40 rounded-xl overflow-hidden backdrop-blur-md border border-white/10 shadow-2xl">
+              <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-radial from-purple-600/10 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-transparent to-transparent"></div>
             </div>
             
-            <div className="absolute bottom-0 transform translate-y-1/2 left-8 flex items-end">
+            <div className="absolute -bottom-10 md:-bottom-12 left-4 sm:left-8 flex items-end">
               <div className="relative">
-                <div className="w-28 h-28 bg-gradient-to-br from-purple-600 to-blue-600 rounded-full flex items-center justify-center text-3xl font-bold border-4 border-black shadow-lg">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-600/90 to-blue-600/90 rounded-full flex items-center justify-center text-3xl font-bold border-4 border-white/10 shadow-lg backdrop-blur-md">
                   {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 blur-md opacity-30"></div>
               </div>
-              <div className="ml-5 mb-5">
-                <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white">
+              <div className="ml-4 sm:ml-5 mb-2 sm:mb-5">
+                <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white">
                   {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
                 </h1>
-                <p className="text-white/70 flex items-center">
+                <p className="text-sm sm:text-base text-white/70 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 opacity-70" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
@@ -552,9 +553,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="absolute bottom-4 right-8 flex items-center">
-              <Link href="/settings" className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-md border border-white/10 transition duration-200 text-sm font-medium flex items-center mr-2 shadow-lg backdrop-blur-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="absolute bottom-4 right-4 sm:right-8 flex items-center">
+              <Link href="/settings" className="px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md border border-white/20 transition duration-200 text-xs sm:text-sm font-medium flex items-center mr-2 shadow-lg backdrop-blur-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -562,7 +563,7 @@ export default function ProfilePage() {
               </Link>
               <button 
                 onClick={() => setDebugMode(!debugMode)}
-                className="text-xs bg-white/5 hover:bg-white/10 px-2 py-1 rounded backdrop-blur-sm"
+                className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded backdrop-blur-md border border-white/10"
               >
                 {debugMode ? '🔍 Debug On' : '🔧 Debug'}
               </button>
@@ -572,7 +573,7 @@ export default function ProfilePage() {
           {/* Status Messages */}
           {message && (
             <div 
-              className={`p-4 mb-6 rounded-md ${
+              className={`p-4 mb-8 rounded-md ${
                 messageType === 'error' ? 'bg-red-900/50 border border-red-500' : 'bg-green-900/50 border border-green-500'
               }`}
             >
@@ -591,101 +592,52 @@ export default function ProfilePage() {
           
           {/* Main Page Loading State */}
           {profileLoading ? (
-            <div className="flex flex-col items-center justify-center py-16">
+            <div className="flex flex-col items-center justify-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
               <p className="text-purple-400">Loading your profile data...</p>
               <p className="text-white/50 text-sm mt-2">This may take a moment</p>
             </div>
           ) : (
             /* Main Content Area */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-8 gap-x-6 xl:gap-x-8 mb-8">
               {/* Left Column - User Info & Stats */}
-              <div className="space-y-6">
+              <div>
                 {/* Account Information */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10 backdrop-blur-sm">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <div className="bg-white/10 rounded-xl p-5 sm:p-6 border border-white/20 backdrop-blur-md shadow-xl">
+                  <h2 className="text-xl font-semibold mb-5 flex items-center text-purple-300">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                     Account Information
                   </h2>
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1">Email</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Email</h3>
                       <p className="text-white">{user.email}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1">Account Created</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Account Created</h3>
                       <p className="text-white">{new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1">Last Sign In</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Last Sign In</h3>
                       <p className="text-white">{new Date(user.last_sign_in_at || "").toLocaleDateString()}</p>
                     </div>
                     {debugMode && (
                       <div>
-                        <h3 className="text-sm font-medium text-white/50 mb-1">User ID</h3>
+                        <h3 className="text-sm font-medium text-white/50 mb-1.5">User ID</h3>
                         <p className="text-xs text-white/70 break-all">{user.id}</p>
                       </div>
                     )}
                   </div>
                 </div>
-                
-                {/* Activity Summary */}
-                <div className="bg-white/5 rounded-xl p-6 border border-white/10 backdrop-blur-sm">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                    </svg>
-                    Activity Summary
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="bg-white/5 rounded-lg p-4 border border-purple-500/20">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-sm font-medium text-white/50 mb-1">Problems Solved</h3>
-                          <p className="text-3xl font-bold text-purple-400">0</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-500/20" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M9 2a1 1 0 000 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                          <path fillRule="evenodd" d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-white/50 mt-1">Track your progress</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-4 border border-blue-500/20">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-sm font-medium text-white/50 mb-1">Contests Participated</h3>
-                          <p className="text-3xl font-bold text-blue-400">{cfHistory.length || 0}</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500/20" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-white/50 mt-1">From connected profiles</p>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-4 border border-green-500/20">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-sm font-medium text-white/50 mb-1">Learning Streak</h3>
-                          <p className="text-3xl font-bold text-green-400">0</p>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-500/20" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <p className="text-xs text-white/50 mt-1">Days in a row</p>
-                    </div>
-                  </div>
-                </div>
               </div>
               
               {/* Middle & Right Columns - CP Profiles */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-8">
                 {/* CP Profile Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-2xl font-bold flex items-center">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-3">
+                  <h2 className="text-2xl font-bold flex items-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
@@ -694,7 +646,7 @@ export default function ProfilePage() {
                   {cfProfile && (
                     <div className="text-sm text-white/70 flex items-center">
                       <span className="mr-2">Last updated:</span>
-                      <span className="bg-white/10 px-2 py-1 rounded-full text-xs">
+                      <span className="bg-white/20 px-2 py-1 rounded-full text-xs backdrop-blur-md">
                         {new Date().toLocaleDateString()}
                       </span>
                     </div>
@@ -702,10 +654,10 @@ export default function ProfilePage() {
                 </div>
                 
                 {/* Codeforces Card */}
-                <div className="bg-gradient-to-br from-purple-900/30 to-purple-800/10 rounded-xl p-6 border border-purple-500/30 backdrop-blur-sm">
-                  <div className="flex justify-between items-start mb-6">
+                <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/20 rounded-xl p-5 sm:p-6 border border-white/20 backdrop-blur-md shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
                     <div>
-                      <h2 className="text-xl font-semibold text-purple-400 flex items-center">
+                      <h2 className="text-xl font-semibold text-purple-300 flex items-center">
                         <img src="https://codeforces.org/s/0/favicon-32x32.png" alt="Codeforces Logo" className="w-5 h-5 mr-2" />
                         Codeforces
                       </h2>
@@ -717,7 +669,7 @@ export default function ProfilePage() {
                     </div>
                     
                     {cfProfile && (
-                      <div className="bg-white/10 px-3 py-1 rounded-full text-sm font-medium" style={{color: getRatingColor(cfProfile.rating)}}>
+                      <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-md self-start" style={{color: getRatingColor(cfProfile.rating)}}>
                         {cfProfile.rank || 'Unrated'}
                       </div>
                     )}
@@ -725,31 +677,31 @@ export default function ProfilePage() {
                   
                   {cfProfile ? (
                     <div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-                        <div className="bg-white/5 p-3 rounded-lg">
-                          <p className="text-xs text-white/50">Current Rating</p>
-                          <p className="text-2xl font-bold" style={{color: getRatingColor(cfProfile.rating)}}>{cfProfile.rating || 'Unrated'}</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                          <p className="text-xs text-white/60">Current Rating</p>
+                          <p className="text-xl sm:text-2xl font-bold" style={{color: getRatingColor(cfProfile.rating)}}>{cfProfile.rating || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/5 p-3 rounded-lg">
-                          <p className="text-xs text-white/50">Max Rating</p>
-                          <p className="text-2xl font-bold" style={{color: getRatingColor(cfProfile.maxRating)}}>{cfProfile.maxRating || 'Unrated'}</p>
+                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                          <p className="text-xs text-white/60">Max Rating</p>
+                          <p className="text-xl sm:text-2xl font-bold" style={{color: getRatingColor(cfProfile.maxRating)}}>{cfProfile.maxRating || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/5 p-3 rounded-lg">
-                          <p className="text-xs text-white/50">Max Rank</p>
+                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                          <p className="text-xs text-white/60">Max Rank</p>
                           <p className="text-lg font-bold text-white">{cfProfile.maxRank || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/5 p-3 rounded-lg">
-                          <p className="text-xs text-white/50">Contests</p>
+                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                          <p className="text-xs text-white/60">Contests</p>
                           <p className="text-lg font-bold text-white">{cfHistory.length}</p>
                         </div>
                       </div>
                       
-                      <div className="mt-6 flex justify-between">
+                      <div className="mt-8 flex flex-col sm:flex-row justify-between gap-3">
                         <a 
                           href={`https://codeforces.com/profile/${cfProfile.handle}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-sm bg-purple-800/30 hover:bg-purple-800/50 px-4 py-2 rounded-md text-white flex items-center transition-colors"
+                          className="text-sm bg-purple-800/40 hover:bg-purple-700/50 px-4 py-2 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-purple-500/30 backdrop-blur-md"
                         >
                           View Profile
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -759,7 +711,7 @@ export default function ProfilePage() {
                         </a>
                         <button 
                           onClick={disconnectCodeforces}
-                          className="text-sm bg-red-900/30 hover:bg-red-900/50 px-4 py-2 rounded-md text-white flex items-center transition-colors"
+                          className="text-sm bg-red-900/40 hover:bg-red-800/50 px-4 py-2 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-red-500/30 backdrop-blur-md"
                         >
                           Disconnect
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -770,19 +722,19 @@ export default function ProfilePage() {
                     </div>
                   ) : (
                     <div className="mt-4">
-                      <div className="bg-white/5 p-6 rounded-lg border border-purple-500/20">
-                        <h3 className="text-md font-medium mb-4">Connect Your Codeforces Account</h3>
-                        <p className="text-sm text-white/70 mb-6">Link your Codeforces profile to track your competitive programming progress and visualize your rating history.</p>
+                      <div className="bg-white/20 p-5 sm:p-6 rounded-lg border border-white/20 backdrop-blur-md">
+                        <h3 className="text-lg font-medium mb-4 text-purple-200">Connect Your Codeforces Account</h3>
+                        <p className="text-sm text-white/70 mb-6">Link your Codeforces profile to visualize your rating history.</p>
                         
-                        <div className="space-y-4">
-            <div>
+                        <div className="space-y-5">
+                          <div>
                             <label className="block text-sm font-medium mb-2 text-white/80">Codeforces Handle</label>
                             <div className="relative">
                               <input
                                 type="text"
                                 value={cfHandle}
                                 onChange={(e) => setCfHandle(e.target.value)}
-                                className="w-full px-4 py-3 bg-black/40 border border-purple-500/30 rounded-md text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-white/30"
+                                className="w-full px-4 py-3 bg-black/20 border border-purple-500/30 rounded-md text-white focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 placeholder-white/30 backdrop-blur-md"
                                 placeholder="Enter your Codeforces handle"
                               />
                               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-white/20">
@@ -795,7 +747,7 @@ export default function ProfilePage() {
                           <button
                             onClick={connectCodeforces}
                             disabled={cfLoading}
-                            className="w-full px-4 py-3 bg-purple-600/80 hover:bg-purple-600 text-white rounded-md transition-colors disabled:opacity-50 flex items-center justify-center"
+                            className="w-full px-4 py-3 bg-purple-600/60 hover:bg-purple-600/80 text-white rounded-md transition-colors disabled:opacity-50 flex items-center justify-center backdrop-blur-md border border-purple-500/30"
                           >
                             {cfLoading ? (
                               <>
@@ -822,93 +774,138 @@ export default function ProfilePage() {
                 
                 {/* Rating History Chart */}
                 {showCharts && cfHistory.length > 0 ? (
-                  <div className="bg-white/5 rounded-xl p-6 border border-purple-500/20 backdrop-blur-sm">
-                    <h2 className="text-xl font-semibold mb-6 flex items-center">
+                  <div className="bg-white/20 rounded-xl p-5 sm:p-6 border border-white/20 backdrop-blur-md shadow-xl">
+                    <h2 className="text-xl font-semibold mb-6 flex items-center text-purple-300">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      Rating History
+                      Performance Overview
                     </h2>
                     
-                    <div className="bg-white/5 p-6 rounded-lg">
-                      <div className="h-80 bg-white bg-opacity-95 p-4 rounded-md">
-                        <ChunkErrorBoundary fallback={<div className="h-full flex items-center justify-center text-white/50">Error loading chart</div>}>
-                          <ChartComponent ratingHistory={cfHistory} />
-                        </ChunkErrorBoundary>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <p className="text-xs text-white/50">Total Contests</p>
-                        <p className="text-xl font-bold text-white">{cfHistory.length}</p>
-                      </div>
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <p className="text-xs text-white/50">Initial Rating</p>
-                        <p className="text-xl font-bold" style={{color: getRatingColor(cfHistory[0]?.oldRating)}}>{cfHistory[0]?.oldRating || 'N/A'}</p>
-                      </div>
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <p className="text-xs text-white/50">Current Rating</p>
-                        <p className="text-xl font-bold" style={{color: getRatingColor(cfHistory[cfHistory.length - 1]?.newRating)}}>{cfHistory[cfHistory.length - 1]?.newRating || 'N/A'}</p>
-                      </div>
-                      <div className="bg-white/5 p-3 rounded-lg">
-                        <p className="text-xs text-white/50">Highest Rating</p>
-                        <p className="text-xl font-bold" style={{color: getRatingColor(Math.max(...cfHistory.map(h => h.newRating || 0)))}}>{Math.max(...cfHistory.map(h => h.newRating || 0))}</p>
-                      </div>
-                    </div>
-                    
-                    {/* Recent Contest Table */}
-                    <div className="mt-6">
-                      <h3 className="text-lg font-medium mb-4 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
+                    {/* Tabs Navigation */}
+                    <div className="flex mb-6 border-b border-white/20">
+                      <button
+                        onClick={() => setActiveTab('history')}
+                        className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors relative ${
+                          activeTab === 'history' 
+                          ? 'text-white bg-white/20 border-b-2 border-purple-500' 
+                          : 'text-white/70 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        Rating History
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('contests')}
+                        className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors relative ${
+                          activeTab === 'contests' 
+                          ? 'text-white bg-white/20 border-b-2 border-purple-500' 
+                          : 'text-white/70 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
                         Recent Contests
-                      </h3>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="bg-white/5 text-left">
-                              <th className="p-3 text-sm font-medium text-white/70">Contest</th>
-                              <th className="p-3 text-sm font-medium text-white/70">Rank</th>
-                              <th className="p-3 text-sm font-medium text-white/70">Old Rating</th>
-                              <th className="p-3 text-sm font-medium text-white/70">New Rating</th>
-                              <th className="p-3 text-sm font-medium text-white/70">Change</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {cfHistory.slice(-5).reverse().map((contest, index) => (
-                              <tr key={index} className="border-t border-white/5">
-                                <td className="p-3 text-sm truncate max-w-[200px]">{contest.contestName}</td>
-                                <td className="p-3 text-sm">{contest.rank}</td>
-                                <td className="p-3 text-sm" style={{color: getRatingColor(contest.oldRating)}}>{contest.oldRating}</td>
-                                <td className="p-3 text-sm" style={{color: getRatingColor(contest.newRating)}}>{contest.newRating}</td>
-                                <td className="p-3 text-sm">
-                                  <span className={`${(contest.newRating || 0) > (contest.oldRating || 0) ? 'text-green-400' : 'text-red-400'}`}>
-                                    {(contest.newRating || 0) > (contest.oldRating || 0) ? '+' : ''}
-                                    {((contest.newRating || 0) - (contest.oldRating || 0))}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
-                            {cfHistory.length === 0 && (
-                              <tr>
-                                <td colSpan={5} className="p-4 text-center text-white/50">No contest history available</td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                        <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-white/20">
+                          {cfHistory.length}
+                        </span>
+                      </button>
                     </div>
+                    
+                    {/* Rating History Tab Content */}
+                    {activeTab === 'history' && (
+                      <>
+                        <div className="bg-white/10 p-4 sm:p-6 rounded-lg border border-white/10 shadow-inner">
+                          <div className="h-64 sm:h-80 bg-white bg-opacity-95 p-4 rounded-md shadow-lg">
+                            <ChunkErrorBoundary fallback={<div className="h-full flex items-center justify-center text-white/50">Error loading chart</div>}>
+                              <ChartComponent ratingHistory={cfHistory} />
+                            </ChunkErrorBoundary>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm border border-white/10">
+                            <p className="text-xs text-white/60">Total Contests</p>
+                            <p className="text-xl font-bold text-white">{cfHistory.length}</p>
+                          </div>
+                          <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm border border-white/10">
+                            <p className="text-xs text-white/60">Initial Rating</p>
+                            <p className="text-xl font-bold" style={{color: getRatingColor(cfHistory[0]?.oldRating)}}>{cfHistory[0]?.oldRating || 'N/A'}</p>
+                          </div>
+                          <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm border border-white/10">
+                            <p className="text-xs text-white/60">Current Rating</p>
+                            <p className="text-xl font-bold" style={{color: getRatingColor(cfHistory[cfHistory.length - 1]?.newRating)}}>{cfHistory[cfHistory.length - 1]?.newRating || 'N/A'}</p>
+                          </div>
+                          <div className="bg-white/20 p-3 rounded-lg backdrop-blur-sm border border-white/10">
+                            <p className="text-xs text-white/60">Highest Rating</p>
+                            <p className="text-xl font-bold" style={{color: getRatingColor(Math.max(...cfHistory.map(h => h.newRating || 0)))}}>{Math.max(...cfHistory.map(h => h.newRating || 0))}</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Recent Contests Tab Content */}
+                    {activeTab === 'contests' && (
+                      <div className="bg-white/10 p-4 rounded-lg border border-white/10 shadow-inner">
+                        <div className="overflow-x-auto">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="bg-white/20">
+                                <th className="p-3 text-left text-sm font-medium text-white/80">Contest</th>
+                                <th className="p-3 text-left text-sm font-medium text-white/80">Date</th>
+                                <th className="p-3 text-left text-sm font-medium text-white/80">Rank</th>
+                                <th className="p-3 text-left text-sm font-medium text-white/80">Old Rating</th>
+                                <th className="p-3 text-left text-sm font-medium text-white/80">New Rating</th>
+                                <th className="p-3 text-left text-sm font-medium text-white/80">Change</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cfHistory.slice().reverse().map((contest, index) => (
+                                <tr key={index} className="border-t border-white/10 hover:bg-white/5 transition-colors">
+                                  <td className="p-3 text-sm">
+                                    <a 
+                                      href={`https://codeforces.com/contest/${contest.contestId}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-purple-300 hover:text-purple-200 hover:underline truncate max-w-[200px] inline-block"
+                                    >
+                                      {contest.contestName}
+                                    </a>
+                                  </td>
+                                  <td className="p-3 text-sm text-white/70">
+                                    {contest.ratingUpdateTimeSeconds 
+                                      ? new Date(contest.ratingUpdateTimeSeconds * 1000).toLocaleDateString() 
+                                      : 'N/A'}
+                                  </td>
+                                  <td className="p-3 text-sm">{contest.rank}</td>
+                                  <td className="p-3 text-sm" style={{color: getRatingColor(contest.oldRating)}}>{contest.oldRating}</td>
+                                  <td className="p-3 text-sm" style={{color: getRatingColor(contest.newRating)}}>{contest.newRating}</td>
+                                  <td className="p-3 text-sm">
+                                    <span className={`px-2 py-0.5 rounded-full ${(contest.newRating || 0) > (contest.oldRating || 0) 
+                                      ? 'bg-green-900/50 text-green-300' 
+                                      : 'bg-red-900/50 text-red-300'}`}>
+                                      {(contest.newRating || 0) > (contest.oldRating || 0) ? '+' : ''}
+                                      {((contest.newRating || 0) - (contest.oldRating || 0))}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                              {cfHistory.length === 0 && (
+                                <tr>
+                                  <td colSpan={6} className="p-8 text-center text-white/50">No contest history available</td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : cfProfile ? (
-                  <div className="bg-white/5 rounded-xl p-8 border border-purple-500/20 backdrop-blur-sm flex flex-col items-center justify-center">
-                    <div className="rounded-full bg-purple-900/30 p-4 mb-4">
+                  <div className="bg-white/20 rounded-xl p-8 border border-white/20 backdrop-blur-md shadow-xl flex flex-col items-center justify-center">
+                    <div className="rounded-full bg-purple-900/30 p-4 mb-4 backdrop-blur-md">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-medium mb-2 text-center">No Contests Found</h3>
+                    <h3 className="text-lg font-medium mb-3 text-center text-purple-200">No Contests Found</h3>
                     <p className="text-white/70 text-center text-sm max-w-md">
                       It looks like you haven't participated in any rated Codeforces contests yet. Participate in a contest to see your rating history here.
                     </p>
@@ -920,12 +917,12 @@ export default function ProfilePage() {
           
           {/* Database Information Section (in debug mode) */}
           {debugMode && (
-            <div className="bg-gray-900/70 rounded-xl p-6 border border-yellow-500/30 mb-8 backdrop-blur-sm">
-              <h2 className="text-xl font-semibold mb-4 text-yellow-400">Database Information</h2>
-              <div className="space-y-4">
+            <div className="bg-white/10 rounded-xl p-5 sm:p-6 border border-yellow-500/30 mb-8 backdrop-blur-md shadow-xl">
+              <h2 className="text-xl font-semibold mb-5 text-yellow-400">Database Information</h2>
+              <div className="space-y-5">
                 <div>
                   <h3 className="text-sm font-medium text-white/70 mb-2">How User Data Is Stored</h3>
-                  <div className="bg-black/50 p-4 rounded-md text-sm text-white/70">
+                  <div className="bg-white/10 p-4 rounded-md text-sm text-white/70 backdrop-blur-sm border border-white/10">
                     <p>Your data is stored in multiple linked tables in the Supabase database:</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">
                       <li><strong>auth.users</strong>: Core authentication data (email, password, etc.)</li>
@@ -935,17 +932,17 @@ export default function ProfilePage() {
                     </ul>
                     <p className="mt-2">Each table has a foreign key relationship to your user ID. CP data is stored separately from login data for better database organization and security.</p>
                   </div>
-            </div>
+                </div>
 
-            <div>
+                <div>
                   <h3 className="text-sm font-medium text-white/70 mb-2">User Identifier</h3>
-                  <p className="bg-black/50 p-3 rounded-md text-xs text-white/60 break-all">{user.id}</p>
+                  <p className="bg-white/10 p-3 rounded-md text-xs text-white/60 break-all backdrop-blur-sm border border-white/10">{user.id}</p>
                   <p className="text-xs text-white/50 mt-1">This UUID connects all your data across different tables</p>
                 </div>
 
                 <div>
                   <h3 className="text-sm font-medium text-white/70 mb-2">Caching Strategy</h3>
-                  <div className="bg-black/50 p-4 rounded-md text-sm text-white/70">
+                  <div className="bg-white/10 p-4 rounded-md text-sm text-white/70 backdrop-blur-sm border border-white/10">
                     <p>To improve performance, we use the following strategies:</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">
                       <li><strong>LocalStorage Cache</strong>: Profile data is cached locally for 6 hours</li>

@@ -65,9 +65,8 @@ function PathCard({ path, index }: { path: LearningPathWithProgress; index: numb
   const isDiamond = path.title.includes('Diamond')
 
   return (
-    <Link
-      href={`/learning-paths/${path.id}`}
-      className="block"
+    <div
+      className="block h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -152,7 +151,7 @@ function PathCard({ path, index }: { path: LearningPathWithProgress; index: numb
           </motion.div>
         </div>
       </motion.div>
-    </Link>
+    </div>
   )
 }
 
