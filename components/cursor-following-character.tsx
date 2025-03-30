@@ -6,6 +6,7 @@ import { Environment, Float, useGLTF } from "@react-three/drei"
 import * as THREE from "three"
 import { useDeviceType } from "@/hooks/use-device-type"
 import { motion } from "framer-motion"
+import { toast } from "@/components/ui/use-toast"
 
 interface MousePosition {
   x: number
@@ -13,7 +14,7 @@ interface MousePosition {
 }
 
 // 3D Model Component
-function Model({ mousePosition }: { mousePosition: MousePosition }) {
+function Model({ mousePosition, onModelClick }: { mousePosition: MousePosition, onModelClick: () => void }) {
   const modelRef = useRef<THREE.Group>(null!)
   const [modelError, setModelError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -75,7 +76,7 @@ function Model({ mousePosition }: { mousePosition: MousePosition }) {
 
   return (
     <Float speed={0} rotationIntensity={0} floatIntensity={0} position={[0, 0, 0]}>
-      <group ref={modelRef}>
+      <group ref={modelRef} onClick={onModelClick}>
         <primitive object={scene} scale={0.5} />
       </group>
     </Float>
@@ -83,7 +84,7 @@ function Model({ mousePosition }: { mousePosition: MousePosition }) {
 }
 
 // Scene setup with mouse tracking
-function Scene() {
+function Scene({ onModelClick }: { onModelClick: () => void }) {
   const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 })
   const [isMounted, setIsMounted] = useState(false)
 
@@ -122,7 +123,7 @@ function Scene() {
 
   return (
     <>
-      <Model mousePosition={mousePosition} />
+      <Model mousePosition={mousePosition} onModelClick={onModelClick} />
       <Environment preset="city" />
     </>
   )
@@ -133,11 +134,39 @@ export function CursorFollowingCharacter() {
   const [isMounted, setIsMounted] = useState(false)
   const [interactionCount, setInteractionCount] = useState(0)
   const [showFloatingText, setShowFloatingText] = useState(false)
+  const [isPlayingMeow, setIsPlayingMeow] = useState(false)
+  const [audioLoaded, setAudioLoaded] = useState(false)
+  const [audioError, setAudioError] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     // Skip during SSR
     if (typeof window === "undefined") return
 
+    try {
+      // Create audio element
+      const audio = new Audio();
+      
+      // Add event listeners to track loading state
+      audio.addEventListener('canplaythrough', () => {
+        console.log('Audio loaded successfully');
+        setAudioLoaded(true);
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio loading error:', e);
+        setAudioError(`Failed to load audio: ${e.type}`);
+      });
+      
+      // Set the source after adding listeners
+      audio.src = '/sounds/cat-meow.mp3';
+      
+      audioRef.current = audio;
+    } catch (error) {
+      console.error('Error setting up audio:', error);
+      setAudioError(`Error setting up audio: ${error}`);
+    }
+    
     // Use requestAnimationFrame to ensure the browser is ready
     const frameId = requestAnimationFrame(() => {
       setIsMounted(true)
@@ -147,8 +176,69 @@ export function CursorFollowingCharacter() {
       if (frameId) {
         cancelAnimationFrame(frameId)
       }
+      
+      // Clean up audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
     }
   }, [])
+
+  // Handle cat click to play meow sound
+  const handleCatClick = () => {
+    console.log('Cat clicked, audio state:', { 
+      audioRef: audioRef.current ? 'exists' : 'null', 
+      isPlaying: isPlayingMeow,
+      loaded: audioLoaded,
+      error: audioError
+    });
+    
+    if (audioRef.current) {
+      if (isPlayingMeow) {
+        // If already playing, just restart
+        audioRef.current.currentTime = 0;
+        return;
+      }
+      
+      setIsPlayingMeow(true);
+      
+      // Play the meow sound
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().then(() => {
+        console.log('Audio playing successfully');
+      }).catch(error => {
+        console.error('Error playing audio:', error);
+        toast({
+          title: "Couldn't play sound",
+          description: "Try interacting with the page first or check if your browser allows audio playback.",
+          variant: "destructive"
+        });
+      });
+      
+      // Show a "Meow!" text bubble
+      setShowFloatingText(true);
+      setTimeout(() => setShowFloatingText(false), 2000);
+      
+      // Reset the playing state when audio ends
+      audioRef.current.onended = () => {
+        setIsPlayingMeow(false);
+      };
+    } else {
+      // Fallback if audio isn't available
+      console.log('Audio element not available, showing visual feedback only');
+      setShowFloatingText(true);
+      setTimeout(() => setShowFloatingText(false), 2000);
+      
+      if (audioError) {
+        toast({
+          title: "Audio issue detected",
+          description: audioError,
+          variant: "destructive"
+        });
+      }
+    }
+  }
 
   // Track mouse movement to show floating text
   const handleMouseMove = () => {
@@ -167,6 +257,7 @@ export function CursorFollowingCharacter() {
   }
 
   const floatingTexts = [
+    { text: "Meow!", color: "text-yellow-300", x: 0, y: -80, delay: 0 },
     { text: "Hello!", color: "text-blue-300", x: -110, y: -60, delay: 0 },
     { text: "I'm here to help!", color: "text-purple-300", x: 100, y: -40, delay: 0.5 },
     { text: "Try algorithms!", color: "text-green-300", x: 80, y: 50, delay: 1 }
@@ -174,11 +265,11 @@ export function CursorFollowingCharacter() {
 
   return (
     <div 
-      className="w-full h-[400px] overflow-hidden rounded-lg relative"
+      className="w-full h-[400px] overflow-hidden rounded-lg relative cursor-pointer"
       onMouseMove={handleMouseMove}
     >
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-        <Scene />
+        <Scene onModelClick={handleCatClick} />
       </Canvas>
 
       {/* Floating text animations */}
@@ -240,7 +331,7 @@ export function CursorFollowingCharacter() {
 
       {/* Instructions overlay */}
       <div className="absolute bottom-3 left-0 right-0 text-center text-white/70 text-sm pointer-events-none">
-        Move your cursor to interact with the model
+        Move your cursor to interact with Whisker the cat. Click to hear a meow!
       </div>
     </div>
   )

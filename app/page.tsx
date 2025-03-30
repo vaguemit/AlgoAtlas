@@ -181,11 +181,19 @@ export default function Home() {
         {/* Interactive Character */}
         {isDesktop && isLoaded && (
           <motion.div 
-            className="mt-6 mb-8 flex justify-center"
+            className="mt-6 mb-8 flex justify-center flex-col items-center"
             variants={itemVariants}
           >
             <div className="w-full max-w-2xl">
               <CursorFollowingCharacter />
+            </div>
+            <div className="mt-4 text-center">
+              <a 
+                href="/cat-demo" 
+                className="inline-flex items-center text-sm font-medium text-purple-400 hover:text-purple-300"
+              >
+                Click to interact with Whisker in fullscreen mode! 🐱
+              </a>
             </div>
           </motion.div>
         )}

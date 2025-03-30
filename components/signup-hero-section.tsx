@@ -1,80 +1,9 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Canvas } from "@react-three/fiber"
-import { Float, MeshDistortMaterial, MeshWobbleMaterial } from "@react-three/drei"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
-
-// 3D Background Elements Component
-function FloatingShapes() {
-  return (
-    <>
-      {/* Purple Octahedron */}
-      <Float speed={1.5} rotationIntensity={0.6} floatIntensity={0.6} position={[-2, -0.5, 0]}>
-        <mesh>
-          <octahedronGeometry args={[1.2, 0]} />
-          <MeshDistortMaterial
-            color="#3A1E70"
-            emissive="#3A1E70"
-            emissiveIntensity={0.4}
-            roughness={0.3}
-            metalness={0.8}
-            speed={0.4}
-            distort={0.2}
-          />
-        </mesh>
-      </Float>
-
-      {/* Blue Torus */}
-      <Float speed={1.8} rotationIntensity={0.5} floatIntensity={0.5} position={[2, 0.5, -1]}>
-        <mesh rotation={[Math.PI / 4, 0, Math.PI / 4]}>
-          <torusGeometry args={[0.9, 0.25, 16, 32]} />
-          <MeshWobbleMaterial
-            color="#2A1845"
-            emissive="#2A1845"
-            emissiveIntensity={0.3}
-            factor={0.3}
-            speed={1}
-            roughness={0.4}
-          />
-        </mesh>
-      </Float>
-
-      {/* Small Spheres */}
-      {[
-        { position: [3, -1, 0] as [number, number, number], color: "#4A2085", size: 0.5 },
-        { position: [-3, 1, -1] as [number, number, number], color: "#2A1845", size: 0.4 },
-        { position: [0, 2, -2] as [number, number, number], color: "#3A1E70", size: 0.3 },
-      ].map((sphere, i) => (
-        <Float
-          key={i}
-          speed={2 + Math.random()}
-          rotationIntensity={0.4}
-          floatIntensity={0.7}
-          position={sphere.position}
-        >
-          <mesh>
-            <sphereGeometry args={[sphere.size, 32, 32]} />
-            <meshStandardMaterial
-              color={sphere.color}
-              emissive={sphere.color}
-              emissiveIntensity={0.4}
-              roughness={0.5}
-              metalness={0.8}
-            />
-          </mesh>
-        </Float>
-      ))}
-
-      {/* Ambient Light */}
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={0.8} />
-      <pointLight position={[-10, -10, -5]} intensity={0.5} color="#3A1E70" />
-    </>
-  )
-}
 
 export function SignupHeroSection() {
   const router = useRouter()
@@ -103,45 +32,31 @@ export function SignupHeroSection() {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-5xl mx-auto">
-          {/* Two-column layout on larger screens */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
-            {/* Left column: Text content */}
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-center lg:text-left"
-              >
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#9A70E8] via-[#8265DC] to-[#9A70E8] animate-gradient">
-                  Elevate Your Competitive Programming Journey
-                </h2>
-                <p className="text-lg md:text-xl text-white/80 mb-8">
-                  Join thousands of developers mastering algorithms, solving challenges, and climbing the ranks in the
-                  competitive programming world.
-                </p>
+          <div className="flex flex-col items-center text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="max-w-3xl"
+            >
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#9A70E8] via-[#8265DC] to-[#9A70E8] animate-gradient">
+                Elevate Your Competitive Programming Journey
+              </h2>
+              <p className="text-lg md:text-xl text-white/80 mb-8">
+                Join thousands of developers mastering algorithms, solving challenges, and climbing the ranks in the
+                competitive programming world.
+              </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                  <Button
-                    variant="outline"
-                    className="border-[#3A1E70]/30 hover:border-[#3A1E70]/70 text-white hover:bg-[#3A1E70]/10"
-                    onClick={handleAssistantClick}
-                  >
-                    Try AlgoAtlas Assistant
-                  </Button>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Right column: 3D visualization */}
-            <div className="relative h-64 sm:h-80 lg:h-96">
-              {/* 3D Canvas */}
-              <div className="absolute inset-0 z-0">
-                <Canvas camera={{ position: [0, 0, 6], fov: 50 }}>
-                  <FloatingShapes />
-                </Canvas>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  variant="outline"
+                  className="border-[#3A1E70]/30 hover:border-[#3A1E70]/70 text-white hover:bg-[#3A1E70]/10"
+                  onClick={handleAssistantClick}
+                >
+                  Try AlgoAtlas Assistant
+                </Button>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
