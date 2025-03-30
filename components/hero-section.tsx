@@ -183,7 +183,7 @@ export function HeroSection() {
       </motion.div>
 
       {/* Bottom gradient overlay to enhance transition to next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-28 bg-gradient-to-t from-[#4B0082]/90 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-28 bg-gradient-to-t from-[#09061A] to-transparent"></div>
     </section>
   )
 }

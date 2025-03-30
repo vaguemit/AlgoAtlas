@@ -159,6 +159,8 @@ public class GraphAlgorithm {
 export function CodePreviewPanel() {
   const [activeTab, setActiveTab] = useState("cpp");
   const [projectTitle, setProjectTitle] = useState("Binary Search - Codeforces");
+  const [isTyping, setIsTyping] = useState(false);
+  const [typewriterLine, setTypewriterLine] = useState(0);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Update project title based on active tab
@@ -176,10 +178,20 @@ export function CodePreviewPanel() {
       default:
         setProjectTitle("Competitive Programming");
     }
+
+    // Create typewriter effect when tab changes
+    setIsTyping(true);
+    setTypewriterLine(activeTab === "cpp" ? 30 : activeTab === "python" ? 10 : 20);
+    
+    const timer = setTimeout(() => {
+      setIsTyping(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, [activeTab]);
 
   return (
-    <div className="h-full w-full relative overflow-hidden flex flex-col bg-navy-950 rounded-lg">
+    <div className="h-full w-full relative overflow-hidden flex flex-col bg-navy-950 rounded-lg shadow-xl shadow-black/30">
       {/* VS Code-like header with window controls */}
       <div className="flex items-center bg-[#252526] border-b border-[#3c3c3c]">
         <div className="flex items-center space-x-2 px-3 py-1">
@@ -226,41 +238,84 @@ export function CodePreviewPanel() {
             {/* Code content */}
             <TabsContent value="cpp" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto">
+                <div className="max-h-[400px] overflow-auto relative">
                   <VSCodeEditor language="cpp" code={codeSnippets.cpp} />
+                  {isTyping && activeTab === "cpp" && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div 
+                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
             <TabsContent value="python" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto">
+                <div className="max-h-[400px] overflow-auto relative">
                   <VSCodeEditor language="python" code={codeSnippets.python} />
+                  {isTyping && activeTab === "python" && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div 
+                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
             <TabsContent value="java" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto">
+                <div className="max-h-[400px] overflow-auto relative">
                   <VSCodeEditor language="java" code={codeSnippets.java} />
+                  {isTyping && activeTab === "java" && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div 
+                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
-
-      {/* VS Code-like status bar */}
-      <div className="flex items-center justify-between px-3 py-1 bg-[#007acc] text-white text-xs">
-        <div className="flex items-center space-x-3">
-          <span>{activeTab === "cpp" ? "C++" : activeTab === "python" ? "Python" : "Java"}</span>
-          <span>UTF-8</span>
-          <span>LF</span>
+      
+      {/* IDE Status Bar */}
+      <div className="bg-[#007acc] text-white text-xs px-3 py-1 flex justify-between items-center mt-auto">
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <span className="mr-2">{projectTitle}</span>
+            <span className={`w-2 h-2 rounded-full ${isTyping ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></span>
+          </div>
         </div>
-        <div className="flex items-center space-x-3">
-          <span>Ln 1, Col 1</span>
-          <span>Spaces: 2</span>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+            <span>AlgoAtlas</span>
+          </div>
+          <div>Ln 1, Col 1</div>
         </div>
       </div>
+      
+      {/* Loading overlay */}
+      {isTyping && (
+        <div className="absolute bottom-8 right-8 bg-[#1e1e1e] text-xs text-white/70 px-2 py-1 rounded shadow-md">
+          Analyzing algorithm...
+        </div>
+      )}
     </div>
   );
 } 

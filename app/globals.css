@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
+    --background: 267 71% 4%;
     --foreground: 213 31% 91%;
 
     --muted: 223 47% 11%;
@@ -81,6 +81,7 @@
     -webkit-text-size-adjust: 100%;
     /* Enable smooth scrolling */
     scroll-behavior: smooth;
+    background-color: #0F0822;
   }
 
   body {
@@ -92,6 +93,7 @@
     /* Prevent layout shifts */
     overflow-x: hidden;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-color: #0F0822;
   }
 
   /* Responsive images by default */
@@ -167,9 +169,10 @@
   }
 
   .bg-grid-pattern {
-    background-image: linear-gradient(to right, rgba(147, 51, 234, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(147, 51, 234, 0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgb(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
   }
 
   /* Custom scrollbar */
@@ -335,7 +338,7 @@
   }
 
   .cosmic-gradient {
-    background: linear-gradient(to bottom, #0d0d0d, #2e0854, #4b0082);
+    background: linear-gradient(to bottom, #0F0822, #14092D, #110830, #09061A);
   }
 }
 
@@ -353,11 +356,15 @@
 
 /* Navy colors */
 .bg-navy-800 {
-  background-color: #1a1f36;
+  background-color: #09061A;
 }
 
 .bg-navy-900 {
-  background-color: #0f1225;
+  background-color: #050211;
+}
+
+.bg-navy-950 {
+  background-color: #030108;
 }
 
 /* Custom syntax highlighting colors */

@@ -7,6 +7,8 @@ import { FloatingChatBubble } from "@/components/floating-chat-bubble"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { CosmicBackground } from "@/components/cosmic-background"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,18 +35,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body
-        className={`${inter.className} ${inter.variable} bg-gradient-to-b from-[#0D0D0D] via-[#2E0854] to-[#4B0082] min-h-screen text-white antialiased`}
-      >
+      <body className={`${inter.className} ${inter.variable} min-h-screen text-white antialiased`}>
         <AuthProvider>
           <ThemeProvider>
             <div className="relative overflow-hidden">
+              <CosmicBackground />
               <div className="relative z-10 flex flex-col min-h-screen">
                 <Navbar />
                 <main className="flex-grow pt-16 pb-16">{children}</main>
                 <Footer />
                 <FloatingChatBubble />
               </div>
+              <Toaster />
             </div>
           </ThemeProvider>
         </AuthProvider>

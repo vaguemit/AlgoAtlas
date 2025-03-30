@@ -11,6 +11,26 @@ interface Star {
   twinkle: number
 }
 
+interface ShootingStar {
+  x: number
+  y: number
+  length: number
+  speed: number
+  angle: number
+  opacity: number
+  life: number
+  maxLife: number
+}
+
+interface Nebula {
+  x: number
+  y: number
+  radius: number
+  color: string
+  opacity: number
+  speed: number
+}
+
 export function CosmicBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
@@ -55,6 +75,25 @@ export function CosmicBackground() {
           twinkle: Math.random() * 0.05,
         })
       }
+      
+      // Create shooting stars
+      const shootingStars: ShootingStar[] = []
+      const maxShootingStars = 3
+      
+      // Create nebulae - adjust colors to match GitHub's purple theme
+      const nebulae: Nebula[] = []
+      const nebulaCount = 4 // Fewer nebulae for subtlety
+      
+      for (let i = 0; i < nebulaCount; i++) {
+        nebulae.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 250 + 150,
+          color: `hsl(${240 + Math.random() * 30}, 70%, 40%)`, // More purple-blue hues
+          opacity: Math.random() * 0.03 + 0.01, // More subtle opacity
+          speed: Math.random() * 0.1 - 0.05 // Slower movement
+        })
+      }
 
       // Handle mouse movement
       const handleMouseMove = (e: MouseEvent) => {
@@ -74,6 +113,23 @@ export function CosmicBackground() {
       window.addEventListener("scroll", handleScroll, { passive: true })
       window.addEventListener("resize", resizeCanvas, { passive: true })
 
+      // Create a new shooting star randomly
+      const createShootingStar = () => {
+        if (shootingStars.length < maxShootingStars && Math.random() < 0.01) {
+          const angle = Math.random() * Math.PI * 0.5 - Math.PI * 0.25
+          shootingStars.push({
+            x: Math.random() * canvas.width,
+            y: 0,
+            length: Math.random() * 80 + 50,
+            speed: Math.random() * 15 + 10,
+            angle: angle,
+            opacity: Math.random() * 0.5 + 0.5,
+            life: 0,
+            maxLife: Math.random() * 100 + 50
+          })
+        }
+      }
+
       // Animation loop
       let animationFrameId: number
 
@@ -85,17 +141,47 @@ export function CosmicBackground() {
 
         // Draw gradient background
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-        gradient.addColorStop(0, "#0D0D0D")
-        gradient.addColorStop(0.5, "#2E0854")
-        gradient.addColorStop(1, "#4B0082")
+        gradient.addColorStop(0, "#0F0822") // Slightly brighter dark purple at the top
+        gradient.addColorStop(0.2, "#14092D") // Richer purple tone
+        gradient.addColorStop(0.7, "#110830") // Dark purple
+        gradient.addColorStop(1, "#09061A") // Almost black at the bottom
 
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
+        
+        // Draw nebulae - reduce count and make more subtle
+        nebulae.forEach((nebula) => {
+          // Create radial gradient for nebula
+          const nebulaGradient = ctx.createRadialGradient(
+            nebula.x, nebula.y, 0,
+            nebula.x, nebula.y, nebula.radius
+          )
+          
+          // Use more subtle purples with lower opacity
+          nebulaGradient.addColorStop(0, `${nebula.color.replace(')', `,${nebula.opacity * 0.5})`).replace('hsl', 'hsla')}`)
+          nebulaGradient.addColorStop(1, `${nebula.color.replace(')', `,0)`).replace('hsl', 'hsla')}`)
+          
+          ctx.fillStyle = nebulaGradient
+          ctx.fillRect(nebula.x - nebula.radius, nebula.y - nebula.radius, 
+                      nebula.radius * 2, nebula.radius * 2)
+          
+          // Move nebula slowly
+          nebula.x += nebula.speed
+          nebula.y += nebula.speed * 0.5
+          
+          // Reset nebula if it goes off screen
+          if (nebula.x < -nebula.radius * 2 || nebula.x > canvas.width + nebula.radius * 2 ||
+              nebula.y < -nebula.radius * 2 || nebula.y > canvas.height + nebula.radius * 2) {
+            nebula.x = Math.random() * canvas.width
+            nebula.y = Math.random() * canvas.height
+            nebula.color = `hsl(${240 + Math.random() * 30}, 70%, 40%)`
+          }
+        })
 
-        // Draw and update stars
+        // Draw and update stars - adjust stars to be more subtle
         stars.forEach((star) => {
           // Twinkle effect
-          const twinkleOpacity = Math.sin(Date.now() * star.twinkle) * 0.3 + 0.7
+          const twinkleOpacity = Math.sin(Date.now() * star.twinkle) * 0.2 + 0.7 // Reduced twinkle intensity
 
           // Adjust star brightness based on mouse proximity
           const dx = star.x / canvas.width - mousePosition.x
@@ -107,9 +193,9 @@ export function CosmicBackground() {
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.size * (1 + mouseInfluence * 0.5), 0, Math.PI * 2)
 
-          // Color based on position and scroll
-          const hue = (star.y / canvas.height) * 60 + 240 + scrollPosition * 20
-          ctx.fillStyle = `hsla(${hue}, 100%, 80%, ${star.opacity * twinkleOpacity * (1 + mouseInfluence * 0.5)})`
+          // Color based on position and scroll - shift to more purple hues
+          const hue = (star.y / canvas.height) * 30 + 250 + scrollPosition * 10
+          ctx.fillStyle = `hsla(${hue}, 90%, 85%, ${star.opacity * twinkleOpacity * (1 + mouseInfluence * 0.4)})`
           ctx.fill()
 
           // Move stars
@@ -119,6 +205,49 @@ export function CosmicBackground() {
           if (star.y > canvas.height) {
             star.y = 0
             star.x = Math.random() * canvas.width
+          }
+        })
+        
+        // Possibly create a new shooting star
+        createShootingStar()
+        
+        // Draw and update shooting stars
+        shootingStars.forEach((star, index) => {
+          // Calculate end position
+          const endX = star.x + Math.cos(star.angle) * star.length
+          const endY = star.y + Math.sin(star.angle) * star.length
+          
+          // Create gradient for the shooting star
+          const gradient = ctx.createLinearGradient(star.x, star.y, endX, endY)
+          gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`)
+          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
+          
+          // Draw the shooting star
+          ctx.beginPath()
+          ctx.moveTo(star.x, star.y)
+          ctx.lineTo(endX, endY)
+          ctx.strokeStyle = gradient
+          ctx.lineWidth = 2
+          ctx.stroke()
+          
+          // Add a glow effect
+          ctx.beginPath()
+          ctx.arc(star.x, star.y, 2, 0, Math.PI * 2)
+          ctx.fillStyle = 'rgba(255, 255, 255, ' + star.opacity + ')'
+          ctx.fill()
+          
+          // Move shooting star
+          star.x += Math.cos(star.angle) * star.speed
+          star.y += Math.sin(star.angle) * star.speed
+          
+          // Increment life
+          star.life++
+          
+          // Remove if it's off screen or lived its life
+          if (star.x < 0 || star.x > canvas.width || 
+              star.y < 0 || star.y > canvas.height ||
+              star.life > star.maxLife) {
+            shootingStars.splice(index, 1)
           }
         })
 
