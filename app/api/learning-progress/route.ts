@@ -12,12 +12,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Path ID is required' }, { status: 400 });
     }
 
-    const supabase = createRouteHandlerClient({ cookies });
+    // Create Supabase client with the correct Next.js App Router pattern
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     
     // Check if user is authenticated
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      // Return empty data instead of error when not authenticated
+      return NextResponse.json({ 
+        items: [], 
+        completion: 0,
+        authenticated: false
+      });
     }
     
     const userId = session.user.id;
@@ -49,7 +55,8 @@ export async function GET(request: Request) {
     
     return NextResponse.json({ 
       items: data, 
-      completion: completionData || 0
+      completion: completionData || 0,
+      authenticated: true
     });
     
   } catch (error) {
@@ -75,7 +82,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid status value' }, { status: 400 });
     }
     
-    const supabase = createRouteHandlerClient({ cookies });
+    // Create Supabase client with the correct Next.js App Router pattern
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     
     // Check if user is authenticated
     const { data: { session } } = await supabase.auth.getSession();

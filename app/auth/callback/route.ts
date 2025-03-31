@@ -8,8 +8,8 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code');
   
   try {
-    // Create a Supabase client for server-side
-    const supabase = createRouteHandlerClient({ cookies });
+    // Create a Supabase client for server-side with the correct pattern
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     
     // If we have a code, exchange it for a session
     if (code) {

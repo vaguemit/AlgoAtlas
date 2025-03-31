@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Initialize Supabase client
-    const supabase = createRouteHandlerClient({ cookies });
+    // Initialize Supabase client with the correct pattern
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     
     // Create CodeForces profiles table
     const createCodeforcesTableQuery = `

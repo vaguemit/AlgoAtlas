@@ -4,34 +4,34 @@ import { motion } from "framer-motion"
 
 const learningPaths = [
   {
-    id: "emerald",
+    id: "655208fa-4820-46bc-86d0-5b46251fff7f",
+    title: "Diamond",
+    description: "Introduction to competitive programming with fundamental algorithms and data structures.",
+    color: "bg-cyan-500",
+  },
+  {
+    id: "5bce5182-6f1a-4007-aa34-d4da63dc3292",
     title: "Emerald",
     description: "Introduction to competitive programming with fundamental algorithms and data structures.",
     color: "bg-green-500",
   },
   {
-    id: "sapphire",
+    id: "4207f386-8b27-4b68-ba2b-e17508634848",
     title: "Sapphire",
     description: "Intermediate algorithms and data structures for competitive programming.",
     color: "bg-blue-500",
   },
   {
-    id: "ruby",
+    id: "cc1d892d-a288-4872-9af5-94ff2fadb230",
     title: "Ruby",
     description: "Advanced algorithms and techniques for competitive programming.",
     color: "bg-red-500",
   },
   {
-    id: "amethyst",
+    id: "9aef1d0a-99b8-41b9-ac48-403122605e44",
     title: "Amethyst",
     description: "Expert-level algorithms and techniques for competitive programming masters.",
     color: "bg-purple-500",
-  },
-  {
-    id: "diamond",
-    title: "Diamond",
-    description: "Mastery of competitive programming concepts and advanced problem-solving.",
-    color: "bg-cyan-500",
   },
 ]
 

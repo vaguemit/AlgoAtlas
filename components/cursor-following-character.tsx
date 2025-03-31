@@ -144,27 +144,34 @@ export function CursorFollowingCharacter() {
     if (typeof window === "undefined") return
 
     try {
-      // Create audio element
-      const audio = new Audio();
-      
-      // Add event listeners to track loading state
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Audio loaded successfully');
-        setAudioLoaded(true);
-      });
-      
-      audio.addEventListener('error', (e) => {
-        console.error('Audio loading error:', e);
-        setAudioError(`Failed to load audio: ${e.type}`);
-      });
-      
-      // Set the source after adding listeners
-      audio.src = '/sounds/cat-meow.mp3';
-      
-      audioRef.current = audio;
+      // Only setup audio if browser supports it
+      if (typeof Audio !== 'undefined') {
+        // Create audio element
+        const audio = new Audio();
+        
+        // Add event listeners to track loading state
+        audio.addEventListener('canplaythrough', () => {
+          console.log('Audio loaded successfully');
+          setAudioLoaded(true);
+        });
+        
+        audio.addEventListener('error', (e) => {
+          // Just log the error but don't treat it as critical
+          console.log('Audio loading issue - sound effects may not be available');
+          setAudioLoaded(false);
+        });
+        
+        // Set the source after adding listeners
+        audio.src = '/sounds/cat-meow.mp3';
+        
+        // Attempt to load but don't throw if it fails
+        audio.load();
+        
+        audioRef.current = audio;
+      }
     } catch (error) {
-      console.error('Error setting up audio:', error);
-      setAudioError(`Error setting up audio: ${error}`);
+      // Just log the error but continue without audio
+      console.log('Audio not supported in this environment');
     }
     
     // Use requestAnimationFrame to ensure the browser is ready
@@ -187,14 +194,12 @@ export function CursorFollowingCharacter() {
 
   // Handle cat click to play meow sound
   const handleCatClick = () => {
-    console.log('Cat clicked, audio state:', { 
-      audioRef: audioRef.current ? 'exists' : 'null', 
-      isPlaying: isPlayingMeow,
-      loaded: audioLoaded,
-      error: audioError
-    });
+    // Show visual feedback regardless of audio state
+    setShowFloatingText(true);
+    setTimeout(() => setShowFloatingText(false), 2000);
     
-    if (audioRef.current) {
+    // Only attempt to play audio if it was successfully loaded
+    if (audioRef.current && audioLoaded) {
       if (isPlayingMeow) {
         // If already playing, just restart
         audioRef.current.currentTime = 0;
@@ -203,40 +208,19 @@ export function CursorFollowingCharacter() {
       
       setIsPlayingMeow(true);
       
-      // Play the meow sound
+      // Try to play the meow sound, but don't show errors if it fails
       audioRef.current.currentTime = 0;
       audioRef.current.play().then(() => {
-        console.log('Audio playing successfully');
+        // Audio is playing
       }).catch(error => {
-        console.error('Error playing audio:', error);
-        toast({
-          title: "Couldn't play sound",
-          description: "Try interacting with the page first or check if your browser allows audio playback.",
-          variant: "destructive"
-        });
+        // Silently fail - we'll just show the visual effect
+        console.log('Audio playback not available - showing visual feedback only');
       });
-      
-      // Show a "Meow!" text bubble
-      setShowFloatingText(true);
-      setTimeout(() => setShowFloatingText(false), 2000);
       
       // Reset the playing state when audio ends
       audioRef.current.onended = () => {
         setIsPlayingMeow(false);
       };
-    } else {
-      // Fallback if audio isn't available
-      console.log('Audio element not available, showing visual feedback only');
-      setShowFloatingText(true);
-      setTimeout(() => setShowFloatingText(false), 2000);
-      
-      if (audioError) {
-        toast({
-          title: "Audio issue detected",
-          description: audioError,
-          variant: "destructive"
-        });
-      }
     }
   }
 

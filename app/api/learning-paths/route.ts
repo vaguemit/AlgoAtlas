@@ -57,6 +57,22 @@ const pathOrder: Record<string, number> = {
 // Mock data for paths in case the database is not available
 const mockPaths = [
   {
+    id: "amethyst-path",
+    title: "Amethyst Path",
+    description: "Advanced competitive programming. Master segment trees, advanced graph algorithms, and complex dynamic programming.",
+    problemCount: 23,
+    estimatedHours: 12,
+    difficulty: "Advanced"
+  },
+  {
+    id: "ruby-path",
+    title: "Ruby Path",
+    description: "Expert-level algorithms and techniques. Advanced data structures, network flow, and advanced dynamic programming patterns.",
+    problemCount: 28,
+    estimatedHours: 14,
+    difficulty: "Advanced"
+  },
+  {
     id: "emerald-path",
     title: "Emerald Path",
     description: "Start your journey with the fundamentals of competitive programming. Learn basic algorithms and data structures.",

@@ -79,7 +79,7 @@ export default function AssistantPage() {
   return (
     <div className="container mx-auto py-6 space-y-8">
       <PageHeader
-        heading="AlgoAtlas Assistant"
+        heading="Whiskers - AlgoAtlas Assistant"
         subheading="Get help with algorithms, data structures, and coding problems"
       />
       
@@ -87,7 +87,7 @@ export default function AssistantPage() {
         <div className="lg:col-span-2">
           <Card className="h-[600px] overflow-hidden relative">
             <CardHeader className="bg-gradient-to-r from-purple-800/30 to-blue-800/30 border-b border-purple-600/30">
-              <CardTitle>Chat with AlgoAtlas Assistant</CardTitle>
+              <CardTitle>Chat with Whiskers</CardTitle>
               <CardDescription className="text-gray-300">
                 Ask questions about algorithms, data structures, or get help with coding problems
               </CardDescription>

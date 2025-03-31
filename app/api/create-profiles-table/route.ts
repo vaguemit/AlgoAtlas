@@ -4,8 +4,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Initialize Supabase client
-    const supabase = createRouteHandlerClient({ cookies });
+    // Initialize Supabase client with the correct pattern
+    const supabase = createRouteHandlerClient({ cookies: () => cookies() });
     
     // SQL to create profiles table if it doesn't exist
     const { error } = await supabase.rpc('create_profiles_table_if_not_exists');
@@ -48,21 +48,50 @@ export async function GET() {
           return NextResponse.json({ success: false, error: sqlError.message }, { status: 500 });
         }
         
-        return NextResponse.json({ success: true, message: 'Profiles table created successfully' });
-      }
-      
-      if (createError) {
+        // Also create a trigger to automatically create a profile for new users
+        const createTriggerQuery = `
+          -- Create function to handle new user creation
+          CREATE OR REPLACE FUNCTION public.handle_new_user() 
+          RETURNS TRIGGER AS $$
+          BEGIN
+            INSERT INTO public.profiles (id, username, full_name, avatar_url)
+            VALUES (
+              NEW.id, 
+              LOWER(SPLIT_PART(NEW.email, '@', 1)), -- Default username from email
+              '', -- Empty full name
+              '' -- Empty avatar url
+            );
+            RETURN NEW;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER;
+          
+          -- Create trigger on auth.users table
+          DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+          CREATE TRIGGER on_auth_user_created
+            AFTER INSERT ON auth.users
+            FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+        `;
+        
+        const { error: triggerError } = await supabase.rpc('exec_sql', { query: createTriggerQuery });
+        
+        if (triggerError) {
+          console.error('Error creating user trigger:', triggerError);
+          return NextResponse.json({ success: false, error: triggerError.message }, { status: 500 });
+        }
+      } else if (createError) {
+        // Some other error occurred
+        console.error('Error checking profiles table:', createError);
         return NextResponse.json({ success: false, error: createError.message }, { status: 500 });
       }
-      
-      // Table exists and we could query it
-      return NextResponse.json({ success: true, message: 'Profiles table already exists' });
     }
     
-    return NextResponse.json({ success: true, message: 'Profiles table setup completed successfully' });
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Profiles table and user trigger created or already exists'
+    });
     
-  } catch (error: any) {
-    console.error('Error setting up profiles table:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error('Error in API route:', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 } 

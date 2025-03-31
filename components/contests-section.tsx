@@ -445,7 +445,7 @@ export function ContestsSection() {
   const displayContests = activeTab === "upcoming" ? upcomingContests : endedContests
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="py-6 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>

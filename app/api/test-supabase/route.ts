@@ -10,8 +10,8 @@ export async function GET() {
       .from('profiles')
       .select('count(*)', { count: 'exact', head: true })
     
-    // Test server-side client with auth
-    const supabaseServer = createRouteHandlerClient({ cookies })
+    // Test server-side client with auth using the correct pattern
+    const supabaseServer = createRouteHandlerClient({ cookies: () => cookies() })
     const serverTest = await supabaseServer
       .from('profiles')
       .select('count(*)', { count: 'exact', head: true })

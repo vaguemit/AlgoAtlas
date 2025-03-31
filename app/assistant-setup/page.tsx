@@ -71,10 +71,10 @@ export default function AssistantSetupPage() {
     <div className="container mx-auto max-w-4xl py-12 px-4">
       <div className="flex flex-col gap-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
-            AlgoAtlas Assistant Setup
+          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+            Configure Whiskers - AlgoAtlas Assistant
           </h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg text-blue-100/80">
             Configure your Groq-powered AlgoAtlas Assistant with llama3-70b-8192 model
           </p>
         </div>

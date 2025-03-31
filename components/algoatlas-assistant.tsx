@@ -134,11 +134,25 @@ export function AlgoAtlasAssistant({ embedded = false, hideFloatingButton = fals
         })
       })
       
-      if (!response.ok) {
-        throw new Error('Failed to get response from assistant')
-      }
-      
       const data = await response.json()
+      
+      // Handle rate limiting
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Rate limit error - show message to user but don't throw an error
+          const errorMessage: Message = {
+            role: 'assistant',
+            content: `⏱️ ${data.message || 'You\'re sending messages too quickly. Please wait before sending another message.'}`,
+            timestamp: new Date()
+          }
+          
+          setMessages(prev => [...prev, errorMessage])
+          setIsLoading(false)
+          return; // Exit early without throwing an error
+        } else {
+          throw new Error('Failed to get response from assistant')
+        }
+      }
       
       // Check if fallback model was used
       if (data.fallbackUsed) {
@@ -158,7 +172,7 @@ export function AlgoAtlasAssistant({ embedded = false, hideFloatingButton = fals
       }
       
       setMessages(prev => [...prev, assistantMessage])
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error)
       
       // Add error message
@@ -202,7 +216,7 @@ export function AlgoAtlasAssistant({ embedded = false, hideFloatingButton = fals
               <div className="flex justify-between items-center p-3 border-b border-purple-600/30 bg-gradient-to-r from-purple-800/30 to-blue-800/30">
                 <div className="flex items-center gap-2">
                   <Bot className="h-5 w-5 text-purple-400" />
-                  <span className="font-medium text-white">AlgoAtlas Assistant</span>
+                  <span className="font-medium text-white">Whiskers</span>
                 </div>
                 {!embedded && (
                   <button 
@@ -226,7 +240,7 @@ export function AlgoAtlasAssistant({ embedded = false, hideFloatingButton = fals
                 <div className="flex-1 flex items-center justify-center text-center p-4">
                   <div className="max-w-sm text-gray-400">
                     <Bot className="h-10 w-10 mx-auto mb-2 text-purple-500/70" />
-                    <p>Hi! I'm the AlgoAtlas Assistant. Ask me about algorithms, data structures, or programming help.</p>
+                    <p>Hi! I'm Whiskers, the AlgoAtlas Assistant. Ask me about algorithms, data structures, or programming help.</p>
                   </div>
                 </div>
               ) : (
@@ -339,7 +353,7 @@ export function AlgoAtlasAssistant({ embedded = false, hideFloatingButton = fals
           className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-3 rounded-full shadow-lg flex items-center gap-2"
         >
           <Bot className="h-5 w-5" />
-          <span className={cn("mr-1", isOpen && "hidden")}>Assistant</span>
+          <span className={cn("mr-1", isOpen && "hidden")}>Whiskers</span>
           {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
         </motion.button>
       )}

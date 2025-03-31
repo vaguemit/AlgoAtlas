@@ -24,8 +24,54 @@ const client = new Groq({
 // Get the current configuration (default values)
 import { currentConfig } from '../assistant/config/route';
 
+// Rate limiting storage - in production this should use Redis or a database
+// Format: { [userId or IP]: { lastRequestTime: timestamp, requestCount: number } }
+const rateLimitStore = new Map();
+const RATE_LIMIT_WINDOW = 10000; // 10 seconds in milliseconds
+const MAX_REQUESTS_PER_WINDOW = 1; // Allow 1 request per window
+
 export async function POST(req: Request) {
   try {
+    // Get client IP address or other identifier for rate limiting
+    const clientIP = req.headers.get('x-forwarded-for') || 'unknown-ip';
+    
+    // Check rate limit
+    const now = Date.now();
+    const clientData = rateLimitStore.get(clientIP) || { lastRequestTime: 0, requestCount: 0 };
+    
+    // If it's been less than the window time since the last request
+    if (now - clientData.lastRequestTime < RATE_LIMIT_WINDOW) {
+      // Check if they've exceeded the request limit
+      if (clientData.requestCount >= MAX_REQUESTS_PER_WINDOW) {
+        // Calculate time remaining until they can make another request
+        const timeRemaining = Math.ceil((clientData.lastRequestTime + RATE_LIMIT_WINDOW - now) / 1000);
+        
+        return NextResponse.json(
+          { 
+            error: 'Rate limit exceeded', 
+            message: `Please wait ${timeRemaining} seconds before sending another message`,
+            retryAfter: timeRemaining
+          },
+          { 
+            status: 429,
+            headers: {
+              'Retry-After': timeRemaining.toString()
+            } 
+          }
+        );
+      }
+      
+      // If within the window but under the limit, increment counter
+      clientData.requestCount++;
+    } else {
+      // If outside the window, reset the counter
+      clientData.requestCount = 1;
+      clientData.lastRequestTime = now;
+    }
+    
+    // Update the rate limit store
+    rateLimitStore.set(clientIP, clientData);
+    
     // Parse the request body
     const { message, history = [], userConfig } = await req.json();
     
@@ -44,7 +90,15 @@ export async function POST(req: Request) {
       : currentConfig.allowFallback;
 
     // System prompt to customize the assistant's behavior
-    const systemPrompt = `You are AlgoAtlas Assistant, a helpful AI designed to assist users with algorithmic problems, competitive programming, and computer science concepts. 
+    const systemPrompt = `You are Whiskers, the AlgoAtlas Assistant, a helpful AI designed to assist users with algorithmic problems, competitive programming, and computer science concepts. 
+    
+    IMPORTANT IDENTITY INFORMATION:
+    - You are powered by the Groq API using ${preferredModel} (either llama3-70b-8192 or llama3-8b-8192 model depending on user settings)
+    - You are NOT an OpenAI model, GPT model, or any other AI system
+    - You are NOT "GPT-4", "GPT-4o", "Claude", or any other specific model name other than Llama 3
+    - If asked about your parameters or specifications, state ONLY that you are running on Llama 3 from Meta through Groq's API
+    - NEVER claim to be a different model than what you actually are
+    
     You have expertise in algorithms, data structures, and programming languages like C++, Python, and Java.
     You should provide clear, concise explanations and code examples when relevant.
     When providing code, make sure it's well-commented and follows best practices.

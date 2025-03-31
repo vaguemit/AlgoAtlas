@@ -62,70 +62,89 @@ export function useLearningProgress({
         }
         
         const data = await response.json()
-        setProgress(data.items || [])
-        setCompletionPercentage(data.completion || 0)
+        
+        // Check the authenticated flag from the updated API
+        if (data.authenticated === false) {
+          console.log('User not authenticated for progress, using fallback storage')
+          // Fall back to local storage if the API indicates not authenticated
+          if (fallbackToLocalStorage) {
+            handleLocalStorageFallback()
+          } else {
+            setProgress([])
+            setCompletionPercentage(0)
+          }
+        } else {
+          setProgress(data.items || [])
+          setCompletionPercentage(data.completion || 0)
+        }
       } else if (fallbackToLocalStorage) {
         // User is not authenticated, use localStorage (if available)
-        if (typeof window === 'undefined') return
-        
-        // Retrieve data from localStorage
-        const topicProgress = localStorage.getItem(getLocalStorageKey('topic'))
-        const subtopicProgress = localStorage.getItem(getLocalStorageKey('subtopic'))
-        
-        const items: ProgressItem[] = []
-        let total = 0
-        let completed = 0
-        
-        // Process topic progress
-        if (topicProgress) {
-          const topics = JSON.parse(topicProgress) as Record<string, ProgressStatus>
-          Object.entries(topics).forEach(([topicId, status]) => {
-            items.push({
-              id: `local-topic-${topicId}`,
-              user_id: 'local',
-              path_id: pathId,
-              topic_id: topicId,
-              subtopic_id: null,
-              status,
-              last_updated: new Date().toISOString()
-            })
-            
-            total++
-            if (status === 'complete') completed++
-          })
-        }
-        
-        // Process subtopic progress
-        if (subtopicProgress) {
-          const subtopics = JSON.parse(subtopicProgress) as Record<string, ProgressStatus>
-          Object.entries(subtopics).forEach(([key, status]) => {
-            const [topicId, subtopicId] = key.split('::')
-            
-            items.push({
-              id: `local-subtopic-${key}`,
-              user_id: 'local',
-              path_id: pathId,
-              topic_id: topicId,
-              subtopic_id: subtopicId,
-              status,
-              last_updated: new Date().toISOString()
-            })
-            
-            total++
-            if (status === 'complete') completed++
-          })
-        }
-        
-        setProgress(items)
-        setCompletionPercentage(total > 0 ? Math.round((completed / total) * 100) : 0)
+        handleLocalStorageFallback()
       }
     } catch (err) {
       console.error('Error fetching learning progress:', err)
-      setError('Failed to load progress data')
+      // More descriptive error message
+      setError('Failed to load progress data. Please try refreshing the page or logging in again.')
     } finally {
       setIsLoading(false)
     }
   }, [authLoading, user, pathId, fallbackToLocalStorage, getLocalStorageKey])
+  
+  // Helper function for localStorage fallback to avoid code duplication
+  const handleLocalStorageFallback = useCallback(() => {
+    if (typeof window === 'undefined') return
+    
+    // Retrieve data from localStorage
+    const topicProgress = localStorage.getItem(getLocalStorageKey('topic'))
+    const subtopicProgress = localStorage.getItem(getLocalStorageKey('subtopic'))
+    
+    const items: ProgressItem[] = []
+    let total = 0
+    let completed = 0
+    
+    // Process topic progress
+    if (topicProgress) {
+      const topics = JSON.parse(topicProgress) as Record<string, ProgressStatus>
+      Object.entries(topics).forEach(([topicId, status]) => {
+        items.push({
+          id: `local-topic-${topicId}`,
+          user_id: 'local',
+          path_id: pathId,
+          topic_id: topicId,
+          subtopic_id: null,
+          status,
+          last_updated: new Date().toISOString()
+        })
+        
+        total++
+        if (status === 'complete') completed++
+      })
+    }
+    
+    // Process subtopic progress
+    if (subtopicProgress) {
+      const subtopics = JSON.parse(subtopicProgress) as Record<string, ProgressStatus>
+      Object.entries(subtopics).forEach(([key, status]) => {
+        const [topicId, subtopicId] = key.split('::')
+        
+        items.push({
+          id: `local-subtopic-${key}`,
+          user_id: 'local',
+          path_id: pathId,
+          topic_id: topicId,
+          subtopic_id: subtopicId,
+          status,
+          last_updated: new Date().toISOString()
+        })
+        
+        total++
+        if (status === 'complete') completed++
+      })
+    }
+    
+    setProgress(items)
+    setCompletionPercentage(total > 0 ? Math.round((completed / total) * 100) : 0)
+  }, [pathId, getLocalStorageKey])
   
   // Function to update progress
   const updateProgress = useCallback(async (

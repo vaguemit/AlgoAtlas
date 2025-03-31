@@ -9,8 +9,8 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { pathId, topicId, subtopicId } = body
     
-    // Get user from server-side auth
-    const supabaseServer = createRouteHandlerClient({ cookies })
+    // Get user from server-side auth using the correct pattern
+    const supabaseServer = createRouteHandlerClient({ cookies: () => cookies() })
     const { data: { session } } = await supabaseServer.auth.getSession()
     
     if (!session) {

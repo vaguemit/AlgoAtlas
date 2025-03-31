@@ -163,6 +163,7 @@ export function LearningPathsSection() {
   useEffect(() => {
     const fetchLearningPaths = async () => {
       try {
+        // Use the original API endpoint to fetch from the database
         const response = await fetch("/api/learning-paths")
         if (!response.ok) {
           throw new Error("Failed to fetch learning paths")
@@ -171,8 +172,14 @@ export function LearningPathsSection() {
         
         // The API returns { paths: [...] }
         const pathsArray = data.paths || []
+
+        // Filter out Introduction to Algorithms and Competitive Programming 101 if they exist
+        const filteredPaths = pathsArray.filter((path: any) => 
+          !path.title.includes("Introduction to Algorithms") && 
+          !path.title.includes("Competitive Programming 101")
+        )
         
-        setPaths(pathsArray)
+        setPaths(filteredPaths)
       } catch (err) {
         setError("Failed to load learning paths. Please try again later.")
         console.error(err)
