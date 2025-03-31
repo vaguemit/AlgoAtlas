@@ -82,16 +82,16 @@ export function CosmicBackground() {
       
       // Create nebulae - adjust colors to match GitHub's purple theme
       const nebulae: Nebula[] = []
-      const nebulaCount = 4 // Fewer nebulae for subtlety
+      const nebulaCount = 8 // Increased number of nebulae for more cosmic effect
       
       for (let i = 0; i < nebulaCount; i++) {
         nebulae.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 250 + 150,
-          color: `hsl(${240 + Math.random() * 30}, 70%, 40%)`, // More purple-blue hues
-          opacity: Math.random() * 0.03 + 0.01, // More subtle opacity
-          speed: Math.random() * 0.1 - 0.05 // Slower movement
+          radius: Math.random() * 300 + 200, // Larger nebulae
+          color: `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`, // More vibrant purple hues
+          opacity: Math.random() * 0.08 + 0.04, // Higher opacity for more visibility
+          speed: Math.random() * 0.08 - 0.04 // Slightly slower movement
         })
       }
 
@@ -139,17 +139,17 @@ export function CosmicBackground() {
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // Draw gradient background
+        // Draw gradient background - Darker purplish gradient
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-        gradient.addColorStop(0, "#0F0822") // Slightly brighter dark purple at the top
-        gradient.addColorStop(0.2, "#14092D") // Richer purple tone
-        gradient.addColorStop(0.7, "#110830") // Dark purple
-        gradient.addColorStop(1, "#09061A") // Almost black at the bottom
+        gradient.addColorStop(0, "#120825") // Darker deep purple at top
+        gradient.addColorStop(0.3, "#1F0E3E") // Darker rich purple
+        gradient.addColorStop(0.6, "#150C30") // Darker medium purple
+        gradient.addColorStop(1, "#0A071A") // Very dark purple-blue at bottom
 
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         
-        // Draw nebulae - reduce count and make more subtle
+        // Draw nebulae - darker but still visible
         nebulae.forEach((nebula) => {
           // Create radial gradient for nebula
           const nebulaGradient = ctx.createRadialGradient(
@@ -157,8 +157,9 @@ export function CosmicBackground() {
             nebula.x, nebula.y, nebula.radius
           )
           
-          // Use more subtle purples with lower opacity
-          nebulaGradient.addColorStop(0, `${nebula.color.replace(')', `,${nebula.opacity * 0.5})`).replace('hsl', 'hsla')}`)
+          // Use darker purples with moderate opacity
+          nebulaGradient.addColorStop(0, `${nebula.color.replace(')', `,${nebula.opacity * 1.5})`).replace('hsl', 'hsla')}`)
+          nebulaGradient.addColorStop(0.6, `${nebula.color.replace(')', `,${nebula.opacity * 0.5})`).replace('hsl', 'hsla')}`)
           nebulaGradient.addColorStop(1, `${nebula.color.replace(')', `,0)`).replace('hsl', 'hsla')}`)
           
           ctx.fillStyle = nebulaGradient
@@ -174,14 +175,14 @@ export function CosmicBackground() {
               nebula.y < -nebula.radius * 2 || nebula.y > canvas.height + nebula.radius * 2) {
             nebula.x = Math.random() * canvas.width
             nebula.y = Math.random() * canvas.height
-            nebula.color = `hsl(${240 + Math.random() * 30}, 70%, 40%)`
+            nebula.color = `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`
           }
         })
 
-        // Draw and update stars - adjust stars to be more subtle
+        // Draw and update stars - make stars brighter
         stars.forEach((star) => {
           // Twinkle effect
-          const twinkleOpacity = Math.sin(Date.now() * star.twinkle) * 0.2 + 0.7 // Reduced twinkle intensity
+          const twinkleOpacity = Math.sin(Date.now() * star.twinkle) * 0.3 + 0.8 // Increased twinkle intensity
 
           // Adjust star brightness based on mouse proximity
           const dx = star.x / canvas.width - mousePosition.x
@@ -191,11 +192,11 @@ export function CosmicBackground() {
 
           // Draw star
           ctx.beginPath()
-          ctx.arc(star.x, star.y, star.size * (1 + mouseInfluence * 0.5), 0, Math.PI * 2)
+          ctx.arc(star.x, star.y, star.size * (1 + mouseInfluence * 0.7), 0, Math.PI * 2)
 
-          // Color based on position and scroll - shift to more purple hues
-          const hue = (star.y / canvas.height) * 30 + 250 + scrollPosition * 10
-          ctx.fillStyle = `hsla(${hue}, 90%, 85%, ${star.opacity * twinkleOpacity * (1 + mouseInfluence * 0.4)})`
+          // Color based on position and scroll - brighter whites and subtle blues/purples
+          const hue = (star.y / canvas.height) * 40 + 260 + scrollPosition * 20
+          ctx.fillStyle = `hsla(${hue}, 80%, 90%, ${star.opacity * twinkleOpacity * (1 + mouseInfluence * 0.5)})`
           ctx.fill()
 
           // Move stars
@@ -252,14 +253,15 @@ export function CosmicBackground() {
         })
 
         // Add subtle glow effects based on mouse position
-        const glowRadius = 200
+        const glowRadius = 300 // Larger radius
         const glowX = mousePosition.x * canvas.width
         const glowY = mousePosition.y * canvas.height
 
         const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowRadius)
 
-        glow.addColorStop(0, "rgba(138, 43, 226, 0.2)")
-        glow.addColorStop(1, "rgba(138, 43, 226, 0)")
+        glow.addColorStop(0, "rgba(138, 43, 226, 0.15)") // Darker purple with lower opacity
+        glow.addColorStop(0.6, "rgba(98, 30, 170, 0.1)")
+        glow.addColorStop(1, "rgba(85, 26, 139, 0)")
 
         ctx.fillStyle = glow
         ctx.fillRect(0, 0, canvas.width, canvas.height)

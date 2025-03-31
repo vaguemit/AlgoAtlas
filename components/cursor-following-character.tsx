@@ -265,7 +265,7 @@ export function CursorFollowingCharacter() {
 
   return (
     <div 
-      className="w-full h-[400px] overflow-hidden rounded-lg relative cursor-pointer"
+      className="w-full h-[400px] overflow-hidden rounded-lg relative cursor-pointer bg-gradient-to-b from-[#1F0E3E]/80 to-[#150C30]/80 border border-[#3A1E70]/30 backdrop-blur-sm"
       onMouseMove={handleMouseMove}
     >
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
@@ -327,11 +327,6 @@ export function CursorFollowingCharacter() {
             }}
           />
         ))}
-      </div>
-
-      {/* Instructions overlay */}
-      <div className="absolute bottom-3 left-0 right-0 text-center text-white/70 text-sm pointer-events-none">
-        Move your cursor to interact with Whisker the cat. Click to hear a meow!
       </div>
     </div>
   )

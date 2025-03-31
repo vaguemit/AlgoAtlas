@@ -104,7 +104,11 @@ interface SavedCode {
   input: string
 }
 
-export function OnlineCompiler() {
+interface OnlineCompilerProps {
+  disableAutoFocus?: boolean
+}
+
+export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps) {
   const [language, setLanguage] = useState<keyof typeof LANGUAGES>("cpp")
   const [code, setCode] = useState(LANGUAGES[language].defaultCode)
   const [input, setInput] = useState(defaultInput)
@@ -214,7 +218,7 @@ export function OnlineCompiler() {
     <section className={cn(
       "py-20 relative overflow-hidden",
       isFullscreen && "!p-0"
-    )} id="online-compiler">
+    )}>
       {/* Background elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
@@ -243,6 +247,27 @@ export function OnlineCompiler() {
               Write, run, and debug your code directly in the browser
             </motion.p>
           </>
+        )}
+
+        {/* Features list - moved above compiler */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
+            <FeatureCard
+              title="Multiple Languages"
+              description="Write and run code in C++, Python, Java, and more programming languages."
+              icon={<Code className="h-6 w-6" />}
+            />
+            <FeatureCard
+              title="Real-time Syntax Highlighting"
+              description="Enjoy code highlighting and auto-indentation for a better coding experience."
+              icon={<CodeHighlighter className="h-6 w-6" />}
+            />
+            <FeatureCard
+              title="Save & Share"
+              description="Save your code snippets and share them with others with a simple link."
+              icon={<Share className="h-6 w-6" />}
+            />
+          </div>
         )}
 
         {/* Compiler container */}
@@ -305,7 +330,7 @@ export function OnlineCompiler() {
             <div className="flex flex-col flex-1 min-h-0">
               {/* Code editor */}
               <div className="flex-1 overflow-hidden border-b border-[#3c3c3c] min-h-0">
-                <CodeEditor value={code} language={language} onChange={setCode} />
+                <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
               </div>
 
               {/* Input panel */}
@@ -319,6 +344,7 @@ export function OnlineCompiler() {
                     value={input}
                     language="plaintext"
                     onChange={setInput}
+                    disableAutoFocus={disableAutoFocus}
                   />
                 </div>
               </div>
@@ -423,27 +449,6 @@ export function OnlineCompiler() {
             </div>
           </div>
         </motion.div>
-
-        {/* Features list */}
-        {!isFullscreen && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
-            <FeatureCard
-              title="Multiple Languages"
-              description="Write and run code in C++, Python, Java, and more programming languages."
-              icon={<Code className="h-6 w-6" />}
-            />
-            <FeatureCard
-              title="Real-time Syntax Highlighting"
-              description="Enjoy code highlighting and auto-indentation for a better coding experience."
-              icon={<CodeHighlighter className="h-6 w-6" />}
-            />
-            <FeatureCard
-              title="Save & Share"
-              description="Save your code snippets and share them with others with a simple link."
-              icon={<Share className="h-6 w-6" />}
-            />
-          </div>
-        )}
       </div>
     </section>
   )

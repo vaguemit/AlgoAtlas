@@ -18,6 +18,10 @@ export function SignupHeroSection() {
     router.push("/assistant")
   }
 
+  const handleRegisterClick = () => {
+    router.push("/register")
+  }
+
   return (
     <section className="relative w-full py-24 md:py-32 overflow-hidden">
       {/* Background gradient effects - updated to darker purple */}
@@ -48,6 +52,12 @@ export function SignupHeroSection() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  className="bg-gradient-to-r from-green-600 to-green-500 px-6 py-6 text-lg font-semibold text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all duration-300"
+                  onClick={handleRegisterClick}
+                >
+                  Register Now
+                </Button>
                 <Button
                   variant="outline"
                   className="border-[#3A1E70]/30 hover:border-[#3A1E70]/70 text-white hover:bg-[#3A1E70]/10"

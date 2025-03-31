@@ -527,7 +527,7 @@ export default function ProfilePage() {
           {/* Profile Header - Enhanced */}
           <div className="relative mb-20 md:mb-24">
             <div className="h-40 sm:h-52 bg-gradient-to-r from-purple-900/40 via-blue-900/30 to-indigo-900/40 rounded-xl overflow-hidden backdrop-blur-md border border-white/10 shadow-2xl">
-              <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-20"></div>
+              <div className="absolute inset-0 bg-[url('/patterns/grid-pattern.svg')] opacity-20"></div>
               <div className="absolute inset-0 bg-gradient-radial from-purple-600/10 to-transparent"></div>
               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-transparent to-transparent"></div>
             </div>

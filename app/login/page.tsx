@@ -62,10 +62,17 @@ function LoginForm() {
       // Check if we're in a browser environment
       if (typeof window === 'undefined') return;
 
+      // Get the current URL to extract the protocol and hostname
+      const currentUrl = window.location.href;
+      const urlObj = new URL(currentUrl);
+      
+      // Use the same protocol and hostname for the redirect
+      const redirectUrl = `${urlObj.protocol}//${urlObj.hostname}${urlObj.port ? `:${urlObj.port}` : ''}/auth/callback`;
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
 

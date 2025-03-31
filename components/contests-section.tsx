@@ -186,7 +186,6 @@ function ContestCard({ contest }: { contest: Contest }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileHover={{ scale: 1.03 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -390,27 +389,19 @@ export function ContestsSection() {
 
   // Define fetchContests outside useEffect so it can be called from refreshContests
   const fetchContests = useCallback(async () => {
+    setIsLoading(true)
     try {
-      setIsLoading(true)
-
+      // Fetch contests from API or use mock data
       const response = await fetch("/api/contests")
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
+        throw new Error(`Failed to fetch contests: ${response.statusText}`)
       }
 
       const data = await response.json()
 
-      if (!data.contests || !Array.isArray(data.contests)) {
-        console.error("Unexpected API response structure:", data)
-        setContests(generateFallbackContests())
-        setError("Received invalid data format. Using fallback contests.")
-        setIsLoading(false)
-        return
-      }
-
-      // Convert string dates back to Date objects
-      const contestsWithDates = data.contests.map((contest) => ({
+      // Convert string dates to Date objects
+      const contestsWithDates = data.contests.map((contest: any) => ({
         ...contest,
         startTime: new Date(contest.startTime),
       }))
@@ -462,22 +453,7 @@ export function ContestsSection() {
       <div className="container mx-auto px-4 sm:px-6">
         {/* Section heading */}
         <div className="text-center mb-12 relative">
-          <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            Competitive Programming Contests
-          </motion.h2>
-          <motion.p
-            className="text-lg text-blue-100/80 max-w-3xl mx-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Participate in contests from top platforms and improve your skills
-          </motion.p>
+         
 
           {/* Refresh button */}
           <motion.button
@@ -573,17 +549,6 @@ export function ContestsSection() {
                 ))}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* View all contests button */}
-        {!isLoading && !error && displayContests.length > 0 && (
-          <div className="mt-12 text-center">
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 text-lg hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-                View All {activeTab === "upcoming" ? "Upcoming" : "Ended"} Contests
-              </Button>
-            </motion.div>
           </div>
         )}
       </div>

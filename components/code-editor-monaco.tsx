@@ -9,9 +9,10 @@ interface CodeEditorProps {
   language: string
   onChange: (value: string) => void
   readOnly?: boolean
+  disableAutoFocus?: boolean
 }
 
-export function CodeEditor({ value, language, onChange, readOnly = false }: CodeEditorProps) {
+export function CodeEditor({ value, language, onChange, readOnly = false, disableAutoFocus = false }: CodeEditorProps) {
   const editorRef = useRef<any>(null)
   const [isLoaded, setIsLoaded] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -27,8 +28,10 @@ export function CodeEditor({ value, language, onChange, readOnly = false }: Code
     editorRef.current = editor
     setIsLoaded(true)
 
-    // Focus editor
-    editor.focus()
+    // Focus editor only if auto-focus is not disabled
+    if (!disableAutoFocus) {
+      editor.focus()
+    }
   }
 
   // Map language IDs to Monaco language IDs

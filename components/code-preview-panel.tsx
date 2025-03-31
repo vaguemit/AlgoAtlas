@@ -191,9 +191,9 @@ export function CodePreviewPanel() {
   }, [activeTab]);
 
   return (
-    <div className="h-full w-full relative overflow-hidden flex flex-col bg-navy-950 rounded-lg shadow-xl shadow-black/30">
+    <div className="h-full w-full relative overflow-hidden flex flex-col bg-[#150C30]/90 rounded-lg shadow-xl shadow-black/30">
       {/* VS Code-like header with window controls */}
-      <div className="flex items-center bg-[#252526] border-b border-[#3c3c3c]">
+      <div className="flex items-center bg-[#1F0E3E] border-b border-[#3A1E70]/50">
         <div className="flex items-center space-x-2 px-3 py-1">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
@@ -238,15 +238,15 @@ export function CodePreviewPanel() {
             {/* Code content */}
             <TabsContent value="cpp" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto relative">
+                <div className="max-h-[400px] overflow-auto relative bg-[#120825]/90">
                   <VSCodeEditor language="cpp" code={codeSnippets.cpp} />
                   {isTyping && activeTab === "cpp" && (
                     <div className="absolute inset-0 pointer-events-none">
                       <div 
-                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        className="absolute left-0 h-5 bg-purple-500/10 w-full" 
                         style={{ top: `${typewriterLine * 24}px` }}
                       >
-                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                        <div className="h-full w-2 bg-purple-300/70 animate-pulse ml-4"></div>
                       </div>
                     </div>
                   )}
@@ -255,15 +255,15 @@ export function CodePreviewPanel() {
             </TabsContent>
             <TabsContent value="python" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto relative">
+                <div className="max-h-[400px] overflow-auto relative bg-[#120825]/90">
                   <VSCodeEditor language="python" code={codeSnippets.python} />
                   {isTyping && activeTab === "python" && (
                     <div className="absolute inset-0 pointer-events-none">
                       <div 
-                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        className="absolute left-0 h-5 bg-purple-500/10 w-full" 
                         style={{ top: `${typewriterLine * 24}px` }}
                       >
-                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                        <div className="h-full w-2 bg-purple-300/70 animate-pulse ml-4"></div>
                       </div>
                     </div>
                   )}
@@ -272,15 +272,15 @@ export function CodePreviewPanel() {
             </TabsContent>
             <TabsContent value="java" className="mt-0 p-0 data-[state=inactive]:hidden">
               {!isMobile && (
-                <div className="max-h-[400px] overflow-auto relative">
+                <div className="max-h-[400px] overflow-auto relative bg-[#120825]/90">
                   <VSCodeEditor language="java" code={codeSnippets.java} />
                   {isTyping && activeTab === "java" && (
                     <div className="absolute inset-0 pointer-events-none">
                       <div 
-                        className="absolute left-0 h-5 bg-white/10 w-full" 
+                        className="absolute left-0 h-5 bg-purple-500/10 w-full" 
                         style={{ top: `${typewriterLine * 24}px` }}
                       >
-                        <div className="h-full w-2 bg-white/70 animate-pulse ml-4"></div>
+                        <div className="h-full w-2 bg-purple-300/70 animate-pulse ml-4"></div>
                       </div>
                     </div>
                   )}
@@ -292,7 +292,7 @@ export function CodePreviewPanel() {
       </div>
       
       {/* IDE Status Bar */}
-      <div className="bg-[#007acc] text-white text-xs px-3 py-1 flex justify-between items-center mt-auto">
+      <div className="bg-[#3A1E70] text-white text-xs px-3 py-1 flex justify-between items-center mt-auto">
         <div className="flex items-center space-x-2">
           <div className="flex items-center">
             <span className="mr-2">{projectTitle}</span>
@@ -312,7 +312,7 @@ export function CodePreviewPanel() {
       
       {/* Loading overlay */}
       {isTyping && (
-        <div className="absolute bottom-8 right-8 bg-[#1e1e1e] text-xs text-white/70 px-2 py-1 rounded shadow-md">
+        <div className="absolute bottom-8 right-8 bg-[#150C30] text-xs text-white/70 px-2 py-1 rounded shadow-md">
           Analyzing algorithm...
         </div>
       )}

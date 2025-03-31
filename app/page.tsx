@@ -127,7 +127,7 @@ export default function Home() {
       {/* Featured Algorithms Section */}
       <motion.div 
         ref={featureSectionRef}
-        className="container mx-auto px-4 py-8 sm:py-12 relative z-10 bg-gradient-to-b from-[#0F0822]/95 to-[#09061A]/95 backdrop-blur-sm rounded-lg border border-[#2A1845]/20 my-3 sm:my-5"
+        className="container mx-auto px-4 py-8 sm:py-12 relative z-10 bg-gradient-to-b from-[#1F0E3E]/90 to-[#150C30]/90 backdrop-blur-sm rounded-lg border border-[#3A1E70]/30 my-3 sm:my-5"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -297,7 +297,7 @@ function FeatureCard({ title, description, glowColor, isActive = false }: { titl
         } : {}}
       />
       <motion.div 
-        className="relative bg-[#09061A]/95 backdrop-blur-sm border border-[#2A1845]/30 p-5 rounded-lg hover:border-[#3A1E70]/40 transition-all duration-300 h-full shadow-lg shadow-black/30"
+        className="relative bg-[#150C30]/90 backdrop-blur-sm border border-[#3A1E70]/30 p-5 rounded-lg hover:border-[#3A1E70]/60 transition-all duration-300 h-full shadow-lg shadow-black/30"
         whileHover={{ y: -5 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
