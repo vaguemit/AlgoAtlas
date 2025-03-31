@@ -26,6 +26,7 @@ export function Navbar() {
     { href: "/gym", label: "Gym" },
     { href: "/contests", label: "Contests" },
     { href: "/online-compiler", label: "Online Compiler" },
+    { href: "/assistant", label: "Assistant" },
   ]
 
   useEffect(() => {

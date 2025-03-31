@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, BookOpen, Dumbbell, Trophy, Terminal } from "lucide-react"
+import { Home, BookOpen, Dumbbell, Trophy, Terminal, Bot } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -14,6 +14,7 @@ export function MobileNav() {
     { href: "/gym", label: "Gym", icon: <Dumbbell className="h-5 w-5" /> },
     { href: "/contests", label: "Contests", icon: <Trophy className="h-5 w-5" /> },
     { href: "/online-compiler", label: "Compiler", icon: <Terminal className="h-5 w-5" /> },
+    { href: "/assistant", label: "Assistant", icon: <Bot className="h-5 w-5" /> },
   ]
 
   return (

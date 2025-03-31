@@ -11,83 +11,25 @@ const LANGUAGES = {
   cpp: {
     name: "C++",
     defaultCode: `#include <iostream>
-#include <vector>
-#include <algorithm>
 using namespace std;
 
 int main() {
-    // Fast I/O
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    
-    int n;
-    cin >> n;
-    
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-    }
-    
-    // Your solution here
-    sort(arr.begin(), arr.end());
-    
-    // Output
-    for (int num : arr) {
-        cout << num << " ";
-    }
-    cout << endl;
+    // Your code here
     
     return 0;
 }`,
   },
   python: {
     name: "Python",
-    defaultCode: `def solve():
-    n = int(input())
-    arr = list(map(int, input().split()))
-    
-    // Your solution here
-    arr.sort()
-    
-    // Output
-    print(*arr)
-
-// Fast I/O
-if __name__ == "__main__":
-    solve()`,
+    defaultCode: "",
   },
   java: {
     name: "Java",
-    defaultCode: `import java.util.*;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        
-        int n = sc.nextInt();
-        int[] arr = new int[n];
-        
-        for (int i = 0; i < n; i++) {
-            arr[i] = sc.nextInt();
-        }
-        
-        // Your solution here
-        Arrays.sort(arr);
-        
-        // Output
-        for (int num : arr) {
-            System.out.print(num + " ");
-        }
-        System.out.println();
-        
-        sc.close();
-    }
-}`,
+    defaultCode: "",
   },
 }
 
-const defaultInput = `5
-3 1 4 5 2`
+const defaultInput = ""
 
 // Output types
 type OutputType = "success" | "error" | "info"
@@ -102,6 +44,7 @@ interface SavedCode {
   language: string
   code: string
   input: string
+  expectedOutput: string
 }
 
 interface OnlineCompilerProps {
@@ -112,6 +55,7 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [language, setLanguage] = useState<keyof typeof LANGUAGES>("cpp")
   const [code, setCode] = useState(LANGUAGES[language].defaultCode)
   const [input, setInput] = useState(defaultInput)
+  const [expectedOutput, setExpectedOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [output, setOutput] = useState<OutputMessage[]>([])
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -120,11 +64,23 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
 
   // Update code when language changes
   useEffect(() => {
+    // First clear local variables
+    setCode("")
+    setInput("")
+    setExpectedOutput("")
+    
+    // Then check local storage or use default
     const savedCode = localStorage.getItem(`algoatlas_compiler_${language}`)
     if (savedCode) {
-      const parsed = JSON.parse(savedCode) as SavedCode
-      setCode(parsed.code)
-      setInput(parsed.input)
+      try {
+        const parsed = JSON.parse(savedCode) as SavedCode
+        setCode(parsed.code)
+        setInput(parsed.input)
+        setExpectedOutput(parsed.expectedOutput || "")
+      } catch (error) {
+        // If there's an error parsing stored data, use default
+        setCode(LANGUAGES[language].defaultCode)
+      }
     } else {
       setCode(LANGUAGES[language].defaultCode)
     }
@@ -158,6 +114,44 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
 
       if (data.output) {
         setOutput((prev) => [...prev, { type: "success", content: data.output, timestamp: new Date() }])
+        
+        // Compare actual output with expected output if provided
+        if (expectedOutput.trim()) {
+          const actualOutput = data.output.trim();
+          const expected = expectedOutput.trim();
+          
+          if (actualOutput === expected) {
+            setOutput((prev) => [...prev, { 
+              type: "success", 
+              content: "✓ Output matches expected result", 
+              timestamp: new Date() 
+            }])
+          } else {
+            // Add a detailed comparison message
+            setOutput((prev) => [...prev, { 
+              type: "error", 
+              content: "✗ Output does not match expected result", 
+              timestamp: new Date() 
+            }])
+            
+            // Add detailed visual comparison
+            const comparisonMessage = `
+Comparison:
+--------------------------
+Expected: 
+${expected}
+--------------------------
+Actual: 
+${actualOutput}
+--------------------------`;
+            
+            setOutput((prev) => [...prev, { 
+              type: "info", 
+              content: comparisonMessage, 
+              timestamp: new Date() 
+            }])
+          }
+        }
       }
       
       if (data.error) {
@@ -166,6 +160,15 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
       
       if (!data.output && !data.error) {
         setOutput((prev) => [...prev, { type: "success", content: "Program executed successfully with no output", timestamp: new Date() }])
+        
+        // Check if expected output was provided but program produced no output
+        if (expectedOutput.trim()) {
+          setOutput((prev) => [...prev, { 
+            type: "error", 
+            content: "✗ Expected output was provided, but program produced no output", 
+            timestamp: new Date() 
+          }])
+        }
       }
     } catch (error) {
       setOutput((prev) => [
@@ -186,11 +189,79 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   // Save code to local storage
   const saveCode = () => {
     try {
-      const codeData: SavedCode = { language, code, input }
+      const codeData: SavedCode = { language, code, input, expectedOutput }
       localStorage.setItem(`algoatlas_compiler_${language}`, JSON.stringify(codeData))
       setOutput((prev) => [...prev, { type: "info", content: "Code saved to browser storage", timestamp: new Date() }])
     } catch (error) {
       setOutput((prev) => [...prev, { type: "error", content: "Failed to save code", timestamp: new Date() }])
+    }
+  }
+  
+  // Reset compiler state and clear local storage
+  const resetCompiler = () => {
+    // Clear local storage for current language
+    localStorage.removeItem(`algoatlas_compiler_${language}`)
+    
+    // Reset state
+    setCode(LANGUAGES[language].defaultCode)
+    setInput("")
+    setExpectedOutput("")
+    setOutput([{ type: "info", content: "Compiler reset. All saved data cleared.", timestamp: new Date() }])
+  }
+  
+  // Clear all compiler data from local storage
+  const clearAllCompilerData = () => {
+    // Clear all compiler-related local storage
+    Object.keys(LANGUAGES).forEach(lang => {
+      localStorage.removeItem(`algoatlas_compiler_${lang}`);
+    });
+    
+    // Reset state for current language
+    setCode(LANGUAGES[language].defaultCode)
+    setInput("")
+    setExpectedOutput("")
+    setOutput([{ type: "info", content: "All compiler data cleared for all languages.", timestamp: new Date() }])
+  }
+  
+  // Download code to file
+  const downloadCode = () => {
+    try {
+      // Get appropriate file extension based on language
+      let fileExtension = "";
+      switch (language) {
+        case "cpp":
+          fileExtension = ".cpp";
+          break;
+        case "python":
+          fileExtension = ".py";
+          break;
+        case "java":
+          fileExtension = ".java";
+          break;
+        default:
+          fileExtension = ".txt";
+      }
+      
+      // Create file name
+      const fileName = `algoatlas_code${fileExtension}`;
+      
+      // Create blob and download link
+      const blob = new Blob([code], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setOutput((prev) => [...prev, { type: "info", content: `Downloaded as "${fileName}"`, timestamp: new Date() }]);
+    } catch (error) {
+      setOutput((prev) => [...prev, { type: "error", content: "Failed to download file", timestamp: new Date() }]);
     }
   }
 
@@ -294,6 +365,86 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
                   <option key={key} value={key}>{name}</option>
                 ))}
               </select>
+
+              {/* File open button */}
+              <div className="relative">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Show loading message
+                      setOutput([{ type: "info", content: `Loading file "${file.name}"...`, timestamp: new Date() }]);
+                      
+                      const reader = new FileReader();
+                      
+                      reader.onload = (event) => {
+                        try {
+                          if (event.target?.result) {
+                            // Successfully read file content
+                            const fileContent = event.target.result.toString();
+                            
+                            // Detect language based on file extension
+                            const fileName = file.name.toLowerCase();
+                            let newLang = language;
+                            
+                            if (fileName.endsWith('.cpp') || fileName.endsWith('.h') || fileName.endsWith('.c') || fileName.endsWith('.cc')) {
+                              newLang = 'cpp';
+                            } else if (fileName.endsWith('.py') || fileName.endsWith('.python')) {
+                              newLang = 'python';
+                            } else if (fileName.endsWith('.java')) {
+                              newLang = 'java';
+                            }
+                            
+                            // Set language first if it's changed
+                            if (newLang !== language) {
+                              setLanguage(newLang as keyof typeof LANGUAGES);
+                            }
+                            
+                            // Set code content directly
+                            setCode(fileContent);
+                            
+                            setOutput([{ 
+                              type: "success", 
+                              content: `File "${file.name}" loaded successfully`, 
+                              timestamp: new Date() 
+                            }]);
+                          }
+                        } catch (error) {
+                          setOutput([{ 
+                            type: "error", 
+                            content: `Error processing file: ${error instanceof Error ? error.message : "Unknown error"}`, 
+                            timestamp: new Date() 
+                          }]);
+                        }
+                      };
+                      
+                      reader.onerror = () => {
+                        setOutput([{ 
+                          type: "error", 
+                          content: "Failed to read file. Please try again.", 
+                          timestamp: new Date() 
+                        }]);
+                      };
+                      
+                      // Read the file as text
+                      reader.readAsText(file);
+                    }
+                    // Reset file input so the same file can be selected again
+                    e.target.value = '';
+                  }}
+                  accept=".cpp,.py,.java,.txt,.js,.html,.css,.c,.h,.cc"
+                />
+                <button
+                  className="flex items-center space-x-1 px-3 py-1.5 bg-[#3c3c3c] text-white text-sm rounded-md hover:bg-[#4c4c4c] transition-colors"
+                  title="Open file from your computer"
+                >
+                  <Download className="h-4 w-4 rotate-180" />
+                  <span>Open File</span>
+                </button>
+              </div>
             </div>
 
             {/* Actions */}
@@ -301,9 +452,16 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
               <button
                 onClick={saveCode}
                 className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                title="Save code"
+                title="Save code to browser storage"
               >
                 <Save className="h-4 w-4" />
+              </button>
+              <button
+                onClick={downloadCode}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Download code as file"
+              >
+                <Download className="h-4 w-4" />
               </button>
               <button
                 onClick={copyCode}
@@ -311,6 +469,20 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
                 title="Copy code"
               >
                 <Copy className="h-4 w-4" />
+              </button>
+              <button
+                onClick={resetCompiler}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Reset current language"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <button
+                onClick={clearAllCompilerData}
+                className="p-1.5 rounded-md text-red-500/70 hover:bg-[#3c3c3c] hover:text-red-500 transition-colors flex items-center"
+                title="Clear ALL compiler data"
+              >
+                <AlertCircle className="h-4 w-4" />
               </button>
               <button
                 onClick={toggleFullscreen}
@@ -333,9 +505,10 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
                 <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
               </div>
 
-              {/* Input panel */}
-              <div className="h-[200px] border-t border-[#3c3c3c] flex-shrink-0">
-                <div className="h-full">
+              {/* Input and Expected Output panels */}
+              <div className="h-[200px] border-t border-[#3c3c3c] flex-shrink-0 flex">
+                {/* Input panel */}
+                <div className="h-full w-1/2 border-r border-[#3c3c3c]">
                   <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
                     <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
                     <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
@@ -344,6 +517,20 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
                     value={input}
                     language="plaintext"
                     onChange={setInput}
+                    disableAutoFocus={disableAutoFocus}
+                  />
+                </div>
+                
+                {/* Expected Output panel */}
+                <div className="h-full w-1/2">
+                  <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
+                    <CheckCircle className="h-3.5 w-3.5 mr-2 text-green-400" />
+                    <span className="text-xs text-[#f0f0f0] font-medium">Expected Output</span>
+                  </div>
+                  <CodeEditor
+                    value={expectedOutput}
+                    language="plaintext"
+                    onChange={setExpectedOutput}
                     disableAutoFocus={disableAutoFocus}
                   />
                 </div>
@@ -380,7 +567,7 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
                       className="text-[#8f8f8f] italic flex items-center"
                     >
                       <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
-                      Run your code to see output here
+                      Write code and click Run to execute it
                     </motion.div>
                   ) : (
                     output.map((msg, index) => (

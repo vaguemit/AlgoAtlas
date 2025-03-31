@@ -39,11 +39,14 @@ export function CodeEditor({ value, language, onChange, readOnly = false, disabl
     switch (lang) {
       case "cpp":
         return "cpp"
+      case "c":
+        return "cpp"
       case "python":
         return "python"
       case "java":
         return "java"
       case "plaintext":
+        return "plaintext"
       default:
         return "plaintext"
     }

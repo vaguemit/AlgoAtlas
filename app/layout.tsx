@@ -3,12 +3,14 @@ import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/navbar"
-import { FloatingChatBubble } from "@/components/floating-chat-bubble"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { CosmicBackground } from "@/components/cosmic-background"
 import { Toaster } from "@/components/ui/toaster"
+import { cn } from "@/lib/utils"
+import { MobileNav } from "@/components/mobile-nav"
+import { AssistantWrapper } from "@/components/assistant-wrapper"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,27 +36,32 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
-      <body className={`${inter.className} ${inter.variable} min-h-screen text-white antialiased`}>
-        <AuthProvider>
-          <ThemeProvider>
+    <html lang="en" suppressHydrationWarning className="dark scroll-smooth">
+      <body
+        className={cn(
+          "min-h-screen bg-navy-950 font-sans antialiased overflow-x-hidden",
+          inter.variable
+        )}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+        >
+          <AuthProvider>
             <div className="relative overflow-hidden">
               <CosmicBackground />
               <div className="relative z-10 flex flex-col min-h-screen">
                 <Navbar />
                 <main className="flex-grow pt-16 pb-16">{children}</main>
                 <Footer />
-                <FloatingChatBubble />
               </div>
               <Toaster />
+              <MobileNav />
+              <AssistantWrapper />
             </div>
-          </ThemeProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
 }
-
-
-
-import './globals.css'
