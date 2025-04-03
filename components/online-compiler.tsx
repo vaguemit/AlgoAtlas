@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Play, AlertCircle, CheckCircle, X, Copy, Download, Activity } from "lucide-react"
+import { Play, AlertCircle, CheckCircle, X, Copy, Maximize2, Code, Share, TerminalSquare, SplitSquareVertical, Save, Download, Activity } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { CodeEditor } from "./code-editor-monaco"
 import { PerformanceMetrics } from "./performance-metrics"
@@ -60,24 +60,13 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [expectedOutput, setExpectedOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [output, setOutput] = useState<OutputMessage[]>([])
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [showPerformanceMetrics, setShowPerformanceMetrics] = useState(false)
   const [executionTime, setExecutionTime] = useState(0)
   const [memoryUsed, setMemoryUsed] = useState(0)
   const [complexityAnalysis, setComplexityAnalysis] = useState<ComplexityResult | null>(null)
-  const [activeTab, setActiveTab] = useState("input")
   const compilerRef = useRef<HTMLDivElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
-  
-  // Generate filename based on language
-  const getEditorFilename = () => {
-    const extensions: Record<string, string> = {
-      cpp: 'algorithm.cpp',
-      python: 'solution.py',
-      java: 'Solution.java'
-    };
-    
-    return extensions[language] || 'code.txt';
-  }
 
   // Update code when language changes
   useEffect(() => {
@@ -121,9 +110,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     setMemoryUsed(0)
     setComplexityAnalysis(null)
     setShowPerformanceMetrics(false)
-    
-    // Switch to output tab to show results
-    setActiveTab("output")
 
     try {
       const response = await fetch("/api/execute-code", {
@@ -240,6 +226,32 @@ ${actualOutput}
     }
   }
   
+  // Reset compiler state and clear local storage
+  const resetCompiler = () => {
+    // Clear local storage for current language
+    localStorage.removeItem(`algoatlas_compiler_${language}`)
+    
+    // Reset state
+    setCode(LANGUAGES[language].defaultCode)
+    setInput("")
+    setExpectedOutput("")
+    setOutput([{ type: "info", content: "Compiler reset. All saved data cleared.", timestamp: new Date() }])
+  }
+  
+  // Clear all compiler data from local storage
+  const clearAllCompilerData = () => {
+    // Clear all compiler-related local storage
+    Object.keys(LANGUAGES).forEach(lang => {
+      localStorage.removeItem(`algoatlas_compiler_${lang}`);
+    });
+    
+    // Reset state for current language
+    setCode(LANGUAGES[language].defaultCode)
+    setInput("")
+    setExpectedOutput("")
+    setOutput([{ type: "info", content: "All compiler data cleared for all languages.", timestamp: new Date() }])
+  }
+  
   // Download code to file
   const downloadCode = () => {
     try {
@@ -282,252 +294,454 @@ ${actualOutput}
     }
   }
 
-  // Toggle performance metrics
-  const togglePerformanceMetrics = () => {
-    setShowPerformanceMetrics(prev => !prev)
-    if (!showPerformanceMetrics) {
-      setActiveTab("output") // Switch to output tab to show metrics
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      compilerRef.current?.requestFullscreen()
+      setIsFullscreen(true)
+    } else {
+      document.exitFullscreen()
+      setIsFullscreen(false)
     }
   }
 
+  // Listen for fullscreen change
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
+  }, [])
+
+  // Toggle performance metrics
+  const togglePerformanceMetrics = () => {
+    setShowPerformanceMetrics(prev => !prev)
+  }
+
   return (
-    <section className="w-full">
-      <div className="container px-4 md:px-6">
-        <div className="grid grid-cols-1 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full bg-[#1e1e1e] rounded-lg shadow-2xl overflow-hidden"
-            ref={compilerRef}
-          >
-            {/* Main compiler interface */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[500px]">
-              {/* Code editor */}
-              <div className="flex flex-col overflow-hidden">
-                <CodeEditor
-                  value={code}
-                  language={language}
-                  onChange={setCode}
-                  disableAutoFocus={disableAutoFocus}
-                  filename={getEditorFilename()}
+    <section className={cn(
+      "py-20 relative overflow-hidden",
+      isFullscreen && "!p-0"
+    )}>
+      {/* Background elements */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+
+      <div className={cn(
+        "container mx-auto px-4 sm:px-6",
+        isFullscreen && "!p-0 !m-0 !max-w-none h-screen"
+      )}>
+        {/* Section heading */}
+        {!isFullscreen && (
+          <>
+            <motion.h2
+              className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Online Compiler
+            </motion.h2>
+            <motion.p
+              className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Write, run, and debug your code directly in the browser
+            </motion.p>
+          </>
+        )}
+
+        {/* Features list - moved above compiler */}
+        {!isFullscreen && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
+            <FeatureCard
+              title="Multiple Languages"
+              description="Write and run code in C++, Python, Java, and more programming languages."
+              icon={<Code className="h-6 w-6" />}
+            />
+            <FeatureCard
+              title="Real-time Syntax Highlighting"
+              description="Enjoy code highlighting and auto-indentation for a better coding experience."
+              icon={<CodeHighlighter className="h-6 w-6" />}
+            />
+            <FeatureCard
+              title="Save & Share"
+              description="Save your code snippets and share them with others with a simple link."
+              icon={<Share className="h-6 w-6" />}
+            />
+          </div>
+        )}
+
+        {/* Compiler container */}
+        <motion.div
+          ref={compilerRef}
+          className={cn(
+            "bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col",
+            isFullscreen ? "fixed inset-0 z-50 rounded-none border-0" : "h-[800px]"
+          )}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          {/* Toolbar */}
+          <div className="bg-[#252526] px-4 py-2 flex items-center justify-between border-b border-[#3c3c3c] flex-shrink-0">
+            {/* Language selector */}
+            <div className="flex items-center space-x-4">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as keyof typeof LANGUAGES)}
+                className="bg-[#3c3c3c] text-white text-sm rounded-md border-0 py-1.5 pl-3 pr-8 focus:ring-2 focus:ring-purple-500"
+              >
+                {Object.entries(LANGUAGES).map(([key, { name }]) => (
+                  <option key={key} value={key}>{name}</option>
+                ))}
+              </select>
+
+              {/* File open button */}
+              <div className="relative">
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Show loading message
+                      setOutput([{ type: "info", content: `Loading file "${file.name}"...`, timestamp: new Date() }]);
+                      
+                      const reader = new FileReader();
+                      
+                      reader.onload = (event) => {
+                        try {
+                          if (event.target?.result) {
+                            // Successfully read file content
+                            const fileContent = event.target.result.toString();
+                            
+                            // Detect language based on file extension
+                            const fileName = file.name.toLowerCase();
+                            let newLang = language;
+                            
+                            if (fileName.endsWith('.cpp') || fileName.endsWith('.h') || fileName.endsWith('.c') || fileName.endsWith('.cc')) {
+                              newLang = 'cpp';
+                            } else if (fileName.endsWith('.py') || fileName.endsWith('.python')) {
+                              newLang = 'python';
+                            } else if (fileName.endsWith('.java')) {
+                              newLang = 'java';
+                            }
+                            
+                            // Set language first if it's changed
+                            if (newLang !== language) {
+                              setLanguage(newLang as keyof typeof LANGUAGES);
+                            }
+                            
+                            // Set code content directly
+                            setCode(fileContent);
+                            
+                            setOutput([{ 
+                              type: "success", 
+                              content: `File "${file.name}" loaded successfully`, 
+                              timestamp: new Date() 
+                            }]);
+                          }
+                        } catch (error) {
+                          setOutput([{ 
+                            type: "error", 
+                            content: `Error processing file: ${error instanceof Error ? error.message : "Unknown error"}`, 
+                            timestamp: new Date() 
+                          }]);
+                        }
+                      };
+                      
+                      reader.onerror = () => {
+                        setOutput([{ 
+                          type: "error", 
+                          content: "Failed to read file. Please try again.", 
+                          timestamp: new Date() 
+                        }]);
+                      };
+                      
+                      // Read the file as text
+                      reader.readAsText(file);
+                    }
+                    // Reset file input so the same file can be selected again
+                    e.target.value = '';
+                  }}
+                  accept=".cpp,.py,.java,.txt,.js,.html,.css,.c,.h,.cc"
                 />
+                <button
+                  className="flex items-center space-x-1 px-3 py-1.5 bg-[#3c3c3c] text-white text-sm rounded-md hover:bg-[#4c4c4c] transition-colors"
+                  title="Open file from your computer"
+                >
+                  <Download className="h-4 w-4 rotate-180" />
+                  <span>Open File</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex space-x-2">
+              <button
+                onClick={saveCode}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Save code to browser storage"
+              >
+                <Save className="h-4 w-4" />
+              </button>
+              <button
+                onClick={downloadCode}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Download code as file"
+              >
+                <Download className="h-4 w-4" />
+              </button>
+              <button
+                onClick={copyCode}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Copy code"
+              >
+                <Copy className="h-4 w-4" />
+              </button>
+              <button
+                onClick={resetCompiler}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Reset current language"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <button
+                onClick={clearAllCompilerData}
+                className="p-1.5 rounded-md text-red-500/70 hover:bg-[#3c3c3c] hover:text-red-500 transition-colors flex items-center"
+                title="Clear ALL compiler data"
+              >
+                <AlertCircle className="h-4 w-4" />
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
+                title="Toggle fullscreen"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={togglePerformanceMetrics}
+                className={cn(
+                  "p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center",
+                  showPerformanceMetrics && "bg-purple-500"
+                )}
+                title="Performance metrics"
+              >
+                <Activity className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          <div className={cn(
+            "flex flex-col md:flex-row flex-1 min-h-0",
+            isFullscreen ? "h-[calc(100vh-48px)]" : "h-full"
+          )}>
+            {/* Main content */}
+            <div className="flex flex-col flex-1 min-h-0">
+              {/* Code editor */}
+              <div className="flex-1 overflow-hidden border-b border-[#3c3c3c] min-h-0">
+                <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
               </div>
 
-              {/* Input/Output Panel */}
-              <div className="flex flex-col bg-[#1e1e1e] border border-[#3c3c3c] overflow-hidden">
-                {/* Tabs */}
-                <div className="flex border-b border-[#3c3c3c]">
-                  <button
-                    className={cn(
-                      "px-4 py-2 text-sm transition-colors",
-                      activeTab === "input"
-                        ? "bg-[#1e1e1e] text-white border-t-2 border-t-purple-500"
-                        : "bg-[#252526] text-[#8f8f8f] hover:text-white"
-                    )}
-                    onClick={() => setActiveTab("input")}
-                  >
-                    Input
-                  </button>
-                  <button
-                    className={cn(
-                      "px-4 py-2 text-sm transition-colors",
-                      activeTab === "expected"
-                        ? "bg-[#1e1e1e] text-white border-t-2 border-t-purple-500"
-                        : "bg-[#252526] text-[#8f8f8f] hover:text-white"
-                    )}
-                    onClick={() => setActiveTab("expected")}
-                  >
-                    Expected Output
-                  </button>
-                  <button
-                    className={cn(
-                      "px-4 py-2 text-sm transition-colors",
-                      activeTab === "output"
-                        ? "bg-[#1e1e1e] text-white border-t-2 border-t-purple-500"
-                        : "bg-[#252526] text-[#8f8f8f] hover:text-white"
-                    )}
-                    onClick={() => setActiveTab("output")}
-                  >
-                    Console
-                  </button>
+              {/* Input and Expected Output panels */}
+              <div className="h-[200px] border-t border-[#3c3c3c] flex-shrink-0 flex">
+                {/* Input panel */}
+                <div className="h-full w-1/2 border-r border-[#3c3c3c]">
+                  <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
+                    <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                    <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
+                  </div>
+                  <CodeEditor
+                    value={input}
+                    language="plaintext"
+                    onChange={setInput}
+                    disableAutoFocus={disableAutoFocus}
+                  />
                 </div>
-
-                {/* Input */}
-                {activeTab === "input" && (
-                  <div className="flex-1 p-4">
-                    <textarea
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      placeholder="Enter input for your program..."
-                      className="w-full h-full bg-[#1e1e1e] text-white resize-none outline-none font-mono text-sm"
-                    />
+                
+                {/* Expected Output panel */}
+                <div className="h-full w-1/2">
+                  <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
+                    <CheckCircle className="h-3.5 w-3.5 mr-2 text-green-400" />
+                    <span className="text-xs text-[#f0f0f0] font-medium">Expected Output</span>
                   </div>
-                )}
+                  <CodeEditor
+                    value={expectedOutput}
+                    language="plaintext"
+                    onChange={setExpectedOutput}
+                    disableAutoFocus={disableAutoFocus}
+                  />
+                </div>
+              </div>
+            </div>
 
-                {/* Expected output */}
-                {activeTab === "expected" && (
-                  <div className="flex-1 p-4">
-                    <textarea
-                      value={expectedOutput}
-                      onChange={(e) => setExpectedOutput(e.target.value)}
-                      placeholder="Enter expected output to compare results..."
-                      className="w-full h-full bg-[#1e1e1e] text-white resize-none outline-none font-mono text-sm"
-                    />
-                  </div>
-                )}
+            {/* Output console */}
+            <div className="w-full md:w-1/3 border-t md:border-t-0 md:border-l border-[#3c3c3c] flex flex-col min-h-0">
+              {/* Console header */}
+              <div className="flex items-center justify-between bg-[#252526] px-4 py-2 border-b border-[#3c3c3c]">
+                <div className="flex items-center">
+                  <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                  <span className="text-xs text-[#f0f0f0] font-medium">Console Output</span>
+                </div>
+                <button
+                  onClick={() => setOutput([])}
+                  className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors"
+                  title="Clear console"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
-                {/* Console output */}
-                {activeTab === "output" && (
-                  <div
-                    ref={outputRef}
-                    className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent font-mono text-xs"
-                  >
-                    <AnimatePresence>
-                      {output.length === 0 ? (
-                        <motion.div 
-                          initial={{ opacity: 0 }} 
-                          animate={{ opacity: 1 }} 
-                          className="text-[#8f8f8f] italic flex items-center"
-                        >
-                          <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
-                          Write code and click Run to execute it
-                        </motion.div>
-                      ) : (
-                        output.map((msg, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
+              {/* Console output */}
+              <div
+                ref={outputRef}
+                className="flex-1 bg-[#1e1e1e] p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent font-mono text-xs"
+              >
+                <AnimatePresence>
+                  {output.length === 0 ? (
+                    <motion.div 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      className="text-[#8f8f8f] italic flex items-center"
+                    >
+                      <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
+                      Write code and click Run to execute it
+                    </motion.div>
+                  ) : (
+                    output.map((msg, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
+                      >
+                        <div className="flex items-start">
+                          {msg.type === "success" && (
+                            <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                          )}
+                          {msg.type === "error" && (
+                            <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                          )}
+                          {msg.type === "info" && (
+                            <span className="flex-shrink-0 text-blue-400 mr-2">{">"}</span>
+                          )}
+                          <div
+                            className={cn(
+                              "break-words whitespace-pre-wrap font-mono",
+                              msg.type === "success" && "text-green-400",
+                              msg.type === "error" && "text-red-400",
+                              msg.type === "info" && "text-blue-400",
+                            )}
                           >
-                            <div className="flex items-start">
-                              {msg.type === "success" && (
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                              )}
-                              {msg.type === "error" && (
-                                <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                              )}
-                              {msg.type === "info" && (
-                                <span className="flex-shrink-0 text-blue-400 mr-2">{">"}</span>
-                              )}
-                              <div
-                                className={cn(
-                                  "break-words whitespace-pre-wrap font-mono",
-                                  msg.type === "success" && "text-green-400",
-                                  msg.type === "error" && "text-red-400",
-                                  msg.type === "info" && "text-blue-400",
-                                )}
-                              >
-                                {msg.content}
-                              </div>
-                            </div>
-                            <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{msg.timestamp.toLocaleTimeString()}</div>
-                          </motion.div>
-                        ))
-                      )}
-                    </AnimatePresence>
-                    
-                    {/* Add Performance Metrics Component directly in console output */}
-                    {showPerformanceMetrics && (
-                      <div className="mt-4 border-t border-[#3c3c3c] pt-4">
-                        <PerformanceMetrics
-                          executionTime={executionTime}
-                          memoryUsed={memoryUsed}
-                          complexityAnalysis={complexityAnalysis}
-                          showChart={true}
-                        />
-                      </div>
-                    )}
+                            {msg.content}
+                          </div>
+                        </div>
+                        <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{msg.timestamp.toLocaleTimeString()}</div>
+                      </motion.div>
+                    ))
+                  )}
+                </AnimatePresence>
+                
+                {/* Add Performance Metrics Component directly in console output */}
+                {showPerformanceMetrics && (
+                  <div className="mt-4 border-t border-[#3c3c3c] pt-4">
+                    <PerformanceMetrics
+                      executionTime={executionTime}
+                      memoryUsed={memoryUsed}
+                      complexityAnalysis={complexityAnalysis}
+                      showChart={true}
+                    />
                   </div>
                 )}
-
-                {/* Run button */}
-                <div className="p-4 bg-[#252526] border-t border-[#3c3c3c]">
-                  <motion.button
-                    onClick={runCode}
-                    disabled={isRunning}
-                    className={cn(
-                      "w-full flex items-center justify-center py-3 px-4 rounded-md text-white font-medium transition-all",
-                      isRunning
-                        ? "bg-purple-700/50 cursor-not-allowed"
-                        : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-600/20",
-                    )}
-                    whileHover={isRunning ? {} : { scale: 1.02 }}
-                    whileTap={isRunning ? {} : { scale: 0.98 }}
-                  >
-                    {isRunning ? (
-                      <>
-                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                        Running...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Run Code
-                      </>
-                    )}
-                  </motion.button>
-                </div>
               </div>
-            </div>
 
-            {/* Toolbar */}
-            <div className="p-4 bg-[#252526] border-t border-[#3c3c3c] flex flex-wrap justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as keyof typeof LANGUAGES)}
-                  className="bg-[#3c3c3c] text-white text-sm rounded-md px-3 py-1.5 border border-[#525252] outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  {Object.entries(LANGUAGES).map(([key, { name }]) => (
-                    <option key={key} value={key}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={saveCode}
-                  className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white p-1.5 rounded-md transition-colors flex items-center"
-                  title="Save code"
-                >
-                  Save
-                </button>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={copyCode}
-                  className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white p-1.5 rounded-md transition-colors flex items-center"
-                  title="Copy code"
-                >
-                  <Copy size={16} />
-                </button>
-                
-                <button
-                  onClick={downloadCode}
-                  className="bg-[#3c3c3c] hover:bg-[#4c4c4c] text-white p-1.5 rounded-md transition-colors flex items-center"
-                  title="Download code"
-                >
-                  <Download size={16} />
-                </button>
-                
-                <button
-                  onClick={togglePerformanceMetrics}
+              {/* Run button */}
+              <div className="p-4 bg-[#252526] border-t border-[#3c3c3c]">
+                <motion.button
+                  onClick={runCode}
+                  disabled={isRunning}
                   className={cn(
-                    "p-1.5 rounded-md text-white bg-[#3c3c3c] hover:bg-[#4c4c4c] transition-colors flex items-center",
-                    showPerformanceMetrics && "bg-purple-500 hover:bg-purple-600"
+                    "w-full flex items-center justify-center py-3 px-4 rounded-md text-white font-medium transition-all",
+                    isRunning
+                      ? "bg-purple-700/50 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-600/20",
                   )}
-                  title="Performance metrics"
+                  whileHover={isRunning ? {} : { scale: 1.02 }}
+                  whileTap={isRunning ? {} : { scale: 0.98 }}
                 >
-                  <Activity size={16} />
-                </button>
+                  {isRunning ? (
+                    <>
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Running...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 mr-2" />
+                      Run Code
+                    </>
+                  )}
+                </motion.button>
               </div>
             </div>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )
 }
+
+interface FeatureCardProps {
+  title: string
+  description: string
+  icon: React.ReactNode
+}
+
+function FeatureCard({ title, description, icon }: FeatureCardProps) {
+  return (
+    <motion.div
+      className="bg-black/30 backdrop-blur-sm border border-purple-500/20 p-6 rounded-lg hover:border-purple-500/30 transition-all"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.5 }}
+      whileHover={{ y: -5 }}
+    >
+      <div className="p-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full w-14 h-14 flex items-center justify-center mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+      <p className="text-white/70">{description}</p>
+    </motion.div>
+  )
+}
+
+function CodeHighlighter(props: any) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="m8 3 4 2v14l-4 2z"></path>
+      <path d="m16 7-4-2"></path>
+      <path d="m16 7 4 2v10l-4 2"></path>
+      <path d="m16 21v-4"></path>
+      <path d="m12 19-4 2"></path>
+      <path d="m16 17-4 2"></path>
+    </svg>
+  )
+}
+
