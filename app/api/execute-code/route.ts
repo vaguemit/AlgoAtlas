@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LANGUAGE_CONFIGS, STATUS_MESSAGES, prepareCode } from '@/app/utils/compiler';
 import { CompilerRequest, CompilerResponse, CompilerError } from '@/app/types/compiler';
+import { analyzeComplexity } from '@/app/utils/big-o-analyzer';
 
 // Judge0 API configuration
 const JUDGE0_API_URL = 'https://judge0-ce.p.rapidapi.com';
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json() as CompilerRequest;
-    const { language, code, input = '' } = body;
+    const { language, code, input = '', analyzeComplexity: shouldAnalyzeComplexity = true } = body;
 
     if (!language || !code) {
       return NextResponse.json<CompilerError>(
@@ -106,12 +107,18 @@ export async function POST(req: NextRequest) {
       throw new Error('Execution timed out');
     }
 
+    // Analyze code complexity if requested
+    const complexityAnalysis = shouldAnalyzeComplexity 
+      ? analyzeComplexity(code, language)
+      : undefined;
+
     const response: CompilerResponse = {
       output: result.stdout || '',
       error: result.stderr || result.compile_output || '',
       status: STATUS_MESSAGES[result.status.id] || 'Unknown Status',
-      executionTime: result.time || 0,
-      memoryUsed: result.memory || 0,
+      executionTime: result.time ? parseFloat(result.time) : 0,
+      memoryUsed: result.memory ? parseInt(result.memory, 10) : 0,
+      complexityAnalysis
     };
 
     return NextResponse.json(response);

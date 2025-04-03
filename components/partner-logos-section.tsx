@@ -40,7 +40,7 @@ function LogoItem({ name, logo }: LogoItemProps) {
       {/* Logo */}
       <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 opacity-70 hover:opacity-100 transition-opacity duration-300 relative group">
         <motion.div 
-          className="absolute inset-0 -z-10 bg-purple-500/10 rounded-full blur-lg"
+          className="absolute inset-0 -z-10 bg-transparent rounded-full"
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ opacity: 1, scale: 1.2 }}
           transition={{ duration: 0.3 }}
@@ -127,19 +127,19 @@ export function PartnerLogosSection() {
 
   return (
     <motion.section 
-      className="relative py-8 sm:py-12 overflow-hidden"
+      className="relative py-8 sm:py-12 overflow-hidden bg-transparent"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.8 }}
     >
       {/* Top divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-transparent to-transparent"></div>
 
-      {/* Background gradient - removed solid color, now fully transparent */}
-      <div className="absolute inset-0 pointer-events-none"></div>
+      {/* Background gradient - completely transparent */}
+      <div className="absolute inset-0 pointer-events-none bg-transparent"></div>
 
-      <div className="container mx-auto px-fluid-2 relative z-10">
+      <div className="container mx-auto px-fluid-2 relative z-10 bg-transparent">
         <motion.div 
           className="text-center mb-4 sm:mb-6"
           initial={{ opacity: 0, y: 20 }}
@@ -157,7 +157,7 @@ export function PartnerLogosSection() {
 
         {/* Logo carousel */}
         <div
-          className="relative w-full overflow-hidden"
+          className="relative w-full overflow-hidden bg-transparent"
           ref={containerRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -165,7 +165,7 @@ export function PartnerLogosSection() {
           onTouchEnd={handleMouseLeave}
         >
           {mounted && (
-            <motion.div className="flex" animate={controls} initial={{ x: 0 }}>
+            <motion.div className="flex bg-transparent" animate={controls} initial={{ x: 0 }}>
               {duplicatedLogos.map((logo, index) => (
                 <LogoItem key={`${logo.name}-${index}`} {...logo} />
               ))}
@@ -174,12 +174,12 @@ export function PartnerLogosSection() {
         </div>
 
         {/* Gradient overlays for smooth fade effect at the edges - updated to be transparent */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-[#09061A] to-transparent pointer-events-none z-10"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-[#09061A] to-transparent pointer-events-none z-10"></div>
+        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-transparent to-transparent pointer-events-none z-10"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-transparent to-transparent pointer-events-none z-10"></div>
       </div>
 
       {/* Bottom divider */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-transparent to-transparent"></div>
     </motion.section>
   )
 }

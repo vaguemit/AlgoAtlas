@@ -33,7 +33,7 @@ export default function LearningPathDetails({ pathId }: LearningPathDetailsProps
   const [pathColor, setPathColor] = useState("bg-blue-500")
   const [topics, setTopics] = useState<Topic[]>([])
 
-  const { completionPercentage, updateProgress, getStatusFor } = useLearningProgress({
+  const { updateProgress, getStatusFor } = useLearningProgress({
     pathId,
     fallbackToLocalStorage: true
   })
@@ -135,7 +135,6 @@ export default function LearningPathDetails({ pathId }: LearningPathDetailsProps
       color={pathColor}
       description={pathDescription}
       topics={updatedTopics}
-      progress={completionPercentage}
       onProgressUpdate={(topicId, subtopicId, status) => {
         updateProgress(topicId, subtopicId, status as any)
       }}

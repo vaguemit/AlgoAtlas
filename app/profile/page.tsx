@@ -391,7 +391,7 @@ export default function ProfilePage() {
       
       // Improved error handling with more specific messages
       let errorMessage = 'Failed to connect to Codeforces';
-      
+    
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx

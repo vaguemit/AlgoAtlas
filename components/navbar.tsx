@@ -68,7 +68,9 @@ export function Navbar() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
           ? "bg-navy-900 shadow-[0_4px_20px_rgba(147,51,234,0.2)]"
-          : "bg-navy-900 md:bg-navy-900/70 md:backdrop-blur-sm",
+          : pathname === "/"
+            ? "bg-transparent"
+            : "bg-navy-900 md:bg-navy-900/70 md:backdrop-blur-sm"
       )}
     >
       <div className="container mx-auto px-4">

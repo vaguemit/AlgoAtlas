@@ -13,9 +13,6 @@ export type LearningPathWithProgress = {
   id: string
   title: string
   description: string
-  modulesCount?: number
-  itemsCount?: number
-  completedItemsCount?: number
   problemCount?: number
   estimatedHours?: number
   difficulty?: string
@@ -57,9 +54,6 @@ const getColorGradient = (pathTitle: string): string => {
 function PathCard({ path, index }: { path: LearningPathWithProgress; index: number }) {
   const [isHovered, setIsHovered] = useState(false)
   const icon = getIconComponent(path.title)
-  const completionPercentage = path.completedItemsCount && path.itemsCount 
-    ? Math.round((path.completedItemsCount / path.itemsCount) * 100)
-    : 0
   const difficulty = path.difficulty || getDifficulty(path.title)
   const colorGradient = getColorGradient(path.title)
   const isDiamond = path.title.includes('Diamond')
@@ -123,20 +117,6 @@ function PathCard({ path, index }: { path: LearningPathWithProgress; index: numb
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="mb-6">
-            <div className="flex justify-between text-xs text-white/70 mb-1">
-              <span>Progress</span>
-              <span>{completionPercentage}%</span>
-            </div>
-            <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full bg-gradient-to-r ${colorGradient}`}
-                style={{ width: `${completionPercentage || 2}%` }}
-              ></div>
-            </div>
-          </div>
-
           {/* Action button */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
@@ -145,7 +125,7 @@ function PathCard({ path, index }: { path: LearningPathWithProgress; index: numb
             >
               <Link href={`/learning-paths/${path.id}`}>
                 <BookOpen className="mr-2 h-4 w-4" />
-                Continue Path
+                Resources
               </Link>
             </Button>
           </motion.div>

@@ -75,7 +75,6 @@ interface DivisionDetailsProps {
   color: string
   description: string
   topics: Topic[]
-  progress: number
   onProgressUpdate?: (topicId: string, subtopicId: string | null, status: Status) => void
 }
 
@@ -132,14 +131,12 @@ export function DivisionDetails({
   name, 
   color, 
   description, 
-  topics, 
-  progress: initialProgress,
+  topics,
   onProgressUpdate 
 }: DivisionDetailsProps) {
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({})
   const [topicProgress, setTopicProgress] = useState<Record<string, Status>>({})
   const [subtopicProgress, setSubtopicProgress] = useState<Record<string, Status>>({})
-  const [progress, setProgress] = useState(initialProgress)
 
   useEffect(() => {
     // Load progress from localStorage only if onProgressUpdate is not provided
@@ -190,34 +187,6 @@ export function DivisionDetails({
     updateTopicStatus();
   }, [updateTopicStatus]);
 
-  useEffect(() => {
-    // Update progress when topicProgress or subtopicProgress changes
-    setProgress(calculateProgress())
-  }, [topicProgress, subtopicProgress])
-
-  const calculateProgress = () => {
-    let total = 0
-    let completed = 0
-
-    // Count topics
-    topics.forEach(topic => {
-      total++ // Count the topic itself
-      if (topicProgress[topic.title] === "complete") {
-        completed++
-      }
-      
-      // Count subtopics
-      topic.subtopics.forEach(subtopic => {
-        total++
-        if (subtopicProgress[subtopic.title] === "complete") {
-          completed++
-        }
-      })
-    })
-
-    return total > 0 ? Math.round((completed / total) * 100) : 0
-  }
-
   const toggleTopic = (title: string) => {
     setExpandedTopics((prev) => ({
       ...prev,
@@ -248,9 +217,6 @@ export function DivisionDetails({
       if (typeof window !== "undefined") {
         localStorage.setItem(`${name.toLowerCase()}-topic-progress`, JSON.stringify(newProgress))
       }
-      
-      // Update overall progress
-      setProgress(calculateProgress())
     }
   }
 
@@ -277,9 +243,6 @@ export function DivisionDetails({
       if (typeof window !== "undefined") {
         localStorage.setItem(`${name.toLowerCase()}-subtopic-progress`, JSON.stringify(newProgress))
       }
-      
-      // Update overall progress
-      setProgress(calculateProgress())
     }
   }
 
@@ -297,24 +260,16 @@ export function DivisionDetails({
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
-          {name} Path
-        </h1>
-        <p className="text-lg text-blue-100/80 max-w-3xl mx-auto">{description}</p>
-      </div>
-
-      {/* Progress bar */}
-      <div className="mb-12">
-        <div className="flex justify-between text-sm text-white/60 mb-2">
-          <span>Progress</span>
-          <span>{progress}%</span>
+        <div className="inline-block">
+          <h1 className="text-5xl font-bold mb-4 relative">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 animate-gradient">
+              {name}
+            </span>
+            {!name.toLowerCase().includes('path') && <span className="text-white/90"> Path</span>}
+            <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+          </h1>
         </div>
-        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-          <div
-            className={`h-full ${color} transition-all duration-500`}
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        <p className="text-lg text-blue-100/80 max-w-3xl mx-auto mt-6">{description}</p>
       </div>
 
       {/* Topics */}

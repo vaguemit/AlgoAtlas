@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { cn } from "@/lib/utils"
 
 interface VSCodeEditorProps {
@@ -8,9 +8,9 @@ interface VSCodeEditorProps {
   language: string
 }
 
-// VS Code-like syntax highlighting colors
+// VS Code Dark+ theme syntax highlighting colors
 const vsCodeColors = {
-  keyword: "text-[#569cd6]", // blue
+  keyword: "text-[#569cd6]", // blue 
   control: "text-[#c586c0]", // purple
   string: "text-[#ce9178]", // orange-brown
   comment: "text-[#6a9955]", // green
@@ -18,17 +18,20 @@ const vsCodeColors = {
   function: "text-[#dcdcaa]", // yellow
   type: "text-[#4ec9b0]", // teal
   variable: "text-[#9cdcfe]", // light blue
+  parameter: "text-[#9cdcfe]", // light blue
+  class: "text-[#4ec9b0]", // teal
   operator: "text-[#d4d4d4]", // light gray
   punctuation: "text-[#d4d4d4]", // light gray
   preprocessor: "text-[#c586c0]", // purple
-  class: "text-[#4ec9b0]", // teal
   default: "text-[#d4d4d4]", // light gray
+  decorators: "text-[#dcdcaa]", // yellow
+  namespace: "text-[#4ec9b0]", // teal
 }
 
 // Simple token-based syntax highlighting
-function highlightLine(line: string, language: string): JSX.Element[] {
+function highlightLine(line: string, language: string): React.ReactNode[] {
   // Simple tokenization for basic syntax highlighting
-  const tokens: JSX.Element[] = []
+  const tokens: React.ReactNode[] = []
 
   // Helper function to add a token with appropriate styling
   const addToken = (text: string, type: keyof typeof vsCodeColors) => {
@@ -201,7 +204,7 @@ export function VSCodeEditor({ code, language }: VSCodeEditorProps) {
   const lines = code.split("\n")
 
   return (
-    <div className="w-full bg-[#1e1e1e] text-[#d4d4d4] overflow-hidden rounded-md">
+    <div className="w-full bg-[#1e1e1e] text-[#d4d4d4] font-mono text-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="border-collapse w-full">
           <tbody>
@@ -210,18 +213,18 @@ export function VSCodeEditor({ code, language }: VSCodeEditorProps) {
                 <tr
                   key={index}
                   className={cn(
-                    "transition-colors duration-200",
-                    highlightedLine === index ? "bg-[#282828]" : "hover:bg-[#2a2d2e]",
+                    "transition-colors",
+                    highlightedLine === index ? "bg-[#2a2d2e]" : "hover:bg-[#2a2d2e]",
                   )}
                   onMouseEnter={() => setHighlightedLine(index)}
                   onMouseLeave={() => setHighlightedLine(null)}
                 >
                   {/* Line number */}
-                  <td className="py-0 px-2 text-right text-[#858585] text-xs select-none border-r border-[#3c3c3c] bg-[#1e1e1e] w-12 min-w-[3rem]">
+                  <td className="py-0 px-2 text-right text-[#858585] text-xs select-none border-r border-[#3c3c3c] bg-[#1e1e1e] w-[3rem] min-w-[3rem]">
                     {index + 1}
                   </td>
                   {/* Code content */}
-                  <td className="py-0 px-4 font-mono text-xs sm:text-sm whitespace-pre">
+                  <td className="py-0 px-4 whitespace-pre">
                     {highlightLine(line, language)}
                   </td>
                 </tr>

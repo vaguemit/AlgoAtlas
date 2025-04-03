@@ -127,7 +127,7 @@ export default function Home() {
       {/* Featured Algorithms Section */}
       <motion.div 
         ref={featureSectionRef}
-        className="container mx-auto px-4 py-8 sm:py-12 relative z-10 bg-gradient-to-b from-[#1F0E3E]/90 to-[#150C30]/90 backdrop-blur-sm rounded-lg border border-[#3A1E70]/30 my-3 sm:my-5"
+        className="container mx-auto px-4 py-6 sm:py-8 relative z-10 bg-transparent backdrop-blur-sm rounded-lg border border-[#3A1E70]/20 my-3 sm:my-5"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
@@ -137,16 +137,16 @@ export default function Home() {
           scale: featureSectionScale
         }}
       >
-        {/* Animated background elements */}
+        {/* Animated background elements - made fully transparent */}
         <motion.div 
           className="absolute inset-0 -z-10 overflow-hidden rounded-lg"
           style={{ y: parallaxY1 }}
         >
-          <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-5"></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-transparent opacity-5"></div>
         </motion.div>
         
         <motion.div 
-          className="absolute top-0 right-0 w-32 h-32 bg-[#3A1E70]/15 rounded-full blur-xl"
+          className="absolute top-0 right-0 w-32 h-32 bg-transparent rounded-full blur-xl"
           animate={{ 
             scale: [1, 1.2, 1],
             opacity: [0.15, 0.2, 0.15] 
@@ -158,65 +158,45 @@ export default function Home() {
           }}
         />
 
+        {/* Minimized heading */}
         <motion.h2 
-          className="text-3xl font-bold text-center mb-5 sm:mb-7 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400"
+          className="text-2xl font-bold text-center mb-4 sm:mb-5 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400"
           variants={itemVariants}
         >
           Featured Algorithms
         </motion.h2>
 
-        {/* Code Preview Panel */}
-        {isLoaded && !isMobile && (
-          <motion.div 
-            variants={itemVariants}
-            whileHover={{ 
-              scale: 1.02,
-              transition: { duration: 0.3 }
-            }}
-          >
-            <CodePreviewPanel />
-          </motion.div>
-        )}
-
-        {/* Interactive Character */}
+        {/* Interactive Character - kept as requested */}
         {isDesktop && isLoaded && (
           <motion.div 
-            className="mt-6 mb-8 flex justify-center flex-col items-center"
+            className="flex justify-center flex-col items-center"
             variants={itemVariants}
           >
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-lg">
               <CursorFollowingCharacter />
-            </div>
-            <div className="mt-4 text-center">
-              <a 
-                href="/cat-demo" 
-                className="inline-flex items-center text-sm font-medium text-purple-400 hover:text-purple-300"
-              >
-                Click to interact with Whisker in fullscreen mode! 🐱
-              </a>
             </div>
           </motion.div>
         )}
 
-        {/* Feature cards with enhanced animations */}
+        {/* Feature cards - simplified and condensed */}
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 mt-6 sm:mt-8 px-1 sm:px-0"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-4 sm:mt-6 px-1 sm:px-0"
           variants={containerVariants}
         >
           {[
             {
               title: "Learn Algorithms",
-              description: "Master the fundamentals of algorithms and data structures with our comprehensive tutorials.",
+              description: "Master the fundamentals with comprehensive tutorials.",
               glowColor: "from-[#3A1E70] to-[#2A1845]"
             },
             {
               title: "Solve Problems",
-              description: "Challenge yourself with our curated collection of coding problems across various difficulty levels.",
+              description: "Challenge yourself with our curated coding problems.",
               glowColor: "from-[#4A2085] to-[#2A1845]"
             },
             {
               title: "Join Contests",
-              description: "Compete with others in our regular coding contests and improve your problem-solving skills.",
+              description: "Compete with others to improve your skills.",
               glowColor: "from-[#2A1845] to-[#1A0D35]"
             }
           ].map((feature, index) => (
@@ -285,9 +265,9 @@ function FeatureCard({ title, description, glowColor, isActive = false }: { titl
       transition={{ duration: 0.2 }}
     >
       <motion.div
-        className={`absolute inset-0 bg-gradient-to-r ${glowColor} rounded-lg blur-md opacity-10 group-hover:opacity-20 transition-opacity duration-300 group-hover:scale-105`}
+        className={`absolute inset-0 bg-gradient-to-r ${glowColor} rounded-lg blur-md opacity-5 group-hover:opacity-15 transition-opacity duration-300 group-hover:scale-105`}
         animate={isActive ? {
-          opacity: [0.1, 0.25, 0.1],
+          opacity: [0.05, 0.15, 0.05],
           scale: [1, 1.05, 1],
         } : {}}
         transition={isActive ? {
@@ -297,28 +277,28 @@ function FeatureCard({ title, description, glowColor, isActive = false }: { titl
         } : {}}
       />
       <motion.div 
-        className="relative bg-[#150C30]/90 backdrop-blur-sm border border-[#3A1E70]/30 p-5 rounded-lg hover:border-[#3A1E70]/60 transition-all duration-300 h-full shadow-lg shadow-black/30"
-        whileHover={{ y: -5 }}
+        className="relative bg-transparent backdrop-blur-sm border border-[#3A1E70]/20 p-4 rounded-lg hover:border-[#3A1E70]/40 transition-all duration-300 h-full shadow-sm shadow-black/10"
+        whileHover={{ y: -3 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
         <motion.h2 
-          className="text-2xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#9A70E8] to-[#8265DC]"
+          className="text-lg font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-[#9A70E8] to-[#8265DC]"
           initial={{ opacity: 0.9 }}
           whileHover={{ scale: 1.05, opacity: 1 }}
           transition={{ duration: 0.2 }}
         >
           {title}
         </motion.h2>
-        <p className="text-white/70">{description}</p>
+        <p className="text-white/60 text-sm">{description}</p>
         
         <motion.div
-          className="mt-4 flex justify-end"
+          className="mt-2 flex justify-end"
           initial={{ opacity: 0, scale: 0.8 }}
           whileHover={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="p-2 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#9A70E8]" viewBox="0 0 20 20" fill="currentColor">
+          <div className="p-1 rounded-full bg-white/5 hover:bg-white/10 cursor-pointer transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#9A70E8]" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
             </svg>
           </div>

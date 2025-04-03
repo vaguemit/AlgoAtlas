@@ -164,8 +164,8 @@
   }
 
   .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 12s ease infinite;
+    background-size: 200% auto;
+    animation: gradient 8s ease infinite;
   }
 
   .bg-grid-pattern {
@@ -547,6 +547,19 @@ code[class*="language-"] {
 
   .status-select {
     @apply bg-gray-800 text-white border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500;
+  }
+}
+
+/* Add cursor blink animation for code editor typewriter effect */
+@keyframes cursorBlink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
   }
 }
 

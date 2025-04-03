@@ -2,26 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 
-interface Star {
-  x: number
-  y: number
-  size: number
-  opacity: number
-  speed: number
-  twinkle: number
-}
-
-interface ShootingStar {
-  x: number
-  y: number
-  length: number
-  speed: number
-  angle: number
-  opacity: number
-  life: number
-  maxLife: number
-}
-
 interface Nebula {
   x: number
   y: number
@@ -61,25 +41,6 @@ export function CosmicBackground() {
 
       resizeCanvas()
 
-      // Create stars
-      const stars: Star[] = []
-      const starCount = Math.min(Math.floor(window.innerWidth * 0.08), 200)
-
-      for (let i = 0; i < starCount; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2 + 0.5,
-          opacity: Math.random() * 0.5 + 0.2,
-          speed: 0.05 + Math.random() * 0.1,
-          twinkle: Math.random() * 0.05,
-        })
-      }
-      
-      // Create shooting stars
-      const shootingStars: ShootingStar[] = []
-      const maxShootingStars = 3
-      
       // Create nebulae - adjust colors to match GitHub's purple theme
       const nebulae: Nebula[] = []
       const nebulaCount = 8 // Increased number of nebulae for more cosmic effect
@@ -112,23 +73,6 @@ export function CosmicBackground() {
       window.addEventListener("mousemove", handleMouseMove, { passive: true })
       window.addEventListener("scroll", handleScroll, { passive: true })
       window.addEventListener("resize", resizeCanvas, { passive: true })
-
-      // Create a new shooting star randomly
-      const createShootingStar = () => {
-        if (shootingStars.length < maxShootingStars && Math.random() < 0.01) {
-          const angle = Math.random() * Math.PI * 0.5 - Math.PI * 0.25
-          shootingStars.push({
-            x: Math.random() * canvas.width,
-            y: 0,
-            length: Math.random() * 80 + 50,
-            speed: Math.random() * 15 + 10,
-            angle: angle,
-            opacity: Math.random() * 0.5 + 0.5,
-            life: 0,
-            maxLife: Math.random() * 100 + 50
-          })
-        }
-      }
 
       // Animation loop
       let animationFrameId: number
@@ -176,79 +120,6 @@ export function CosmicBackground() {
             nebula.x = Math.random() * canvas.width
             nebula.y = Math.random() * canvas.height
             nebula.color = `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`
-          }
-        })
-
-        // Draw and update stars - make stars brighter
-        stars.forEach((star) => {
-          // Twinkle effect
-          const twinkleOpacity = Math.sin(Date.now() * star.twinkle) * 0.3 + 0.8 // Increased twinkle intensity
-
-          // Adjust star brightness based on mouse proximity
-          const dx = star.x / canvas.width - mousePosition.x
-          const dy = star.y / canvas.height - mousePosition.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
-          const mouseInfluence = Math.max(0, 1 - distance * 2)
-
-          // Draw star
-          ctx.beginPath()
-          ctx.arc(star.x, star.y, star.size * (1 + mouseInfluence * 0.7), 0, Math.PI * 2)
-
-          // Color based on position and scroll - brighter whites and subtle blues/purples
-          const hue = (star.y / canvas.height) * 40 + 260 + scrollPosition * 20
-          ctx.fillStyle = `hsla(${hue}, 80%, 90%, ${star.opacity * twinkleOpacity * (1 + mouseInfluence * 0.5)})`
-          ctx.fill()
-
-          // Move stars
-          star.y += star.speed
-
-          // Reset stars that go off screen
-          if (star.y > canvas.height) {
-            star.y = 0
-            star.x = Math.random() * canvas.width
-          }
-        })
-        
-        // Possibly create a new shooting star
-        createShootingStar()
-        
-        // Draw and update shooting stars
-        shootingStars.forEach((star, index) => {
-          // Calculate end position
-          const endX = star.x + Math.cos(star.angle) * star.length
-          const endY = star.y + Math.sin(star.angle) * star.length
-          
-          // Create gradient for the shooting star
-          const gradient = ctx.createLinearGradient(star.x, star.y, endX, endY)
-          gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`)
-          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
-          
-          // Draw the shooting star
-          ctx.beginPath()
-          ctx.moveTo(star.x, star.y)
-          ctx.lineTo(endX, endY)
-          ctx.strokeStyle = gradient
-          ctx.lineWidth = 2
-          ctx.stroke()
-          
-          // Add a glow effect
-          ctx.beginPath()
-          ctx.arc(star.x, star.y, 2, 0, Math.PI * 2)
-          ctx.fillStyle = 'rgba(255, 255, 255, ' + star.opacity + ')'
-          ctx.fill()
-          
-          // Move shooting star
-          star.x += Math.cos(star.angle) * star.speed
-          star.y += Math.sin(star.angle) * star.speed
-          
-          // Increment life
-          star.life++
-          
-          // Remove if it's off screen or lived its life
-          if (star.x < 0 || star.x > canvas.width || 
-              star.y < 0 || star.y > canvas.height ||
-              star.life > star.maxLife) {
-            shootingStars.splice(index, 1)
           }
         })
 

@@ -51,25 +51,13 @@ function Model({ mousePosition, onModelClick }: { mousePosition: MousePosition, 
   })
 
   if (isLoading) {
-    return (
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5} position={[0, 0, 0]}>
-        <mesh>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshStandardMaterial color="#f97316" />
-        </mesh>
-      </Float>
-    )
+    // Return transparent placeholder while loading
+    return null
   }
 
   if (modelError) {
-    return (
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5} position={[0, 0, 0]}>
-        <mesh>
-          <sphereGeometry args={[1, 32, 32]} />
-          <meshStandardMaterial color="#f97316" />
-        </mesh>
-      </Float>
-    )
+    // Return transparent placeholder on error
+    return null
   }
 
   const { scene } = useGLTF('/models/Whisker_Bright_0325220149_texture.glb')
@@ -124,7 +112,7 @@ function Scene({ onModelClick }: { onModelClick: () => void }) {
   return (
     <>
       <Model mousePosition={mousePosition} onModelClick={onModelClick} />
-      <Environment preset="city" />
+      <Environment preset="city" background={false} />
     </>
   )
 }
@@ -249,10 +237,10 @@ export function CursorFollowingCharacter() {
 
   return (
     <div 
-      className="w-full h-[400px] overflow-hidden rounded-lg relative cursor-pointer bg-gradient-to-b from-[#1F0E3E]/80 to-[#150C30]/80 border border-[#3A1E70]/30 backdrop-blur-sm"
+      className="w-full h-[400px] overflow-hidden rounded-lg relative cursor-pointer bg-transparent"
       onMouseMove={handleMouseMove}
     >
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} style={{ background: 'transparent' }} gl={{ alpha: true }}>
         <Scene onModelClick={handleCatClick} />
       </Canvas>
 

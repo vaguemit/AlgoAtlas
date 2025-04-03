@@ -4,6 +4,7 @@ export interface CompilerRequest {
   language: Language;
   code: string;
   input?: string;
+  analyzeComplexity?: boolean;
 }
 
 export interface CompilerResponse {
@@ -12,6 +13,16 @@ export interface CompilerResponse {
   status: string;
   executionTime: number;
   memoryUsed: number;
+  complexityAnalysis?: {
+    timeComplexity: string;
+    spaceComplexity: string;
+    details: {
+      pattern: string;
+      complexity: string;
+      description: string;
+      count: number;
+    }[];
+  };
 }
 
 export interface CompilerError {
