@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Dumbbell, ArrowRight, Timer, Target, Trophy, AlertCircle } from "lucide-react"
+import { Dumbbell, ArrowRight, Timer, Target, Trophy, AlertCircle, RefreshCw } from "lucide-react"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { levels, Level, getDifficultyColor } from "./level-sheet/page"
+import { getLastSubmissions, verifyCodeforcesHandle, checkProblemSolved } from "@/lib/codeforces-api"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuth } from "@/contexts/AuthContext"
 
 interface Problem {
   contestId: number
@@ -19,9 +22,12 @@ interface Problem {
 
 interface ContestProblem {
   id: string
+  contestId: number
+  index: string
   difficulty: number
   name: string
   url: string
+  solved?: boolean
 }
 
 interface ActiveContest {
@@ -50,11 +56,15 @@ async function fetchCodeforcesProblems(rating: number): Promise<Problem[]> {
 }
 
 export default function GymPage() {
+  const { user } = useAuth()
+  const supabase = createClientComponentClient()
   const [userLevel, setUserLevel] = useState<number>(1)
   const [isLoading, setIsLoading] = useState(false)
   const [activeContest, setActiveContest] = useState<ActiveContest | null>(null)
   const [selectedProblems, setSelectedProblems] = useState<ContestProblem[]>([])
   const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [cfHandle, setCfHandle] = useState<string>("")
+  const [isCheckingSubmissions, setIsCheckingSubmissions] = useState(false)
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -72,7 +82,79 @@ export default function GymPage() {
     return () => clearInterval(timer)
   }, [activeContest])
 
+  useEffect(() => {
+    const loadUserData = async () => {
+      // Load saved level from localStorage
+      const savedLevel = localStorage.getItem('userLevel')
+      if (savedLevel) {
+        setUserLevel(Number(savedLevel))
+      }
+
+      if (!user) return
+
+      // Load Codeforces handle from database
+      const { data: cfData, error } = await supabase
+        .from('codeforces_profiles')
+        .select('handle')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (error && error.code !== 'PGRST116') {
+        // PGRST116 is "no rows returned" which is expected if user hasn't connected their profile
+        console.error('Error fetching Codeforces profile:', error)
+        return
+      }
+
+      if (cfData?.handle) {
+        setCfHandle(cfData.handle)
+      }
+    }
+
+    loadUserData()
+  }, [user, supabase])
+
+  const checkSubmissions = async () => {
+    if (!activeContest || !cfHandle) return
+    
+    setIsCheckingSubmissions(true)
+    try {
+      const submissions = await getLastSubmissions(cfHandle)
+      const updatedProblems = activeContest.problems.map(problem => ({
+        ...problem,
+        solved: checkProblemSolved(
+          submissions,
+          problem.contestId,
+          problem.index,
+          activeContest.startTime
+        )
+      }))
+      
+      setActiveContest({
+        ...activeContest,
+        problems: updatedProblems
+      })
+
+      // Check if all problems are solved
+      const allSolved = updatedProblems.every(p => p.solved)
+      if (allSolved) {
+        const newLevel = userLevel + 1
+        setUserLevel(newLevel)
+        localStorage.setItem('userLevel', String(newLevel))
+        toast.success("Congratulations! Level up!")
+        endContest()
+      }
+    } catch (error) {
+      toast.error("Error checking submissions")
+    }
+    setIsCheckingSubmissions(false)
+  }
+
   const startContest = async () => {
+    if (!cfHandle) {
+      toast.error("Please connect your Codeforces handle in the profile page first")
+      return
+    }
+
     setIsLoading(true)
     try {
       const levelData = levels.find((l: Level) => l.id === userLevel)
@@ -88,9 +170,12 @@ export default function GymPage() {
           const randomProblem = problems[Math.floor(Math.random() * problems.length)]
           contestProblems.push({
             id: `${randomProblem.contestId}${randomProblem.index}`,
+            contestId: randomProblem.contestId,
+            index: randomProblem.index,
             difficulty: problem.difficulty,
             name: randomProblem.name,
-            url: `https://codeforces.com/problemset/problem/${randomProblem.contestId}/${randomProblem.index}`
+            url: `https://codeforces.com/problemset/problem/${randomProblem.contestId}/${randomProblem.index}`,
+            solved: false
           })
         }
       }
@@ -121,9 +206,12 @@ export default function GymPage() {
         const newProblems = [...selectedProblems]
         newProblems[index] = {
           id: `${randomProblem.contestId}${randomProblem.index}`,
+          contestId: randomProblem.contestId,
+          index: randomProblem.index,
           difficulty: targetDifficulty,
           name: randomProblem.name,
-          url: `https://codeforces.com/problemset/problem/${randomProblem.contestId}/${randomProblem.index}`
+          url: `https://codeforces.com/problemset/problem/${randomProblem.contestId}/${randomProblem.index}`,
+          solved: false
         }
         setSelectedProblems(newProblems)
         toast.success("Problem rerolled!")
@@ -167,13 +255,6 @@ export default function GymPage() {
     setSelectedProblems([])
   }
 
-  useEffect(() => {
-    const savedLevel = localStorage.getItem('userLevel')
-    if (savedLevel) {
-      setUserLevel(Number(savedLevel))
-    }
-  }, [])
-
   return (
     <div className="pt-20 pb-10">
       <div className="container mx-auto px-4">
@@ -211,6 +292,21 @@ export default function GymPage() {
             <div className="bg-black/95 backdrop-blur-sm border border-purple-500/20 p-6 rounded-lg mb-8">
               <h2 className="text-2xl font-bold text-white mb-4">Start a Contest</h2>
               
+              {!cfHandle && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <div className="flex items-center text-red-400 mb-2">
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    <h3 className="font-semibold">Codeforces Profile Required</h3>
+                  </div>
+                  <p className="text-sm text-white/70">
+                    You need to connect your Codeforces profile before starting a contest.{' '}
+                    <Link href="/profile" className="text-purple-400 hover:text-purple-300 underline">
+                      Go to Profile Page
+                    </Link>
+                  </p>
+                </div>
+              )}
+
               {/* Instructions */}
               <div className="mb-6 p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
                 <h3 className="text-lg font-semibold text-purple-400 mb-2">Instructions:</h3>
@@ -298,7 +394,14 @@ export default function GymPage() {
 
               <div className="grid gap-4">
                 {activeContest.problems.map((problem, index) => (
-                  <div key={problem.id} className="bg-black/80 border border-purple-500/20 p-4 rounded-lg">
+                  <div 
+                    key={problem.id} 
+                    className={`bg-black/80 border ${
+                      problem.solved
+                        ? 'border-green-500/30 bg-green-500/10'
+                        : 'border-purple-500/20'
+                    } p-4 rounded-lg`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-sm font-medium text-purple-400 mb-1">Problem {index + 1}</span>
@@ -308,21 +411,33 @@ export default function GymPage() {
                         <span className={`text-sm font-medium ${getDifficultyColor(problem.difficulty)}`}>
                           {problem.difficulty}
                         </span>
-                        <a
-                          href={problem.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300"
-                        >
-                          Solve →
-                        </a>
+                        {problem.solved ? (
+                          <span className="text-green-400 font-medium">✓ Solved</span>
+                        ) : (
+                          <a
+                            href={problem.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            Solve →
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-between">
+                <Button
+                  onClick={checkSubmissions}
+                  disabled={isCheckingSubmissions}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isCheckingSubmissions ? 'animate-spin' : ''}`} />
+                  Check Submissions
+                </Button>
                 <Button
                   onClick={endContest}
                   className="bg-purple-600 hover:bg-purple-700"
