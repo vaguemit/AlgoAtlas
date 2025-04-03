@@ -9,7 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext"
 import { CosmicBackground } from "@/components/cosmic-background"
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from "@/lib/utils"
-import { MobileNav } from "@/components/mobile-nav"
 import { AssistantWrapper } from "@/components/assistant-wrapper"
 
 const inter = Inter({
@@ -56,7 +55,6 @@ export default function RootLayout({
                 <Footer />
               </div>
               <Toaster />
-              <MobileNav />
               <AssistantWrapper />
             </div>
           </AuthProvider>

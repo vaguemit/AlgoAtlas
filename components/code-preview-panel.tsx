@@ -418,11 +418,11 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
       <div className="flex-1 flex flex-col">
         {/* VS Code-like header with menu bar */}
         <div className="flex items-center bg-[#252526] border-b border-[#1e1e1e] text-white">
-          <div className="flex items-center space-x-2 px-3 py-1">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-          </div>
+        <div className="flex items-center space-x-2 px-3 py-1">
+          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+          <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+        </div>
 
           {/* VS Code menu items */}
           <div className="flex items-center text-xs text-gray-300 ml-2">
@@ -468,40 +468,40 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
         
         {/* Tabs section */}
         <div className="flex items-center bg-[#252526] border-b border-[#1e1e1e] text-white">
-          <div className="flex-1 flex items-center">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="w-full justify-start rounded-none bg-transparent p-0 h-auto">
-                <TabsTrigger
-                  value="cpp"
-                  className={cn(
-                    "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
+        <div className="flex-1 flex items-center">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full justify-start rounded-none bg-transparent p-0 h-auto">
+              <TabsTrigger
+                value="cpp"
+                className={cn(
+                  "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                     "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-[#007acc]",
-                    "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
-                  )}
-                >
-                  codeforces.cpp
-                </TabsTrigger>
-                <TabsTrigger
-                  value="python"
-                  className={cn(
-                    "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
+                )}
+              >
+                codeforces.cpp
+              </TabsTrigger>
+              <TabsTrigger
+                value="python"
+                className={cn(
+                  "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                     "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-[#007acc]",
-                    "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
-                  )}
-                >
-                  atcoder.py
-                </TabsTrigger>
-                <TabsTrigger
-                  value="java"
-                  className={cn(
-                    "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
+                )}
+              >
+                atcoder.py
+              </TabsTrigger>
+              <TabsTrigger
+                value="java"
+                className={cn(
+                  "rounded-none px-2 sm:px-4 py-2 h-8 data-[state=active]:shadow-none transition-all text-xs",
                     "data-[state=active]:bg-[#1e1e1e] data-[state=active]:border-t-2 data-[state=active]:border-t-[#007acc]",
-                    "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
-                  )}
-                >
-                  icpc.java
-                </TabsTrigger>
-              </TabsList>
+                  "data-[state=inactive]:bg-[#2d2d2d] data-[state=inactive]:text-[#8f8f8f]"
+                )}
+              >
+                icpc.java
+              </TabsTrigger>
+            </TabsList>
             </Tabs>
           </div>
         </div>
@@ -515,30 +515,30 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
             {activeTab === "java" && "icpc.java"}
           </span>
         </div>
-        
-        {/* Code content */}
+
+            {/* Code content */}
         <Tabs value={activeTab} className="flex-1 flex flex-col overflow-hidden">
           <style jsx global>{scrollbarStyles}</style>
           <TabsContent value="cpp" className="mt-0 p-0 data-[state=inactive]:hidden h-full overflow-hidden">
-            {!isMobile && (
+              {!isMobile && (
               <div 
                 className="overflow-auto relative bg-[#1e1e1e] vscode-scrollbar"
                 style={{ height: `${height}px`, width: "100%" }}
               >
-                <VSCodeEditor language="cpp" code={displayCode("cpp")} />
-                {isTyping && activeTab === "cpp" && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div 
-                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
-                      style={{ top: `${typewriterLine * 24}px` }}
-                    >
+                  <VSCodeEditor language="cpp" code={displayCode("cpp")} />
+                  {isTyping && activeTab === "cpp" && (
+                    <div className="absolute inset-0 pointer-events-none">
                       <div 
+                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div 
                         className="h-full w-2 bg-[#007acc] ml-4"
-                        style={{ 
-                          animation: "cursorBlink 0.8s steps(2) infinite",
+                          style={{ 
+                            animation: "cursorBlink 0.8s steps(2) infinite",
                           boxShadow: "0 0 5px rgba(0, 122, 204, 0.5)"
-                        }}
-                      ></div>
+                          }}
+                        ></div>
                     </div>
                     
                     {/* Autocomplete dropdown - only show sometimes */}
@@ -577,31 +577,31 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
                         </div>
                       </div>
                     )}
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
           <TabsContent value="python" className="mt-0 p-0 data-[state=inactive]:hidden h-full overflow-hidden">
-            {!isMobile && (
+              {!isMobile && (
               <div 
                 className="overflow-auto relative bg-[#1e1e1e] vscode-scrollbar"
                 style={{ height: `${height}px`, width: "100%" }}
               >
-                <VSCodeEditor language="python" code={displayCode("python")} />
-                {isTyping && activeTab === "python" && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div 
-                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
-                      style={{ top: `${typewriterLine * 24}px` }}
-                    >
+                  <VSCodeEditor language="python" code={displayCode("python")} />
+                  {isTyping && activeTab === "python" && (
+                    <div className="absolute inset-0 pointer-events-none">
                       <div 
+                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div 
                         className="h-full w-2 bg-[#007acc] ml-4"
-                        style={{ 
-                          animation: "cursorBlink 0.8s steps(2) infinite",
+                          style={{ 
+                            animation: "cursorBlink 0.8s steps(2) infinite",
                           boxShadow: "0 0 5px rgba(0, 122, 204, 0.5)"
-                        }}
-                      ></div>
+                          }}
+                        ></div>
                     </div>
                     
                     {/* Autocomplete dropdown - only show sometimes */}
@@ -641,31 +641,31 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
                         </div>
                       </div>
                     )}
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
           <TabsContent value="java" className="mt-0 p-0 data-[state=inactive]:hidden h-full overflow-hidden">
-            {!isMobile && (
+              {!isMobile && (
               <div 
                 className="overflow-auto relative bg-[#1e1e1e] vscode-scrollbar"
                 style={{ height: `${height}px`, width: "100%" }}
               >
-                <VSCodeEditor language="java" code={displayCode("java")} />
-                {isTyping && activeTab === "java" && (
-                  <div className="absolute inset-0 pointer-events-none">
-                    <div 
-                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
-                      style={{ top: `${typewriterLine * 24}px` }}
-                    >
+                  <VSCodeEditor language="java" code={displayCode("java")} />
+                  {isTyping && activeTab === "java" && (
+                    <div className="absolute inset-0 pointer-events-none">
                       <div 
+                      className="absolute left-0 h-5 bg-[#264f78]/30 w-full" 
+                        style={{ top: `${typewriterLine * 24}px` }}
+                      >
+                        <div 
                         className="h-full w-2 bg-[#007acc] ml-4"
-                        style={{ 
-                          animation: "cursorBlink 0.8s steps(2) infinite",
+                          style={{ 
+                            animation: "cursorBlink 0.8s steps(2) infinite",
                           boxShadow: "0 0 5px rgba(0, 122, 204, 0.5)"
-                        }}
-                      ></div>
+                          }}
+                        ></div>
                     </div>
                     
                     {/* Autocomplete dropdown - only show sometimes */}
@@ -702,26 +702,26 @@ export function CodePreviewPanel({ height = 600 }: CodePreviewPanelProps) {
                         </div>
                       </div>
                     )}
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-        
+                    </div>
+                  )}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+      
         {/* VS Code Status Bar */}
         <div className="bg-[#007acc] text-white text-xs px-3 py-1 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center">
-              <span className="mr-2">{projectTitle}</span>
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center">
+            <span className="mr-2">{projectTitle}</span>
               <span className={`w-2 h-2 rounded-full ${isTyping ? 'bg-white animate-pulse' : 'bg-white/70'}`}></span>
-            </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
               <span>
                 {activeTab === "cpp" && "C++"}
                 {activeTab === "python" && "Python"}
