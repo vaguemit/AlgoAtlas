@@ -4,28 +4,28 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CosmicBackground } from "./cosmic-background"
 import { CodePreviewPanel } from "./code-preview-panel"
+import { CursorFollowingCharacter } from "./cursor-following-character"
+import { PartnerLogosSection } from "./partner-logos-section"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Code, Binary, Cpu, Database, Terminal } from "lucide-react"
+import { CodeBracketIcon, ChartBarIcon, AcademicCapIcon, ComputerDesktopIcon, SparklesIcon } from "@heroicons/react/24/outline"
 
 export function HeroSection() {
-  // Track hover states for enhanced effects
   const [isGetStartedHovered, setIsGetStartedHovered] = useState(false)
   const [isLearnMoreHovered, setIsLearnMoreHovered] = useState(false)
   const [isTitleHovered, setIsTitleHovered] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const isMobile = useMediaQuery("(max-width: 768px)")
   const isTablet = useMediaQuery("(max-width: 1024px)")
+  const isDesktop = useMediaQuery("(min-width: 1025px)")
   
-  // Add new state for text animation
   const [textIndex, setTextIndex] = useState(0)
   const techWords = ["Algorithms", "Data Structures", "Problem Solving", "Competitive Coding"]
 
   useEffect(() => {
-    // Small delay to start animations after component mount
     const timer = setTimeout(() => {
       setIsVisible(true)
     }, 100)
-    
     return () => clearTimeout(timer)
   }, [])
 
@@ -90,225 +90,242 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative w-full min-h-[90svh] overflow-hidden">
-      {/* Cosmic Background with enhanced opacity */}
-      <div className="absolute inset-0 opacity-80">
+    <section className="relative w-full min-h-screen overflow-hidden bg-[#0A0B1E]">
+      {/* Cosmic Background with standardized opacity */}
+      <div className="absolute inset-0 opacity-95">
         <CosmicBackground />
       </div>
 
-      {/* Floating Tech Icons */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-20 left-[15%]"
-          variants={floatingIconVariants}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 0 }}
+      {/* Additional gradient overlay for smoother transition */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0B1E] via-[#0F0B2B] to-[#1A0B38] opacity-50"></div>
+
+      {/* Content container */}
+      <div className="relative z-10 container mx-auto">
+        {/* Hero Content */}
+        <motion.div 
+          className="px-fluid-2 pt-16 sm:pt-20 pb-8 flex flex-col md:flex-row items-center justify-center gap-6 lg:gap-12"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
         >
-          <Code className="w-8 h-8 text-purple-400/60" />
+          {/* Text content */}
+          <div className="w-full md:w-1/2 mx-auto md:mx-0 flex flex-col justify-center">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col items-center md:items-start space-y-3">
+                <div className="relative text-center md:text-left">
+                  <div className="relative">
+                    <div className="text-fluid-6xl font-bold tracking-tight text-white/90">
+                      Navigate Your
+                    </div>
+                  </div>
+                  
+                  <div className="relative mt-2">
+                    <div className="text-fluid-5xl font-bold tracking-tight text-white/90">
+                      Competitive Programming
+                    </div>
+                  </div>
+                  
+                  <div className="relative mt-2">
+                    <div className="text-fluid-6xl font-bold tracking-tight text-white/90">
+                      Journey
+                    </div>
+                  </div>
+
+                  {/* Horizontal Carousel */}
+                  <div className="mt-8 overflow-hidden">
+                    <div className="flex space-x-4 animate-scroll">
+                      <div className="flex space-x-4">
+                        {[Code, Binary, Cpu, Database, Terminal].map((Icon, index) => (
+                          <motion.div
+                            key={index}
+                            className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/5 border border-white/10"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          >
+                            <Icon className="w-6 h-6 text-white/70" />
+                          </motion.div>
+                        ))}
+                      </div>
+                      <div className="flex space-x-4">
+                        {[Code, Binary, Cpu, Database, Terminal].map((Icon, index) => (
+                          <motion.div
+                            key={index}
+                            className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/5 border border-white/10"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          >
+                            <Icon className="w-6 h-6 text-white/70" />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Animated tech words */}
+                  <div className="mt-6 h-8 relative overflow-hidden">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={textIndex}
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -20, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="absolute inset-0"
+                      >
+                        <span className="text-lg text-[#8B5CF6]/90 font-medium">
+                          Master {techWords[textIndex]}
+                        </span>
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Code preview panel - desktop only */}
+          {!isMobile && (
+            <motion.div 
+              className="w-full md:w-1/2 relative"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <CodePreviewPanel height={isTablet ? 300 : 350} />
+            </motion.div>
+          )}
         </motion.div>
+
+        {/* Partner Logos Section */}
         <motion.div
-          className="absolute top-40 right-[20%]"
-          variants={floatingIconVariants}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 0.5 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8 }}
+          className="py-12"
         >
-          <Binary className="w-8 h-8 text-blue-400/60" />
+          <PartnerLogosSection />
         </motion.div>
-        <motion.div
-          className="absolute bottom-32 left-[25%]"
-          variants={floatingIconVariants}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 1 }}
-        >
-          <Cpu className="w-8 h-8 text-cyan-400/60" />
-        </motion.div>
-        <motion.div
-          className="absolute top-60 right-[30%]"
-          variants={floatingIconVariants}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 1.5 }}
-        >
-          <Database className="w-8 h-8 text-purple-400/60" />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-40 right-[15%]"
-          variants={floatingIconVariants}
-          initial="initial"
-          animate="animate"
-          transition={{ delay: 2 }}
-        >
-          <Terminal className="w-8 h-8 text-blue-400/60" />
-        </motion.div>
+
+        {/* Feature Cards Section */}
+        <div className="py-12">
+          {/* First row of feature cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 px-4 max-w-7xl mx-auto">
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-xl border border-purple-500/20 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="text-purple-400 mb-3">
+                <CodeBracketIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-white">Problem Solving Gym</h3>
+              <p className="text-gray-300">
+                Level up your skills with our adaptive problem-solving gym. Get personalized problem sets and track your progress through difficulty levels.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-xl border border-purple-500/20 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className="text-purple-400 mb-3">
+                <ChartBarIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-white">Contest Tracker</h3>
+              <p className="text-gray-300">
+                Stay updated with upcoming coding contests across platforms. Never miss a competition and track your contest history.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-xl border border-purple-500/20 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="text-purple-400 mb-3">
+                <AcademicCapIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-white">Learning Paths</h3>
+              <p className="text-gray-300">
+                Follow structured learning paths to master algorithms and data structures. From basics to advanced topics, we've got you covered.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* Interactive Character Section */}
+          {isDesktop && (
+            <div className="flex justify-center flex-col items-center mb-24">
+              <div className="w-full max-w-lg flex flex-col items-center">
+                <CursorFollowingCharacter />
+                <div className="text-center -mt-24 max-w-2xl relative z-10">
+                  <motion.h2 
+                    className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 tracking-tight"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    Improve Rapidly
+                  </motion.h2>
+                  <motion.p 
+                    className="mt-4 text-gray-300 text-xl max-w-xl mx-auto leading-relaxed tracking-wide"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                  >
+                    With Whiskers embedded throughout the platform, you can simplify your concepts and level up your skills while having a great experience.
+                  </motion.p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Second row of feature cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 max-w-7xl mx-auto">
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-xl border border-purple-500/20 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="text-purple-400 mb-3">
+                <ComputerDesktopIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-white">Online Compilers</h3>
+              <p className="text-gray-300">
+                Write and test your code directly in the browser with our integrated development environment.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 p-6 rounded-xl border border-purple-500/20 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              <div className="text-purple-400 mb-3">
+                <SparklesIcon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2 text-white">AI Assistant</h3>
+              <p className="text-gray-300">
+                Get instant help with coding problems and concepts from our intelligent AI assistant.
+              </p>
+            </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* Content container with improved spacing */}
-      <motion.div 
-        className="relative z-10 container mx-auto px-fluid-2 pt-24 sm:pt-32 pb-16 flex flex-col md:flex-row items-center justify-center min-h-[90svh] gap-8 lg:gap-16"
-        initial="hidden"
-        animate={isVisible ? "visible" : "hidden"}
-        variants={containerVariants}
-      >
-        {/* Text content on the left */}
-        <div className="w-full md:w-1/2 mx-auto md:mx-0 flex flex-col justify-center">
-          <motion.div className="mb-8 sm:mb-12" variants={itemVariants}>
-            <div className="flex flex-col items-center md:items-start space-y-4">
-              <div
-                className="relative cursor-pointer transition-transform duration-300 ease-out group"
-                style={{ transform: isTitleHovered ? "scale(1.03)" : "scale(1)" }}
-                onMouseEnter={() => setIsTitleHovered(true)}
-                onMouseLeave={() => setIsTitleHovered(false)}
-              >
-                {/* Main text */}
-                <div className="relative text-center md:text-left">
-                  <div className="text-fluid-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 animate-gradient drop-shadow-2xl">
-                    Navigate Your
-                  </div>
-                  <div className="absolute -inset-x-8 -inset-y-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-2xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
-                
-                <div className="relative mt-3 text-center md:text-left">
-                  <div className="text-fluid-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-300 via-purple-300 to-blue-300 animate-gradient drop-shadow-2xl">
-                    Competitive Programming
-                  </div>
-                  <div className="absolute -inset-x-8 -inset-y-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-2xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
-                
-                <div className="relative mt-3 text-center md:text-left">
-                  <div className="text-fluid-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-blue-300 to-purple-300 animate-gradient drop-shadow-2xl">
-                    Journey
-                  </div>
-                  <div className="absolute -inset-x-8 -inset-y-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-2xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
-
-                {/* Animated tech words */}
-                <div className="mt-6 h-8 relative overflow-hidden text-center md:text-left">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={textIndex}
-                      initial={{ y: 20, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: -20, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute inset-0"
-                    >
-                      <span className="text-lg text-blue-300/80 font-medium">
-                        Master {techWords[textIndex]}
-                      </span>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-
-                {/* Enhanced glow effect */}
-                <div
-                  className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-xl rounded-full -z-10 transition-all duration-500"
-                  style={{ 
-                    opacity: isTitleHovered ? 0.8 : 0.4,
-                    transform: isTitleHovered ? "scale(1.1)" : "scale(1)" 
-                  }}
-                ></div>
-              </div>
-
-              {/* Enhanced decorative line with pulse effect */}
-              <motion.div 
-                className="relative h-1.5 w-24 sm:w-32 md:w-40 mt-8"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 rounded-full origin-left"
-                  whileHover={{ width: "16rem", transition: { duration: 0.8 } }}
-                  transition={{ duration: 0.5 }}
-                />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 rounded-full origin-left"
-                  animate={{
-                    opacity: [1, 0.5, 1],
-                    scale: [1, 1.2, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Code preview panel with enhanced styling */}
-        {!isMobile && (
-          <motion.div 
-            className="w-full md:w-1/2 relative group"
-            variants={codePreviewVariants}
-          >
-            <div className="relative">
-              <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <CodePreviewPanel height={isTablet ? 400 : 500} />
-            </div>
-          </motion.div>
-        )}
-        
-        {/* Enhanced floating animation elements */}
-        <div className="absolute top-1/4 left-2/3 w-40 h-40 opacity-20">
-          <motion.div 
-            className="w-full h-full rounded-full bg-purple-500/30 blur-3xl"
-            animate={{ 
-              x: [0, 20, 0], 
-              y: [0, -20, 0],
-              scale: [0.8, 1, 0.8],
-              opacity: [0.2, 0.3, 0.2]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 8,
-              ease: "easeInOut" 
-            }}
-          />
-        </div>
-        
-        <div className="absolute bottom-1/3 right-1/4 w-32 h-32 opacity-20">
-          <motion.div 
-            className="w-full h-full rounded-full bg-blue-500/30 blur-3xl"
-            animate={{ 
-              x: [0, -15, 0], 
-              y: [0, 15, 0],
-              scale: [1, 0.9, 1],
-              opacity: [0.2, 0.3, 0.2]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 6,
-              ease: "easeInOut",
-              delay: 1 
-            }}
-          />
-        </div>
-        
-        {/* Enhanced additional decorative element */}
-        <div className="absolute top-1/2 right-10 w-64 h-64 opacity-10">
-          <motion.div 
-            className="w-full h-full rounded-full bg-cyan-500/20 blur-3xl"
-            animate={{ 
-              x: [0, 10, 0], 
-              y: [0, -10, 0],
-              scale: [0.9, 1.1, 0.9],
-              opacity: [0.1, 0.2, 0.1]
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 10,
-              ease: "easeInOut",
-              delay: 2 
-            }}
-          />
-        </div>
-      </motion.div>
-
-      {/* Enhanced bottom gradient overlay */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#09061A] via-[#09061A]/80 to-transparent"></div>
+      {/* Bottom gradient */}
+      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#2A1151] via-[#1A0B38] to-transparent"></div>
     </section>
   )
 }

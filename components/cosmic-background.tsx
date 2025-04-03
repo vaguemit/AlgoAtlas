@@ -83,12 +83,12 @@ export function CosmicBackground() {
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // Draw gradient background - Darker purplish gradient
+        // Draw gradient background - Darker navy to purple gradient
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-        gradient.addColorStop(0, "#120825") // Darker deep purple at top
-        gradient.addColorStop(0.3, "#1F0E3E") // Darker rich purple
-        gradient.addColorStop(0.6, "#150C30") // Darker medium purple
-        gradient.addColorStop(1, "#0A071A") // Very dark purple-blue at bottom
+        gradient.addColorStop(0, "#0A0B1E") // Very dark navy blue at top
+        gradient.addColorStop(0.4, "#0F0B2B") // Dark navy-purple transition
+        gradient.addColorStop(0.7, "#1A0B38") // Deep purple
+        gradient.addColorStop(1, "#2A1151") // Lighter violet at bottom
 
         ctx.fillStyle = gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -102,9 +102,9 @@ export function CosmicBackground() {
           )
           
           // Use darker purples with moderate opacity
-          nebulaGradient.addColorStop(0, `${nebula.color.replace(')', `,${nebula.opacity * 1.5})`).replace('hsl', 'hsla')}`)
-          nebulaGradient.addColorStop(0.6, `${nebula.color.replace(')', `,${nebula.opacity * 0.5})`).replace('hsl', 'hsla')}`)
-          nebulaGradient.addColorStop(1, `${nebula.color.replace(')', `,0)`).replace('hsl', 'hsla')}`)
+          nebulaGradient.addColorStop(0, `hsla(260, 70%, 20%, ${nebula.opacity * 0.4})`)
+          nebulaGradient.addColorStop(0.6, `hsla(260, 70%, 15%, ${nebula.opacity * 0.2})`)
+          nebulaGradient.addColorStop(1, 'hsla(260, 70%, 10%, 0)')
           
           ctx.fillStyle = nebulaGradient
           ctx.fillRect(nebula.x - nebula.radius, nebula.y - nebula.radius, 
