@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabase"
 import { toast } from "@/components/ui/use-toast"
 
-export default function CheckEmailPage() {
+// Content component that uses useSearchParams
+function CheckEmailContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email") || ""
   const [countdown, setCountdown] = useState(60)
@@ -118,4 +119,28 @@ export default function CheckEmailPage() {
       </div>
     </div>
   )
-} 
+}
+
+// Loading fallback for the Suspense boundary
+function CheckEmailLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="w-full max-w-md space-y-8 p-6 rounded-xl bg-[#09061A]/90 backdrop-blur-sm border border-[#3A1E70]/30 shadow-xl">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#9A70E8] via-[#8265DC] to-[#9A70E8] animate-gradient">
+            Loading...
+          </h1>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function CheckEmailPage() {
+  return (
+    <Suspense fallback={<CheckEmailLoading />}>
+      <CheckEmailContent />
+    </Suspense>
+  )
+}

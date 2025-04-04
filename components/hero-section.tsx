@@ -114,52 +114,24 @@ export function HeroSection() {
               <div className="flex flex-col items-center md:items-start space-y-3">
                 <div className="relative text-center md:text-left">
                   <div className="relative">
-                    <div className="text-fluid-6xl font-bold tracking-tight text-white/90">
-                      Navigate Your
+                    <div className="text-fluid-5xl font-bold tracking-tight text-purple/90">
+                      Navigate
                     </div>
                   </div>
                   
                   <div className="relative mt-2">
                     <div className="text-fluid-5xl font-bold tracking-tight text-white/90">
-                      Competitive Programming
+                       Your Competitive Programming
                     </div>
                   </div>
                   
                   <div className="relative mt-2">
-                    <div className="text-fluid-6xl font-bold tracking-tight text-white/90">
+                    <div className="text-fluid-5xl font-bold tracking-tight text-white/90">
                       Journey
                     </div>
                   </div>
 
-                  {/* Horizontal Carousel */}
-                  <div className="mt-8 overflow-hidden">
-                    <div className="flex space-x-4 animate-scroll">
-                      <div className="flex space-x-4">
-                        {[Code, Binary, Cpu, Database, Terminal].map((Icon, index) => (
-                          <motion.div
-                            key={index}
-                            className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/5 border border-white/10"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          >
-                            <Icon className="w-6 h-6 text-white/70" />
-                          </motion.div>
-                        ))}
-                      </div>
-                      <div className="flex space-x-4">
-                        {[Code, Binary, Cpu, Database, Terminal].map((Icon, index) => (
-                          <motion.div
-                            key={index}
-                            className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/5 border border-white/10"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          >
-                            <Icon className="w-6 h-6 text-white/70" />
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  
 
                   {/* Animated tech words */}
                   <div className="mt-6 h-8 relative overflow-hidden">
