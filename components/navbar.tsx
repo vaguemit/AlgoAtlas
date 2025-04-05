@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, X, Code } from "lucide-react"
+import { Menu, X, Code, User, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { SearchBar } from "./search-bar"
-import { UserMenu } from "./user-menu"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/lib/supabase"
 
@@ -119,9 +118,39 @@ export function Navbar() {
               <SearchBar />
             </div>
 
-            {/* User Menu - Hidden on mobile */}
+            {/* User Profile Link - Replace UserMenu */}
             <div className="hidden lg:block">
-              <UserMenu />
+              {!loading && (
+                <>
+                  {user ? (
+                    <div className="flex items-center space-x-4">
+                      <Link 
+                        href="/profile" 
+                        className="flex items-center px-3 py-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 hover:border-purple-500/60 transition-all duration-300 rounded-md"
+                      >
+                        <User className="h-4 w-4 mr-2 text-purple-300" />
+                        <span className="text-sm text-white">Profile</span>
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleLogout}
+                        className="text-sm font-medium text-white/60 hover:text-white/80"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="flex items-center px-3 py-1.5 bg-purple-500/20 border border-purple-500/40 hover:bg-purple-500/30 hover:border-purple-500/60 transition-all duration-300 rounded-md"
+                    >
+                      <span className="text-sm text-white">Login</span>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -184,11 +213,47 @@ export function Navbar() {
                 ))}
               </nav>
 
-              {/* Mobile User Menu */}
+              {/* Mobile User Profile */}
               <div className="mt-6 pt-6 border-t border-purple-500/20">
-                <div className="flex justify-center">
-                  <UserMenu />
-                </div>
+                {!loading && (
+                  <div className="flex flex-col space-y-3">
+                    {user ? (
+                      <>
+                        <div className="px-4 py-2 text-center">
+                          <p className="text-sm font-medium text-white">{user.user_metadata?.full_name || 'User'}</p>
+                          <p className="text-xs text-purple-300">{user.email || ''}</p>
+                        </div>
+                        <Link
+                          href="/profile"
+                          className="flex items-center px-4 py-3 rounded-md text-base font-medium transition-colors text-white hover:bg-purple-500/10 hover:text-purple-400"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Link>
+                        <Button
+                          onClick={async () => {
+                            await handleLogout();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          variant="ghost"
+                          className="flex items-center w-full justify-start px-4 py-3 rounded-md text-base font-medium transition-colors text-white hover:bg-purple-500/10 hover:text-purple-400"
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Sign out
+                        </Button>
+                      </>
+                    ) : (
+                      <Link
+                        href="/login"
+                        className="flex items-center justify-center px-4 py-3 rounded-md text-base font-medium transition-colors text-white hover:bg-purple-500/10 hover:text-purple-400"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        Login
+                      </Link>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
