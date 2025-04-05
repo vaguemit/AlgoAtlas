@@ -73,7 +73,6 @@ export default function ProfilePage() {
   // UI state
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error'>('success');
-  const [debugMode, setDebugMode] = useState(false);
   const [lastError, setLastError] = useState<any>(null);
   
   // CP profiles state
@@ -554,19 +553,13 @@ export default function ProfilePage() {
             </div>
 
             <div className="absolute bottom-4 right-4 sm:right-8 flex items-center">
-              <Link href="/settings" className="px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md border border-white/20 transition duration-200 text-xs sm:text-sm font-medium flex items-center mr-2 shadow-lg backdrop-blur-md">
+              <Link href="/settings" className="px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md border border-white/20 transition duration-200 text-xs sm:text-sm font-medium flex items-center shadow-lg backdrop-blur-md">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Edit Profile
               </Link>
-              <button 
-                onClick={() => setDebugMode(!debugMode)}
-                className="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded backdrop-blur-md border border-white/10"
-              >
-                {debugMode ? '🔍 Debug On' : '🔧 Debug'}
-              </button>
             </div>
           </div>
           
@@ -578,15 +571,6 @@ export default function ProfilePage() {
               }`}
             >
               {message}
-              
-              {debugMode && lastError && messageType === 'error' && (
-                <div className="mt-2 pt-2 border-t border-white/20">
-                  <p className="text-xs text-white/70">Debug Information:</p>
-                  <pre className="mt-1 text-xs overflow-auto p-2 bg-black/50 rounded max-h-40 text-white/60">
-                    {JSON.stringify(lastError, null, 2)}
-                  </pre>
-                </div>
-              )}
             </div>
           )}
           
@@ -623,12 +607,6 @@ export default function ProfilePage() {
                       <h3 className="text-sm font-medium text-white/50 mb-1.5">Last Sign In</h3>
                       <p className="text-white">{new Date(user.last_sign_in_at || "").toLocaleDateString()}</p>
                     </div>
-                    {debugMode && (
-                      <div>
-                        <h3 className="text-sm font-medium text-white/50 mb-1.5">User ID</h3>
-                        <p className="text-xs text-white/70 break-all">{user.id}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -911,48 +889,6 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 ) : null}
-              </div>
-            </div>
-          )}
-          
-          {/* Database Information Section (in debug mode) */}
-          {debugMode && (
-            <div className="bg-white/10 rounded-xl p-5 sm:p-6 border border-yellow-500/30 mb-8 backdrop-blur-md shadow-xl">
-              <h2 className="text-xl font-semibold mb-5 text-yellow-400">Database Information</h2>
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-sm font-medium text-white/70 mb-2">How User Data Is Stored</h3>
-                  <div className="bg-white/10 p-4 rounded-md text-sm text-white/70 backdrop-blur-sm border border-white/10">
-                    <p>Your data is stored in multiple linked tables in the Supabase database:</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-1">
-                      <li><strong>auth.users</strong>: Core authentication data (email, password, etc.)</li>
-                      <li><strong>profiles</strong>: Basic profile information linked to auth.users</li>
-                      <li><strong>codeforces_profiles</strong>: Codeforces data linked to your user ID</li>
-                      <li><strong>rating_history</strong>: Contest history for connected platforms</li>
-                    </ul>
-                    <p className="mt-2">Each table has a foreign key relationship to your user ID. CP data is stored separately from login data for better database organization and security.</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-white/70 mb-2">User Identifier</h3>
-                  <p className="bg-white/10 p-3 rounded-md text-xs text-white/60 break-all backdrop-blur-sm border border-white/10">{user.id}</p>
-                  <p className="text-xs text-white/50 mt-1">This UUID connects all your data across different tables</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-white/70 mb-2">Caching Strategy</h3>
-                  <div className="bg-white/10 p-4 rounded-md text-sm text-white/70 backdrop-blur-sm border border-white/10">
-                    <p>To improve performance, we use the following strategies:</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-1">
-                      <li><strong>LocalStorage Cache</strong>: Profile data is cached locally for 6 hours</li>
-                      <li><strong>Background Updates</strong>: Data older than 24h is refreshed in the background</li>
-                      <li><strong>Batch Database Operations</strong>: All contest data is saved in a single operation</li>
-                      <li><strong>Instant Initial Load</strong>: Shows cached data immediately while fresh data loads</li>
-                    </ul>
-                    <p className="mt-2 text-xs">Cache expiration: {CACHE_EXPIRATION/1000/60/60} hours</p>
-                  </div>
-                </div>
               </div>
             </div>
           )}
