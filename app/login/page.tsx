@@ -59,23 +59,17 @@ function LoginForm() {
       setGoogleLoading(true);
       setError("");
       
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') return;
-
-      // Get the current URL to extract the protocol and hostname
-      const currentUrl = window.location.href;
-      const urlObj = new URL(currentUrl);
-      
-      // Use the same protocol and hostname for the redirect
-      const redirectUrl = `${urlObj.protocol}//${urlObj.hostname}${urlObj.port ? `:${urlObj.port}` : ''}/auth/callback`;
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: redirectUrl,
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            prompt: 'select_account',
+            access_type: 'offline',
+          }
         },
       });
-
+      
       if (error) throw error;
       
       // If successful, the user will be redirected automatically
@@ -200,4 +194,4 @@ export default function LoginPage() {
       <LoginForm />
     </Suspense>
   );
-} 
+}

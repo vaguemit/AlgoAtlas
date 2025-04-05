@@ -3,7 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  },
+});
 
 // Database types
 export type Profile = {
@@ -41,4 +47,4 @@ export type LearningProgress = {
   subtopic_id: string;
   status: 'not-started' | 'reading' | 'practicing' | 'complete' | 'skipped' | 'ignored';
   last_updated: string;
-}; 
+};
