@@ -27,7 +27,7 @@ import { currentConfig } from '../assistant/config/route';
 // Rate limiting storage - in production this should use Redis or a database
 // Format: { [userId or IP]: { lastRequestTime: timestamp, requestCount: number } }
 const rateLimitStore = new Map();
-const RATE_LIMIT_WINDOW = 10000; // 10 seconds in milliseconds
+const RATE_LIMIT_WINDOW = 3000; // 3 seconds in milliseconds
 const MAX_REQUESTS_PER_WINDOW = 1; // Allow 1 request per window
 
 export async function POST(req: Request) {

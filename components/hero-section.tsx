@@ -9,6 +9,9 @@ import { PartnerLogosSection } from "./partner-logos-section"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Code, Binary, Cpu, Database, Terminal } from "lucide-react"
 import { CodeBracketIcon, ChartBarIcon, AcademicCapIcon, ComputerDesktopIcon, SparklesIcon } from "@heroicons/react/24/outline"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function HeroSection() {
   const [isGetStartedHovered, setIsGetStartedHovered] = useState(false)
@@ -18,9 +21,15 @@ export function HeroSection() {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const isTablet = useMediaQuery("(max-width: 1024px)")
   const isDesktop = useMediaQuery("(min-width: 1025px)")
+  const router = useRouter()
+  const { user } = useAuth()
   
   const [textIndex, setTextIndex] = useState(0)
   const techWords = ["Algorithms", "Data Structures", "Problem Solving", "Competitive Coding"]
+
+  const handleRegisterClick = () => {
+    router.push("/register")
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -131,7 +140,22 @@ export function HeroSection() {
                     </div>
                   </div>
 
-                  
+                  {/* Register Now Button */}
+                  {!user && (
+                    <motion.div 
+                      className="mt-8"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 }}
+                    >
+                      <Button
+                        className="bg-gradient-to-r from-green-600 to-green-500 px-6 py-6 text-lg font-semibold text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/40 transition-all duration-300"
+                        onClick={handleRegisterClick}
+                      >
+                        Register Now
+                      </Button>
+                    </motion.div>
+                  )}
 
                   {/* Animated tech words */}
                   <div className="mt-6 h-8 relative overflow-hidden">

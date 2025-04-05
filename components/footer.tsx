@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Code, ArrowRight, Github, Twitter, Linkedin, Youtube } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -74,8 +75,14 @@ export function Footer() {
           <div className="space-y-4 max-w-2xl">
             <Link href="/" className="flex items-center space-x-2 group justify-center">
               <div className="relative">
-                <Code className="h-6 w-6 text-purple-500" />
-                <div className="absolute inset-0 bg-purple-500 blur-md opacity-50 group-hover:opacity-80 transition-opacity duration-300"></div>
+                <Image 
+                  src="/compass-logo.png"
+                  alt="AlgoAtlas Logo"
+                  width={32}
+                  height={32}
+                  className="h-8 w-8"
+                />
+                <div className="absolute inset-0 bg-purple-500 blur-md opacity-50 group-hover:opacity-80 transition-opacity duration-300 rounded-full"></div>
               </div>
               <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400">
                 AlgoAtlas

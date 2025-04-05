@@ -26,7 +26,23 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "AlgoAtlas - Learn Algorithms and Data Structures",
   description: "A platform for learning algorithms and data structures",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: [
+      {
+        url: '/compass-logo.png',
+        sizes: '32x32',
+      },
+      {
+        url: '/compass-logo.png',
+        sizes: '64x64',
+      },
+    ],
+    apple: {
+      url: '/compass-logo.png',
+      sizes: '180x180',
+    },
+  }
 }
 
 export default function RootLayout({
@@ -36,6 +52,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="dark scroll-smooth">
+      <head>
+        <link rel="icon" href="/compass-logo.png" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-navy-950 font-sans antialiased overflow-x-hidden",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Menu, X, Code } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -77,7 +78,13 @@ export function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Code className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400/80" />
+            <Image 
+              src="/compass-logo.png"
+              alt="AlgoAtlas Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10"
+            />
             <span className="text-lg sm:text-xl font-bold text-white/90">
               AlgoAtlas
             </span>

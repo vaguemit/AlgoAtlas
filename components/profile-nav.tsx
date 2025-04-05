@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { User, Settings } from "lucide-react"
+import { User } from "lucide-react"
 
 export function ProfileNav() {
   const pathname = usePathname()
@@ -12,12 +12,6 @@ export function ProfileNav() {
       label: "Profile",
       active: pathname === "/profile",
       icon: <User className="mr-2 h-4 w-4" />
-    },
-    {
-      href: "/profile/settings",
-      label: "Settings",
-      active: pathname === "/profile/settings",
-      icon: <Settings className="mr-2 h-4 w-4" />
     }
   ]
 

@@ -1,7 +1,6 @@
 "use client"
 
 import { HeroSection } from "@/components/hero-section"
-import { SignupHeroSection } from "@/components/signup-hero-section"
 import { useEffect, useState } from "react"
 import { motion, useScroll, useSpring } from "framer-motion"
 
@@ -36,15 +35,6 @@ export default function Home() {
         transition={{ duration: 1 }}
       >
         <HeroSection />
-      </motion.div>
-
-      {/* Signup Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <SignupHeroSection />
       </motion.div>
     </main>
   )
