@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "compiler:start": "ts-node scripts/manage-compiler.ts start",
-    "compiler:stop": "ts-node scripts/manage-compiler.ts stop"
+    "compiler:stop": "ts-node scripts/manage-compiler.ts stop",
+    "remove-logs": "node scripts/remove-console-logs.js"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
