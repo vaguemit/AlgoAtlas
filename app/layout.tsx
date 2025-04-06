@@ -10,6 +10,7 @@ import { CosmicBackground } from "@/components/cosmic-background"
 import { Toaster } from "@/components/ui/toaster"
 import { cn } from "@/lib/utils"
 import { AssistantWrapper } from "@/components/assistant-wrapper"
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -75,6 +76,7 @@ export default function RootLayout({
               </div>
               <Toaster />
               <AssistantWrapper />
+              <Analytics debug={process.env.NODE_ENV === 'development'} />
             </div>
           </AuthProvider>
         </ThemeProvider>
