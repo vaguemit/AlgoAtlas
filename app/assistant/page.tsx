@@ -8,10 +8,12 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { SendHorizonal, Loader2, X } from 'lucide-react'
+import { SendHorizonal, Loader2, X, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
+import { useAuth } from '@/contexts/AuthContext'
+import Link from 'next/link'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -21,6 +23,7 @@ interface Message {
 }
 
 export default function AssistantPage() {
+  const { user } = useAuth()
   const [selectedModel, setSelectedModel] = useState('llama3-70b-8192')
   const [allowFallback, setAllowFallback] = useState(true)
   const [inputMessage, setInputMessage] = useState('')
@@ -322,6 +325,58 @@ export default function AssistantPage() {
       document.head.removeChild(style)
     }
   }, [])
+
+  // Return LoginUI if user is not authenticated
+  if (!user) {
+    return (
+      <div className="container mx-auto py-12">
+        <PageHeader
+          heading="AlgoAtlas Assistant"
+          subheading="Get help with algorithms, data structures, and coding problems"
+        />
+        
+        <div className="flex justify-center mt-8">
+          <div className="bg-black/60 backdrop-blur-sm p-8 rounded-2xl border border-purple-500/30 max-w-md w-full">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-16 w-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
+                <Lock className="h-8 w-8 text-purple-400" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+                Login Required
+              </h3>
+              
+              <p className="text-gray-300 mb-6">
+                You need to be logged in to access the AI assistant.
+                Please sign in with your account to continue.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
+                <Button
+                  asChild
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                >
+                  <Link href="/login">
+                    Sign In
+                  </Link>
+                </Button>
+                
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full border-purple-500/30 hover:bg-purple-500/20"
+                >
+                  <Link href="/register">
+                    Register
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn(
@@ -641,4 +696,4 @@ export default function AssistantPage() {
       </div>
     </div>
   )
-} 
+}

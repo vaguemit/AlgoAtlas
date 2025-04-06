@@ -211,13 +211,6 @@ function ContestCard({ contest }: { contest: Contest }) {
           contest.status === "ended" ? "bg-black/80" : "bg-black/95",
         )}
       >
-        {/* Status badge */}
-        {contest.status === "ended" && (
-          <div className="absolute top-4 left-4">
-            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">Ended</span>
-          </div>
-        )}
-
         {/* Platform badge */}
         <div className="absolute top-4 right-4">
           <span

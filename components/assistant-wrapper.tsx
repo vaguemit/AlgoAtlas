@@ -2,24 +2,19 @@
 
 import { usePathname } from "next/navigation"
 import { AlgoAtlasAssistant } from "@/components/algoatlas-assistant"
-import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/AuthContext"
+import { LoginPrompt } from "./login-prompt"
 
 export function AssistantWrapper() {
   const pathname = usePathname()
-  const [mounted, setMounted] = useState(false)
+  const { user } = useAuth()
+  const hideAssistant = pathname === "/assistant"
   
-  // Use useEffect to prevent hydration errors
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  // If user is not logged in, show the login prompt instead
+  if (!user) {
+    return <LoginPrompt feature="AI assistant" embedded={true} />
+  }
   
-  // Don't render the assistant if we're on the assistant page
-  if (!mounted) return null
-  
-  // Don't show the floating button on assistant-related pages
-  const isAssistantPath = pathname.startsWith("/assistant") || pathname === "/assistant"
-  
-  if (isAssistantPath) return null
-  
-  return <AlgoAtlasAssistant hideFloatingButton={false} />
-} 
+  // Otherwise, show the assistant as normal
+  return <AlgoAtlasAssistant hideFloatingButton={hideAssistant} />
+}
