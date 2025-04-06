@@ -109,7 +109,7 @@ function PathCard({ path, index }: { path: LearningPathWithProgress; index: numb
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="flex items-center text-blue-300/80">
               <Code className="h-4 w-4 mr-2" />
-              <span className="text-sm">{path.problemCount || 0} Problems</span>
+              <span className="text-sm">{path.problemCount || 0} Resources</span>
             </div>
             <div className="flex items-center text-blue-300/80">
               <Clock className="h-4 w-4 mr-2" />

@@ -230,7 +230,7 @@ export default function AssistantPage() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
     }
   }, [messages])
-
+  
   // Load preferences from local storage on client side
   useEffect(() => {
     // Add custom styling for markdown content
@@ -330,10 +330,10 @@ export default function AssistantPage() {
     )}>
       {/* Header only visible on desktop */}
       <div className="hidden lg:block">
-        <PageHeader
+      <PageHeader
           heading="AlgoAtlas Assistant"
-          subheading="Get help with algorithms, data structures, and coding problems"
-        />
+        subheading="Get help with algorithms, data structures, and coding problems"
+      />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -354,9 +354,9 @@ export default function AssistantPage() {
               </div>
               <div>
                 <CardTitle>Whiskers</CardTitle>
-                <CardDescription className="text-gray-300">
+              <CardDescription className="text-gray-300">
                   Your personal algorithm assistant
-                </CardDescription>
+              </CardDescription>
               </div>
               {/* Close button only visible on mobile */}
               <div className="ml-auto lg:hidden">

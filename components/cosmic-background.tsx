@@ -13,7 +13,6 @@ interface Nebula {
 
 export function CosmicBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [scrollPosition, setScrollPosition] = useState(0)
   const [isMounted, setIsMounted] = useState(false)
 
@@ -41,26 +40,28 @@ export function CosmicBackground() {
 
       resizeCanvas()
 
-      // Create nebulae - adjust colors to match GitHub's purple theme
+      // Create nebulae - with reduced effects
       const nebulae: Nebula[] = []
-      const nebulaCount = 8 // Increased number of nebulae for more cosmic effect
+      const nebulaCount = 6 // Reduced number of nebulae
       
       for (let i = 0; i < nebulaCount; i++) {
+        // Calculate position to avoid top-left corner
+        let x = Math.random() * canvas.width
+        let y = Math.random() * canvas.height
+        
+        // If in top-left quadrant, move it to a different area
+        if (x < canvas.width * 0.3 && y < canvas.height * 0.3) {
+          x += canvas.width * 0.3
+          y += canvas.height * 0.2
+        }
+        
         nebulae.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 300 + 200, // Larger nebulae
-          color: `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`, // More vibrant purple hues
-          opacity: Math.random() * 0.08 + 0.04, // Higher opacity for more visibility
-          speed: Math.random() * 0.08 - 0.04 // Slightly slower movement
-        })
-      }
-
-      // Handle mouse movement
-      const handleMouseMove = (e: MouseEvent) => {
-        setMousePosition({
-          x: e.clientX / window.innerWidth,
-          y: e.clientY / window.innerHeight,
+          x: x,
+          y: y,
+          radius: Math.random() * 200 + 150, // Smaller nebulae
+          color: `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`,
+          opacity: Math.random() * 0.03 + 0.01, // Further reduced opacity
+          speed: Math.random() * 0.06 - 0.03 // Slightly slower movement
         })
       }
 
@@ -70,7 +71,6 @@ export function CosmicBackground() {
       }
 
       // Add event listeners
-      window.addEventListener("mousemove", handleMouseMove, { passive: true })
       window.addEventListener("scroll", handleScroll, { passive: true })
       window.addEventListener("resize", resizeCanvas, { passive: true })
 
@@ -83,17 +83,11 @@ export function CosmicBackground() {
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-        // Draw gradient background - Darker navy to purple gradient
-        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-        gradient.addColorStop(0, "#0A0B1E") // Very dark navy blue at top
-        gradient.addColorStop(0.4, "#0F0B2B") // Dark navy-purple transition
-        gradient.addColorStop(0.7, "#1A0B38") // Deep purple
-        gradient.addColorStop(1, "#2A1151") // Lighter violet at bottom
-
-        ctx.fillStyle = gradient
+        // Use a single solid background color instead of gradient
+        ctx.fillStyle = "#0A0B1E" // Very dark navy blue
         ctx.fillRect(0, 0, canvas.width, canvas.height)
         
-        // Draw nebulae - darker but still visible
+        // Draw nebulae - darker and less visible
         nebulae.forEach((nebula) => {
           // Create radial gradient for nebula
           const nebulaGradient = ctx.createRadialGradient(
@@ -101,9 +95,9 @@ export function CosmicBackground() {
             nebula.x, nebula.y, nebula.radius
           )
           
-          // Use darker purples with moderate opacity
-          nebulaGradient.addColorStop(0, `hsla(260, 70%, 20%, ${nebula.opacity * 0.4})`)
-          nebulaGradient.addColorStop(0.6, `hsla(260, 70%, 15%, ${nebula.opacity * 0.2})`)
+          // Use darker purples with lower opacity
+          nebulaGradient.addColorStop(0, `hsla(260, 70%, 20%, ${nebula.opacity * 0.2})`)
+          nebulaGradient.addColorStop(0.6, `hsla(260, 70%, 15%, ${nebula.opacity * 0.1})`)
           nebulaGradient.addColorStop(1, 'hsla(260, 70%, 10%, 0)')
           
           ctx.fillStyle = nebulaGradient
@@ -117,25 +111,21 @@ export function CosmicBackground() {
           // Reset nebula if it goes off screen
           if (nebula.x < -nebula.radius * 2 || nebula.x > canvas.width + nebula.radius * 2 ||
               nebula.y < -nebula.radius * 2 || nebula.y > canvas.height + nebula.radius * 2) {
-            nebula.x = Math.random() * canvas.width
-            nebula.y = Math.random() * canvas.height
+            
+            // When resetting, avoid top-left corner
+            let newX = Math.random() * canvas.width
+            let newY = Math.random() * canvas.height
+            
+            if (newX < canvas.width * 0.3 && newY < canvas.height * 0.3) {
+              newX += canvas.width * 0.3
+              newY += canvas.height * 0.2
+            }
+            
+            nebula.x = newX
+            nebula.y = newY
             nebula.color = `hsl(${270 + Math.random() * 40}, 80%, ${30 + Math.random() * 20}%)`
           }
         })
-
-        // Add subtle glow effects based on mouse position
-        const glowRadius = 300 // Larger radius
-        const glowX = mousePosition.x * canvas.width
-        const glowY = mousePosition.y * canvas.height
-
-        const glow = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, glowRadius)
-
-        glow.addColorStop(0, "rgba(138, 43, 226, 0.15)") // Darker purple with lower opacity
-        glow.addColorStop(0.6, "rgba(98, 30, 170, 0.1)")
-        glow.addColorStop(1, "rgba(85, 26, 139, 0)")
-
-        ctx.fillStyle = glow
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         animationFrameId = requestAnimationFrame(animate)
       }
@@ -144,7 +134,6 @@ export function CosmicBackground() {
 
       // Cleanup function
       return () => {
-        window.removeEventListener("mousemove", handleMouseMove)
         window.removeEventListener("scroll", handleScroll)
         window.removeEventListener("resize", resizeCanvas)
         cancelAnimationFrame(animationFrameId)

@@ -520,29 +520,29 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent backdrop-blur-sm text-white pt-10 pb-20">
-      <div className="container mx-auto px-3 sm:px-4 py-8">
+    <div className="min-h-screen bg-transparent backdrop-blur-sm text-white pb-20">
+      <div className="container mx-auto px-3 sm:px-6 py-4">
         <div className="max-w-7xl mx-auto">
           {/* Profile Header - Enhanced */}
-          <div className="relative mb-20 md:mb-24">
-            <div className="h-40 sm:h-52 bg-gradient-to-r from-purple-900/40 via-blue-900/30 to-indigo-900/40 rounded-xl overflow-hidden backdrop-blur-md border border-white/10 shadow-2xl">
+          <div className="relative mb-24 md:mb-28">
+            <div className="h-40 sm:h-56 bg-gradient-to-r from-purple-900/40 via-blue-900/30 to-indigo-900/40 rounded-xl overflow-hidden backdrop-blur-md border border-white/10 shadow-2xl">
               <div className="absolute inset-0 bg-[url('/patterns/grid-pattern.svg')] opacity-20"></div>
               <div className="absolute inset-0 bg-gradient-radial from-purple-600/10 to-transparent"></div>
               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-transparent to-transparent"></div>
             </div>
             
-            <div className="absolute -bottom-10 md:-bottom-12 left-4 sm:left-8 flex items-end">
+            <div className="absolute -bottom-12 md:-bottom-14 left-6 sm:left-10 flex items-end">
               <div className="relative">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-600/90 to-blue-600/90 rounded-full flex items-center justify-center text-3xl font-bold border-4 border-white/10 shadow-lg backdrop-blur-md">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-600/90 to-blue-600/90 rounded-full flex items-center justify-center text-3xl font-bold border-4 border-white/10 shadow-lg backdrop-blur-md">
                   {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
                 </div>
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 blur-md opacity-30"></div>
               </div>
-              <div className="ml-4 sm:ml-5 mb-2 sm:mb-5">
+              <div className="ml-5 sm:ml-6 mb-2 sm:mb-6">
                 <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-white">
                   {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
                 </h1>
-                <p className="text-sm sm:text-base text-white/70 flex items-center">
+                <p className="text-sm sm:text-base text-white/70 flex items-center mt-1">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 opacity-70" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
@@ -552,9 +552,9 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="absolute bottom-4 right-4 sm:right-8 flex items-center">
-              <Link href="/settings" className="px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md border border-white/20 transition duration-200 text-xs sm:text-sm font-medium flex items-center shadow-lg backdrop-blur-md">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="absolute bottom-4 right-6 sm:right-10 flex items-center">
+              <Link href="/settings" className="px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-md border border-white/20 transition duration-200 text-sm font-medium flex items-center shadow-lg backdrop-blur-md">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
@@ -566,7 +566,7 @@ export default function ProfilePage() {
           {/* Status Messages */}
           {message && (
             <div 
-              className={`p-4 mb-8 rounded-md ${
+              className={`p-5 mb-10 rounded-lg ${
                 messageType === 'error' ? 'bg-red-900/50 border border-red-500' : 'bg-green-900/50 border border-green-500'
               }`}
             >
@@ -576,35 +576,35 @@ export default function ProfilePage() {
           
           {/* Main Page Loading State */}
           {profileLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"></div>
+            <div className="flex flex-col items-center justify-center py-24">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-6"></div>
               <p className="text-purple-400">Loading your profile data...</p>
               <p className="text-white/50 text-sm mt-2">This may take a moment</p>
             </div>
           ) : (
             /* Main Content Area */
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-8 gap-x-6 xl:gap-x-8 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-10 gap-x-8 xl:gap-x-10 mb-12">
               {/* Left Column - User Info & Stats */}
               <div>
                 {/* Account Information */}
-                <div className="bg-white/10 rounded-xl p-5 sm:p-6 border border-white/20 backdrop-blur-md shadow-xl">
-                  <h2 className="text-xl font-semibold mb-5 flex items-center text-purple-300">
+                <div className="bg-white/10 rounded-xl p-6 sm:p-7 border border-white/20 backdrop-blur-md shadow-xl">
+                  <h2 className="text-xl font-semibold mb-6 flex items-center text-purple-300">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                     </svg>
                     Account Information
                   </h2>
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Email</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-2">Email</h3>
                       <p className="text-white">{user.email}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Account Created</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-2">Account Created</h3>
                       <p className="text-white">{new Date(user.created_at).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-white/50 mb-1.5">Last Sign In</h3>
+                      <h3 className="text-sm font-medium text-white/50 mb-2">Last Sign In</h3>
                       <p className="text-white">{new Date(user.last_sign_in_at || "").toLocaleDateString()}</p>
                     </div>
                   </div>
@@ -612,9 +612,9 @@ export default function ProfilePage() {
               </div>
               
               {/* Middle & Right Columns - CP Profiles */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-10">
                 {/* CP Profile Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-4">
                   <h2 className="text-2xl font-bold flex items-center text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -624,7 +624,7 @@ export default function ProfilePage() {
                   {cfProfile && (
                     <div className="text-sm text-white/70 flex items-center">
                       <span className="mr-2">Last updated:</span>
-                      <span className="bg-white/20 px-2 py-1 rounded-full text-xs backdrop-blur-md">
+                      <span className="bg-white/20 px-3 py-1.5 rounded-full text-xs backdrop-blur-md">
                         {new Date().toLocaleDateString()}
                       </span>
                     </div>
@@ -632,22 +632,22 @@ export default function ProfilePage() {
                 </div>
                 
                 {/* Codeforces Card */}
-                <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/20 rounded-xl p-5 sm:p-6 border border-white/20 backdrop-blur-md shadow-xl">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
+                <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/20 rounded-xl p-6 sm:p-7 border border-white/20 backdrop-blur-md shadow-xl">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-8 gap-4">
                     <div>
                       <h2 className="text-xl font-semibold text-purple-300 flex items-center">
                         <img src="https://codeforces.org/s/0/favicon-32x32.png" alt="Codeforces Logo" className="w-5 h-5 mr-2" />
                         Codeforces
                       </h2>
                       {cfProfile && (
-                        <p className="text-white/70 text-sm mt-1">
+                        <p className="text-white/70 text-sm mt-2">
                           Handle: <span className="font-semibold text-white">{cfProfile.handle}</span>
                         </p>
                       )}
                     </div>
                     
                     {cfProfile && (
-                      <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium backdrop-blur-md self-start" style={{color: getRatingColor(cfProfile.rating)}}>
+                      <div className="bg-white/20 px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur-md self-start" style={{color: getRatingColor(cfProfile.rating)}}>
                         {cfProfile.rank || 'Unrated'}
                       </div>
                     )}
@@ -655,44 +655,44 @@ export default function ProfilePage() {
                   
                   {cfProfile ? (
                     <div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 mt-8">
+                        <div className="bg-white/20 p-4 sm:p-5 rounded-lg backdrop-blur-sm border border-white/10">
                           <p className="text-xs text-white/60">Current Rating</p>
-                          <p className="text-xl sm:text-2xl font-bold" style={{color: getRatingColor(cfProfile.rating)}}>{cfProfile.rating || 'Unrated'}</p>
+                          <p className="text-xl sm:text-2xl font-bold mt-1" style={{color: getRatingColor(cfProfile.rating)}}>{cfProfile.rating || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                        <div className="bg-white/20 p-4 sm:p-5 rounded-lg backdrop-blur-sm border border-white/10">
                           <p className="text-xs text-white/60">Max Rating</p>
-                          <p className="text-xl sm:text-2xl font-bold" style={{color: getRatingColor(cfProfile.maxRating)}}>{cfProfile.maxRating || 'Unrated'}</p>
+                          <p className="text-xl sm:text-2xl font-bold mt-1" style={{color: getRatingColor(cfProfile.maxRating)}}>{cfProfile.maxRating || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                        <div className="bg-white/20 p-4 sm:p-5 rounded-lg backdrop-blur-sm border border-white/10">
                           <p className="text-xs text-white/60">Max Rank</p>
-                          <p className="text-lg font-bold text-white">{cfProfile.maxRank || 'Unrated'}</p>
+                          <p className="text-lg font-bold mt-1 text-white">{cfProfile.maxRank || 'Unrated'}</p>
                         </div>
-                        <div className="bg-white/20 p-3 sm:p-4 rounded-lg backdrop-blur-sm border border-white/10">
+                        <div className="bg-white/20 p-4 sm:p-5 rounded-lg backdrop-blur-sm border border-white/10">
                           <p className="text-xs text-white/60">Contests</p>
-                          <p className="text-lg font-bold text-white">{cfHistory.length}</p>
+                          <p className="text-lg font-bold mt-1 text-white">{cfHistory.length}</p>
                         </div>
                       </div>
                       
-                      <div className="mt-8 flex flex-col sm:flex-row justify-between gap-3">
+                      <div className="mt-10 flex flex-col sm:flex-row justify-between gap-4">
                         <a 
                           href={`https://codeforces.com/profile/${cfProfile.handle}`} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-sm bg-purple-800/40 hover:bg-purple-700/50 px-4 py-2 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-purple-500/30 backdrop-blur-md"
+                          className="text-sm bg-purple-800/40 hover:bg-purple-700/50 px-5 py-2.5 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-purple-500/30 backdrop-blur-md"
                         >
                           View Profile
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
                             <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
                           </svg>
                         </a>
                         <button 
                           onClick={disconnectCodeforces}
-                          className="text-sm bg-red-900/40 hover:bg-red-800/50 px-4 py-2 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-red-500/30 backdrop-blur-md"
+                          className="text-sm bg-red-900/40 hover:bg-red-800/50 px-5 py-2.5 rounded-md text-white flex items-center justify-center sm:justify-start transition-colors border border-red-500/30 backdrop-blur-md"
                         >
                           Disconnect
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                           </svg>
                         </button>

@@ -4,11 +4,10 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, X, Code, User, LogOut } from "lucide-react"
+import { Menu, X, User, LogOut } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { SearchBar } from "./search-bar"
 import { useAuth } from "@/contexts/AuthContext"
 import { supabase } from "@/lib/supabase"
 
@@ -113,12 +112,7 @@ export function Navbar() {
 
           {/* Right side items */}
           <div className="flex items-center space-x-4">
-            {/* Search Bar - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <SearchBar />
-            </div>
-
-            {/* User Profile Link - Replace UserMenu */}
+            {/* User Profile Link */}
             <div className="hidden lg:block">
               {!loading && (
                 <>
@@ -189,11 +183,6 @@ export function Navbar() {
             className="lg:hidden bg-[#0F0822] border-t border-purple-500/20"
           >
             <div className="container mx-auto px-4 py-4">
-              {/* Mobile Search */}
-              <div className="mb-6">
-                <SearchBar />
-              </div>
-
               {/* Mobile Navigation Links */}
               <nav className="flex flex-col space-y-4">
                 {navLinks.map((link) => (
