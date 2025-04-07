@@ -325,15 +325,19 @@ ${actualOutput}
   return (
     <section className={cn(
       "py-20 relative overflow-hidden",
-      isFullscreen && "!p-0"
+      isFullscreen && "fixed inset-0 z-50 !p-0 bg-navy-950"
     )}>
       {/* Background elements */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      {!isFullscreen && (
+        <>
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+        </>
+      )}
 
       <div className={cn(
         "container mx-auto px-4 sm:px-6",
-        isFullscreen && "!p-0 !m-0 !max-w-none h-screen"
+        isFullscreen && "!p-0 !m-0 !max-w-none h-full"
       )}>
         {/* Check if user is logged in */}
         {!user ? (
@@ -386,7 +390,7 @@ ${actualOutput}
               ref={compilerRef}
               className={cn(
                 "bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col",
-                isFullscreen ? "fixed inset-0 z-50 rounded-none border-0" : "h-[800px]"
+                isFullscreen ? "h-full rounded-none border-0" : "h-[800px]"
               )}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
