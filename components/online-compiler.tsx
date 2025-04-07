@@ -63,7 +63,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [expectedOutput, setExpectedOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [output, setOutput] = useState<OutputMessage[]>([])
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const [showPerformanceMetrics, setShowPerformanceMetrics] = useState(false)
   const [executionTime, setExecutionTime] = useState(0)
   const [memoryUsed, setMemoryUsed] = useState(0)
@@ -297,101 +296,45 @@ ${actualOutput}
     }
   }
 
-  // Toggle fullscreen mode
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      compilerRef.current?.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
-    }
-  }
-
-  // Listen for fullscreen change
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
-  }, [])
-
   // Toggle performance metrics
   const togglePerformanceMetrics = () => {
     setShowPerformanceMetrics(prev => !prev)
   }
 
   return (
-    <section className={cn(
-      "py-20 relative overflow-hidden",
-      isFullscreen && "fixed inset-0 z-50 !p-0 bg-navy-950"
-    )}>
+    <section className="py-20 relative overflow-hidden">
       {/* Background elements */}
-      {!isFullscreen && (
-        <>
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-        </>
-      )}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
 
-      <div className={cn(
-        "container mx-auto px-4 sm:px-6",
-        isFullscreen && "!p-0 !m-0 !max-w-none h-full"
-      )}>
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Check if user is logged in */}
         {!user ? (
           <LoginPrompt feature="compiler" />
         ) : (
           <>
             {/* Section heading */}
-            {!isFullscreen && (
-              <>
-                <motion.h2
-                  className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  Online Compiler
-                </motion.h2>
-                <motion.p
-                  className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  Write, run, and debug your code directly in the browser
-                </motion.p>
-              </>
-            )}
-
-            {/* Features list - moved above compiler */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
-              <FeatureCard
-                title="Multiple Languages"
-                description="Write and run code in C++, Python, Java, and more programming languages."
-                icon={<Code className="h-6 w-6" />}
-              />
-              <FeatureCard
-                title="Real-time Syntax Highlighting"
-                description="Enjoy code highlighting and auto-indentation for a better coding experience."
-                icon={<CodeHighlighter className="h-6 w-6" />}
-              />
-              <FeatureCard
-                title="Save & Share"
-                description="Save your code snippets and share them with others with a simple link."
-                icon={<Share className="h-6 w-6" />}
-              />
-            </div>
+            <motion.h2
+              className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Online Compiler
+            </motion.h2>
+            <motion.p
+              className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Write, run, and debug your code directly in the browser
+            </motion.p>
 
             {/* Compiler container */}
             <motion.div
               ref={compilerRef}
-              className={cn(
-                "bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col",
-                isFullscreen ? "h-full rounded-none border-0" : "h-[800px]"
-              )}
+              className="bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col h-[800px]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -529,13 +472,6 @@ ${actualOutput}
                     <AlertCircle className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={toggleFullscreen}
-                    className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                    title="Toggle fullscreen"
-                  >
-                    <Maximize2 className="h-4 w-4" />
-                  </button>
-                  <button
                     onClick={togglePerformanceMetrics}
                     className={cn(
                       "p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center",
@@ -548,10 +484,7 @@ ${actualOutput}
                 </div>
               </div>
 
-              <div className={cn(
-                "flex flex-col md:flex-row flex-1 min-h-0",
-                isFullscreen ? "h-[calc(100vh-48px)]" : "h-full"
-              )}>
+              <div className="flex flex-col md:flex-row flex-1 min-h-0 h-full">
                 {/* Main content */}
                 <div className="flex flex-col flex-1 min-h-0">
                   {/* Code editor */}
@@ -702,6 +635,25 @@ ${actualOutput}
                 </div>
               </div>
             </motion.div>
+
+            {/* Features list - moved below compiler */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-5xl mx-auto">
+              <FeatureCard
+                title="Multiple Languages"
+                description="Write and run code in C++, Python, Java, and more programming languages."
+                icon={<Code className="h-6 w-6" />}
+              />
+              <FeatureCard
+                title="Real-time Syntax Highlighting"
+                description="Enjoy code highlighting and auto-indentation for a better coding experience."
+                icon={<CodeHighlighter className="h-6 w-6" />}
+              />
+              <FeatureCard
+                title="Save & Share"
+                description="Save your code snippets and share them with others with a simple link."
+                icon={<Share className="h-6 w-6" />}
+              />
+            </div>
           </>
         )}
       </div>
