@@ -1,14 +1,28 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Play, AlertCircle, CheckCircle, X, Copy, Maximize2, Code, Share, TerminalSquare, SplitSquareVertical, Save, Download, Activity, Lock } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { CodeEditor } from "./code-editor-monaco"
 import { PerformanceMetrics } from "./performance-metrics"
 import { ComplexityResult } from "@/app/utils/big-o-analyzer"
 import { useAuth } from "@/contexts/AuthContext"
 import { LoginPrompt } from "./login-prompt"
+
+// Custom debounce function to avoid external dependencies
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  
+  return function(...args: Parameters<T>) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 // Define supported languages and their sample code
 const LANGUAGES = {
@@ -63,13 +77,70 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [expectedOutput, setExpectedOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
   const [output, setOutput] = useState<OutputMessage[]>([])
-  const [isFullscreen, setIsFullscreen] = useState(false)
   const [showPerformanceMetrics, setShowPerformanceMetrics] = useState(false)
   const [executionTime, setExecutionTime] = useState(0)
   const [memoryUsed, setMemoryUsed] = useState(0)
   const [complexityAnalysis, setComplexityAnalysis] = useState<ComplexityResult | null>(null)
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
   const compilerRef = useRef<HTMLDivElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
+  const consoleContainerRef = useRef<HTMLDivElement>(null)
+  const editorSectionRef = useRef<HTMLDivElement>(null)
+
+  // Auto-save code changes with debounce
+  const debouncedSaveCode = useCallback(
+    debounce((codeToSave: string, codeLanguage: keyof typeof LANGUAGES) => {
+      if (typeof window !== 'undefined') {
+        setSaveStatus('saving')
+        localStorage.setItem(`compiler_code_${codeLanguage}`, codeToSave)
+        setTimeout(() => setSaveStatus('saved'), 500)
+      }
+    }, 1000),
+    []
+  )
+  
+  // Auto-save input changes with debounce
+  const debouncedSaveInput = useCallback(
+    debounce((inputToSave: string) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('compiler_input', inputToSave)
+      }
+    }, 1000),
+    []
+  )
+  
+  // Auto-save expected output changes with debounce
+  const debouncedSaveExpectedOutput = useCallback(
+    debounce((outputToSave: string) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('compiler_expected_output', outputToSave)
+      }
+    }, 1000),
+    []
+  )
+  
+  // Watch for code changes and auto-save
+  useEffect(() => {
+    setSaveStatus('saving')
+    debouncedSaveCode(code, language)
+  }, [code, language, debouncedSaveCode])
+  
+  // Watch for input changes and auto-save
+  useEffect(() => {
+    debouncedSaveInput(input)
+  }, [input, debouncedSaveInput])
+  
+  // Watch for expected output changes and auto-save
+  useEffect(() => {
+    debouncedSaveExpectedOutput(expectedOutput)
+  }, [expectedOutput, debouncedSaveExpectedOutput])
+  
+  // Save language preference when it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('compiler_language', language)
+    }
+  }, [language])
 
   // Update code when language changes
   useEffect(() => {
@@ -79,19 +150,21 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     setExpectedOutput("")
     
     // Then check local storage or use default
-    const savedCode = localStorage.getItem(`algoatlas_compiler_${language}`)
+    const savedCode = localStorage.getItem(`compiler_code_${language}`)
     if (savedCode) {
-      try {
-        const parsed = JSON.parse(savedCode) as SavedCode
-        setCode(parsed.code)
-        setInput(parsed.input)
-        setExpectedOutput(parsed.expectedOutput || "")
-      } catch (error) {
-        // If there's an error parsing stored data, use default
-        setCode(LANGUAGES[language].defaultCode)
-      }
+      setCode(savedCode)
     } else {
       setCode(LANGUAGES[language].defaultCode)
+    }
+    
+    const savedInput = localStorage.getItem('compiler_input')
+    if (savedInput) {
+      setInput(savedInput)
+    }
+    
+    const savedExpectedOutput = localStorage.getItem('compiler_expected_output')
+    if (savedExpectedOutput) {
+      setExpectedOutput(savedExpectedOutput)
     }
   }, [language])
 
@@ -101,6 +174,23 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
       outputRef.current.scrollTop = outputRef.current.scrollHeight
     }
   }, [output])
+
+  // Measure console size on mount and window resize
+  useEffect(() => {
+    const updateConsoleSize = () => {
+      if (consoleContainerRef.current) {
+        const { width, height } = consoleContainerRef.current.getBoundingClientRect()
+        setConsoleSize({ width, height })
+      }
+    }
+    
+    // Initial measurement
+    updateConsoleSize()
+    
+    // Listen for window resize
+    window.addEventListener('resize', updateConsoleSize)
+    return () => window.removeEventListener('resize', updateConsoleSize)
+  }, [])
 
   // Function to run code
   const runCode = async () => {
@@ -112,7 +202,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     setExecutionTime(0)
     setMemoryUsed(0)
     setComplexityAnalysis(null)
-    setShowPerformanceMetrics(false)
 
     try {
       const response = await fetch("/api/execute-code", {
@@ -141,7 +230,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
       
       if (data.complexityAnalysis) {
         setComplexityAnalysis(data.complexityAnalysis)
-        setShowPerformanceMetrics(true)
       }
 
       if (data.output) {
@@ -218,21 +306,34 @@ ${actualOutput}
     setOutput((prev) => [...prev, { type: "info", content: "Code copied to clipboard", timestamp: new Date() }])
   }
   
-  // Save code to local storage
+  // Manual save function
   const saveCode = () => {
-    try {
-      const codeData: SavedCode = { language, code, input, expectedOutput }
-      localStorage.setItem(`algoatlas_compiler_${language}`, JSON.stringify(codeData))
-      setOutput((prev) => [...prev, { type: "info", content: "Code saved to browser storage", timestamp: new Date() }])
-    } catch (error) {
-      setOutput((prev) => [...prev, { type: "error", content: "Failed to save code", timestamp: new Date() }])
+    if (typeof window !== 'undefined') {
+      setSaveStatus('saving')
+      // Save code for current language
+      localStorage.setItem(`compiler_code_${language}`, code)
+      localStorage.setItem('compiler_language', language)
+      localStorage.setItem('compiler_input', input)
+      localStorage.setItem('compiler_expected_output', expectedOutput)
+      
+      // Show success message
+      setOutput([
+        ...output,
+        {
+          type: "success",
+          content: "Code, input, and settings saved to browser storage",
+          timestamp: new Date()
+        }
+      ])
+      
+      setTimeout(() => setSaveStatus('saved'), 500)
     }
   }
   
   // Reset compiler state and clear local storage
   const resetCompiler = () => {
     // Clear local storage for current language
-    localStorage.removeItem(`algoatlas_compiler_${language}`)
+    localStorage.removeItem(`compiler_code_${language}`)
     
     // Reset state
     setCode(LANGUAGES[language].defaultCode)
@@ -245,7 +346,7 @@ ${actualOutput}
   const clearAllCompilerData = () => {
     // Clear all compiler-related local storage
     Object.keys(LANGUAGES).forEach(lang => {
-      localStorage.removeItem(`algoatlas_compiler_${lang}`);
+      localStorage.removeItem(`compiler_code_${lang}`);
     });
     
     // Reset state for current language
@@ -255,118 +356,84 @@ ${actualOutput}
     setOutput([{ type: "info", content: "All compiler data cleared for all languages.", timestamp: new Date() }])
   }
   
-  // Download code to file
+  // Download code as a file
   const downloadCode = () => {
     try {
-      // Get appropriate file extension based on language
-      let fileExtension = "";
-      switch (language) {
-        case "cpp":
-          fileExtension = ".cpp";
-          break;
-        case "python":
-          fileExtension = ".py";
-          break;
-        case "java":
-          fileExtension = ".java";
-          break;
-        default:
-          fileExtension = ".txt";
-      }
+      const fileExt = language === 'cpp' ? '.cpp' : language === 'python' ? '.py' : '.java'
+      const filename = `algoatlas_code${fileExt}`
       
-      // Create file name
-      const fileName = `algoatlas_code${fileExtension}`;
+      // Create a blob with the code content
+      const blob = new Blob([code], { type: 'text/plain;charset=utf-8' })
       
-      // Create blob and download link
-      const blob = new Blob([code], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
+      // Create a URL for the blob
+      const url = URL.createObjectURL(blob)
       
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
+      // Create a temporary link element to trigger the download
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      
+      // Append to body, click, and clean up
+      document.body.appendChild(link)
+      link.click()
       
       // Clean up
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, 100)
       
-      setOutput((prev) => [...prev, { type: "info", content: `Downloaded as "${fileName}"`, timestamp: new Date() }]);
+      setOutput([
+        ...output,
+        {
+          type: "success",
+          content: `Code downloaded as ${filename}`,
+          timestamp: new Date()
+        }
+      ])
     } catch (error) {
-      setOutput((prev) => [...prev, { type: "error", content: "Failed to download file", timestamp: new Date() }]);
+      setOutput([
+        ...output,
+        {
+          type: "error",
+          content: "Failed to download code",
+          timestamp: new Date()
+        }
+      ])
     }
-  }
-
-  // Toggle fullscreen mode
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      compilerRef.current?.requestFullscreen()
-      setIsFullscreen(true)
-    } else {
-      document.exitFullscreen()
-      setIsFullscreen(false)
-    }
-  }
-
-  // Listen for fullscreen change
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    document.addEventListener("fullscreenchange", handleFullscreenChange)
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
-  }, [])
-
-  // Toggle performance metrics
-  const togglePerformanceMetrics = () => {
-    setShowPerformanceMetrics(prev => !prev)
   }
 
   return (
-    <section className={cn(
-      "py-20 relative overflow-hidden",
-      isFullscreen && "fixed inset-0 z-50 !p-0 bg-navy-950"
-    )}>
+    <section className="py-20 relative overflow-hidden">
       {/* Background elements */}
-      {!isFullscreen && (
-        <>
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
-        </>
-      )}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
 
-      <div className={cn(
-        "container mx-auto px-4 sm:px-6",
-        isFullscreen && "!p-0 !m-0 !max-w-none h-full"
-      )}>
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Check if user is logged in */}
         {!user ? (
           <LoginPrompt feature="compiler" />
         ) : (
           <>
             {/* Section heading */}
-            {!isFullscreen && (
-              <>
-                <motion.h2
-                  className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  Online Compiler
-                </motion.h2>
-                <motion.p
-                  className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  Write, run, and debug your code directly in the browser
-                </motion.p>
-              </>
-            )}
+            <motion.h2
+              className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Online Compiler
+            </motion.h2>
+            <motion.p
+              className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Write, run, and debug your code directly in the browser
+            </motion.p>
 
-            {/* Features list - moved above compiler */}
+            {/* Features list */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
               <FeatureCard
                 title="Multiple Languages"
@@ -379,19 +446,16 @@ ${actualOutput}
                 icon={<CodeHighlighter className="h-6 w-6" />}
               />
               <FeatureCard
-                title="Save & Share"
-                description="Save your code snippets and share them with others with a simple link."
-                icon={<Share className="h-6 w-6" />}
+                title="Auto-save"
+                description="Your code is automatically saved as you type."
+                icon={<Save className="h-6 w-6" />}
               />
             </div>
 
             {/* Compiler container */}
             <motion.div
               ref={compilerRef}
-              className={cn(
-                "bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col",
-                isFullscreen ? "h-full rounded-none border-0" : "h-[800px]"
-              )}
+              className="bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col h-[600px]"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -419,7 +483,6 @@ ${actualOutput}
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          // Show loading message
                           setOutput([{ type: "info", content: `Loading file "${file.name}"...`, timestamp: new Date() }]);
                           
                           const reader = new FileReader();
@@ -427,10 +490,7 @@ ${actualOutput}
                           reader.onload = (event) => {
                             try {
                               if (event.target?.result) {
-                                // Successfully read file content
                                 const fileContent = event.target.result.toString();
-                                
-                                // Detect language based on file extension
                                 const fileName = file.name.toLowerCase();
                                 let newLang = language;
                                 
@@ -442,12 +502,10 @@ ${actualOutput}
                                   newLang = 'java';
                                 }
                                 
-                                // Set language first if it's changed
                                 if (newLang !== language) {
                                   setLanguage(newLang as keyof typeof LANGUAGES);
                                 }
                                 
-                                // Set code content directly
                                 setCode(fileContent);
                                 
                                 setOutput([{ 
@@ -473,10 +531,8 @@ ${actualOutput}
                             }]);
                           };
                           
-                          // Read the file as text
                           reader.readAsText(file);
                         }
-                        // Reset file input so the same file can be selected again
                         e.target.value = '';
                       }}
                       accept=".cpp,.py,.java,.txt,.js,.html,.css,.c,.h,.cc"
@@ -492,14 +548,23 @@ ${actualOutput}
                 </div>
 
                 {/* Actions */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={saveCode}
-                    className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                    title="Save code to browser storage"
-                  >
-                    <Save className="h-4 w-4" />
-                  </button>
+                <div className="flex space-x-2 items-center">
+                  {/* Auto-save status indicator */}
+                  <div className="text-[10px] mr-2 flex items-center">
+                    {saveStatus === 'saving' && (
+                      <span className="text-[#8f8f8f] flex items-center">
+                        <div className="h-2 w-2 border-2 border-[#8f8f8f]/30 border-t-[#8f8f8f] rounded-full animate-spin mr-2"></div>
+                        Saving...
+                      </span>
+                    )}
+                    {saveStatus === 'saved' && (
+                      <span className="text-green-400 flex items-center">
+                        <CheckCircle className="h-2 w-2 mr-1" />
+                        Auto-saved
+                      </span>
+                    )}
+                  </div>
+                  
                   <button
                     onClick={downloadCode}
                     className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
@@ -528,51 +593,86 @@ ${actualOutput}
                   >
                     <AlertCircle className="h-4 w-4" />
                   </button>
-                  <button
-                    onClick={toggleFullscreen}
-                    className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                    title="Toggle fullscreen"
-                  >
-                    <Maximize2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={togglePerformanceMetrics}
-                    className={cn(
-                      "p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center",
-                      showPerformanceMetrics && "bg-purple-500"
-                    )}
-                    title="Performance metrics"
-                  >
-                    <Activity className="h-4 w-4" />
-                  </button>
                 </div>
               </div>
 
-              <div className={cn(
-                "flex flex-col md:flex-row flex-1 min-h-0",
-                isFullscreen ? "h-[calc(100vh-48px)]" : "h-full"
-              )}>
-                {/* Main content */}
-                <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex flex-col md:flex-row flex-1 min-h-0 h-full">
+                {/* Main content - Left side */}
+                <div className="flex flex-col min-h-0" style={{ flex: "1 1 67%" }}>
                   {/* Code editor */}
-                  <div className="flex-1 overflow-hidden border-b border-[#3c3c3c] min-h-0">
+                  <div className="h-[300px] overflow-hidden min-h-0">
                     <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
                   </div>
 
-                  {/* Input and Expected Output panels */}
+                  {/* Console Output and Expected Output panels */}
                   <div className="h-[200px] border-t border-[#3c3c3c] flex-shrink-0 flex">
-                    {/* Input panel */}
-                    <div className="h-full w-1/2 border-r border-[#3c3c3c]">
-                      <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
-                        <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
-                        <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
+                    {/* Console Output panel */}
+                    <div className="h-full w-1/2 border-r border-[#3c3c3c] flex flex-col">
+                      <div className="flex items-center justify-between bg-[#252526] px-4 py-2 border-b border-[#3c3c3c]">
+                        <div className="flex items-center">
+                          <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                          <span className="text-xs text-[#f0f0f0] font-medium">Console Output</span>
+                        </div>
+                        <button
+                          onClick={() => setOutput([])}
+                          className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors"
+                          title="Clear console"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
-                      <CodeEditor
-                        value={input}
-                        language="plaintext"
-                        onChange={setInput}
-                        disableAutoFocus={disableAutoFocus}
-                      />
+                      
+                      {/* Console output content */}
+                      <div
+                        ref={outputRef}
+                        className="flex-1 bg-[#1e1e1e] p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent font-mono text-xs"
+                      >
+                        <AnimatePresence>
+                          {output.length === 0 ? (
+                            <motion.div 
+                              initial={{ opacity: 0 }} 
+                              animate={{ opacity: 1 }} 
+                              className="text-[#8f8f8f] italic flex items-center"
+                            >
+                              <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
+                              Write code and click Run to execute it
+                            </motion.div>
+                          ) : (
+                            output.map((msg, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
+                              >
+                                <div className="flex items-start">
+                                  {msg.type === "success" && (
+                                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                  )}
+                                  {msg.type === "error" && (
+                                    <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                                  )}
+                                  {msg.type === "info" && (
+                                    <span className="flex-shrink-0 text-blue-400 mr-2">{">"}</span>
+                                  )}
+                                  <div
+                                    className={cn(
+                                      "break-words whitespace-pre-wrap font-mono",
+                                      msg.type === "success" && "text-green-400",
+                                      msg.type === "error" && "text-red-400",
+                                      msg.type === "info" && "text-blue-400",
+                                    )}
+                                  >
+                                    {msg.content}
+                                  </div>
+                                </div>
+                                <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{msg.timestamp.toLocaleTimeString()}</div>
+                              </motion.div>
+                            ))
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                     
                     {/* Expected Output panel */}
@@ -591,85 +691,40 @@ ${actualOutput}
                   </div>
                 </div>
 
-                {/* Output console */}
-                <div className="w-full md:w-1/3 border-t md:border-t-0 md:border-l border-[#3c3c3c] flex flex-col min-h-0">
-                  {/* Console header */}
-                  <div className="flex items-center justify-between bg-[#252526] px-4 py-2 border-b border-[#3c3c3c]">
-                    <div className="flex items-center">
+                {/* Right side - Input and Performance Metrics */}
+                <div className="border-t md:border-t-0 md:border-l border-[#3c3c3c] flex flex-col min-h-0" style={{ flex: "0 0 33%" }}>
+                  {/* Input section */}
+                  <div className="flex flex-col flex-1 min-h-0">
+                    <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center">
                       <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
-                      <span className="text-xs text-[#f0f0f0] font-medium">Console Output</span>
+                      <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
                     </div>
-                    <button
-                      onClick={() => setOutput([])}
-                      className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors"
-                      title="Clear console"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <div className="flex-1 overflow-hidden min-h-0">
+                      <CodeEditor
+                        value={input}
+                        language="plaintext"
+                        onChange={setInput}
+                        disableAutoFocus={disableAutoFocus}
+                      />
+                    </div>
                   </div>
-
-                  {/* Console output */}
-                  <div
-                    ref={outputRef}
-                    className="flex-1 bg-[#1e1e1e] p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent font-mono text-xs"
-                  >
-                    <AnimatePresence>
-                      {output.length === 0 ? (
-                        <motion.div 
-                          initial={{ opacity: 0 }} 
-                          animate={{ opacity: 1 }} 
-                          className="text-[#8f8f8f] italic flex items-center"
-                        >
-                          <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
-                          Write code and click Run to execute it
-                        </motion.div>
-                      ) : (
-                        output.map((msg, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
-                          >
-                            <div className="flex items-start">
-                              {msg.type === "success" && (
-                                <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                              )}
-                              {msg.type === "error" && (
-                                <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                              )}
-                              {msg.type === "info" && (
-                                <span className="flex-shrink-0 text-blue-400 mr-2">{">"}</span>
-                              )}
-                              <div
-                                className={cn(
-                                  "break-words whitespace-pre-wrap font-mono",
-                                  msg.type === "success" && "text-green-400",
-                                  msg.type === "error" && "text-red-400",
-                                  msg.type === "info" && "text-blue-400",
-                                )}
-                              >
-                                {msg.content}
-                              </div>
-                            </div>
-                            <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{msg.timestamp.toLocaleTimeString()}</div>
-                          </motion.div>
-                        ))
-                      )}
-                    </AnimatePresence>
-                    
-                    {/* Add Performance Metrics Component directly in console output */}
-                    {showPerformanceMetrics && (
-                      <div className="mt-4 border-t border-[#3c3c3c] pt-4">
-                        <PerformanceMetrics
-                          executionTime={executionTime}
-                          memoryUsed={memoryUsed}
-                          complexityAnalysis={complexityAnalysis}
-                          showChart={true}
-                        />
+                  
+                  {/* Performance Metrics */}
+                  <div className="border-t border-[#3c3c3c] overflow-hidden">
+                    <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Activity className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                        <span className="text-xs text-[#f0f0f0] font-medium">Performance Metrics</span>
                       </div>
-                    )}
+                    </div>
+                    <div className="overflow-auto max-h-[200px] p-4 bg-[#1e1e1e]">
+                      <PerformanceMetrics
+                        executionTime={executionTime}
+                        memoryUsed={memoryUsed}
+                        complexityAnalysis={complexityAnalysis}
+                        showChart={true}
+                      />
+                    </div>
                   </div>
 
                   {/* Run button */}
