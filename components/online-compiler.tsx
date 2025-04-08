@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Play, AlertCircle, CheckCircle, X, Copy, Maximize2, Code, Share, TerminalSquare, SplitSquareVertical, Save, Download, Activity, Lock } from "lucide-react"
+import { Play, AlertCircle, CheckCircle, X, Copy, Maximize2, Code, Share, TerminalSquare, SplitSquareVertical, Save, Download, Activity, Lock, Brain, MessageSquare } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { CodeEditor } from "./code-editor-monaco"
@@ -82,6 +82,9 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [memoryUsed, setMemoryUsed] = useState(0)
   const [complexityAnalysis, setComplexityAnalysis] = useState<ComplexityResult | null>(null)
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
+  const [aiAnalysis, setAiAnalysis] = useState<string>("")
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false)
   const compilerRef = useRef<HTMLDivElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
   const consoleContainerRef = useRef<HTMLDivElement>(null)
@@ -386,6 +389,55 @@ ${actualOutput}
     }
   }
 
+  // Function to analyze code with AI
+  const analyzeCodeWithAI = async () => {
+    setIsAnalyzing(true)
+    setAiAnalysis("")
+    setOutput((prev) => [...prev, { type: "info", content: "Analyzing code with AI...", timestamp: new Date() }])
+    
+    try {
+      const response = await fetch("/api/analyze-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ language, code }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Analysis failed")
+      }
+
+      setAiAnalysis(data.analysis)
+      setShowAiAnalysis(true)
+      setOutput((prev) => [...prev, { 
+        type: "success", 
+        content: "AI analysis completed", 
+        timestamp: new Date() 
+      }])
+    } catch (error) {
+      setOutput((prev) => [
+        ...prev,
+        { 
+          type: "error", 
+          content: error instanceof Error ? `AI analysis error: ${error.message}` : "AI analysis failed", 
+          timestamp: new Date() 
+        },
+      ])
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  // Toggle AI analysis panel
+  const toggleAiAnalysis = () => {
+    if (!showAiAnalysis && !aiAnalysis) {
+      analyzeCodeWithAI()
+    } else {
+      setShowAiAnalysis(!showAiAnalysis)
+    }
+  }
+
   return (
     <section className="relative overflow-hidden h-screen">
       {/* Background elements */}
@@ -514,6 +566,20 @@ ${actualOutput}
                     )}
                   </div>
                   
+                  {/* AI Analysis button */}
+                  <button
+                    onClick={toggleAiAnalysis}
+                    className={cn(
+                      "p-1.5 rounded-md transition-colors flex items-center",
+                      showAiAnalysis 
+                        ? "text-purple-400 bg-[#3c3c3c]" 
+                        : "text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-purple-400"
+                    )}
+                    title="AI Code Analysis"
+                  >
+                    <Brain className="h-4 w-4" />
+                  </button>
+                  
                   <button
                     onClick={downloadCode}
                     className="p-1.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
@@ -546,12 +612,75 @@ ${actualOutput}
               </div>
 
               <div className="flex flex-col md:flex-row flex-1 min-h-0 h-full">
-                {/* Main content - Left side */}
-                <div className="flex flex-col min-h-0" style={{ flex: "1 1 67%" }}>
+                {/* Main content area with AI Analysis sidebar */}
+                <div className="flex flex-row min-h-0" style={{ flex: "1 1 67%" }}>
                   {/* Code editor - Increased height */}
-                  <div className="flex-1 overflow-hidden min-h-0">
-                    <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
+                  <div className={cn(
+                    "flex-1 overflow-hidden min-h-0 flex flex-col",
+                    showAiAnalysis && "border-r border-[#3c3c3c]"
+                  )}>
+                    <div className="flex-1 overflow-hidden min-h-0">
+                      <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
+                    </div>
                   </div>
+                  
+                  {/* AI Analysis panel */}
+                  {showAiAnalysis && (
+                    <div className="w-1/3 min-w-[300px] border-l border-[#3c3c3c] flex flex-col">
+                      <div className="px-4 py-2 bg-[#252526] border-b border-[#3c3c3c] flex items-center justify-between">
+                        <div className="flex items-center">
+                          <Brain className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                          <span className="text-xs text-[#f0f0f0] font-medium">AI Code Analysis</span>
+                        </div>
+                        <button
+                          onClick={() => setShowAiAnalysis(false)}
+                          className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors"
+                          title="Close AI Analysis"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="flex-1 bg-[#1e1e1e] p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent text-sm">
+                        {isAnalyzing ? (
+                          <div className="flex flex-col items-center justify-center h-full text-center">
+                            <div className="h-8 w-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4"></div>
+                            <p className="text-[#8f8f8f]">Analyzing your code...</p>
+                            <p className="text-[#8f8f8f] text-xs mt-2">This may take a few seconds</p>
+                          </div>
+                        ) : aiAnalysis ? (
+                          <div className="prose prose-invert max-w-none">
+                            <div className="flex items-start mb-4">
+                              <MessageSquare className="h-5 w-5 text-purple-400 mr-3 mt-1 flex-shrink-0" />
+                              <div className="flex-1 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: aiAnalysis }} />
+                            </div>
+                            <div className="mt-6 pt-6 border-t border-[#3c3c3c]">
+                              <button
+                                onClick={analyzeCodeWithAI}
+                                className="flex items-center space-x-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                              >
+                                <Brain className="h-4 w-4" />
+                                <span>Analyze again</span>
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-center">
+                            <Brain className="h-12 w-12 text-[#3c3c3c] mb-4" />
+                            <p className="text-[#8f8f8f]">No analysis yet</p>
+                            <button
+                              onClick={analyzeCodeWithAI}
+                              className="mt-4 px-4 py-2 bg-purple-600/20 text-purple-400 rounded-md hover:bg-purple-600/30 transition-colors text-sm"
+                            >
+                              Analyze Code
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="px-4 py-3 bg-[#252526] border-t border-[#3c3c3c] text-xs text-[#8f8f8f]">
+                        <p>AI analysis can identify bugs and suggest improvements</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Console Output and Expected Output panels */}
                   <div className="h-[250px] border-t border-[#3c3c3c] flex-shrink-0 flex">
