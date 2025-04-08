@@ -175,23 +175,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     }
   }, [output])
 
-  // Measure console size on mount and window resize
-  useEffect(() => {
-    const updateConsoleSize = () => {
-      if (consoleContainerRef.current) {
-        const { width, height } = consoleContainerRef.current.getBoundingClientRect()
-        setConsoleSize({ width, height })
-      }
-    }
-    
-    // Initial measurement
-    updateConsoleSize()
-    
-    // Listen for window resize
-    window.addEventListener('resize', updateConsoleSize)
-    return () => window.removeEventListener('resize', updateConsoleSize)
-  }, [])
-
   // Function to run code
   const runCode = async () => {
     setIsRunning(true)
@@ -404,66 +387,32 @@ ${actualOutput}
   }
 
   return (
-    <section className="py-20 relative overflow-hidden">
+    <section className="relative overflow-hidden h-screen">
       {/* Background elements */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent"></div>
 
-      <div className="container mx-auto px-4 sm:px-6">
+      <div className="h-full w-full mx-auto">
         {/* Check if user is logged in */}
         {!user ? (
           <LoginPrompt feature="compiler" />
         ) : (
           <>
-            {/* Section heading */}
-            <motion.h2
-              className="text-4xl md:text-5xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              Online Compiler
-            </motion.h2>
-            <motion.p
-              className="text-lg text-center text-blue-100/80 max-w-3xl mx-auto mb-12"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Write, run, and debug your code directly in the browser
-            </motion.p>
-
-            {/* Features list */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-5xl mx-auto">
-              <FeatureCard
-                title="Multiple Languages"
-                description="Write and run code in C++, Python, Java, and more programming languages."
-                icon={<Code className="h-6 w-6" />}
-              />
-              <FeatureCard
-                title="Real-time Syntax Highlighting"
-                description="Enjoy code highlighting and auto-indentation for a better coding experience."
-                icon={<CodeHighlighter className="h-6 w-6" />}
-              />
-              <FeatureCard
-                title="Auto-save"
-                description="Your code is automatically saved as you type."
-                icon={<Save className="h-6 w-6" />}
-              />
-            </div>
-
-            {/* Compiler container */}
+            {/* Compiler container - Made fullscreen */}
             <motion.div
               ref={compilerRef}
-              className="bg-[#1e1e1e] border border-[#3c3c3c] rounded-lg shadow-2xl overflow-hidden flex flex-col h-[600px]"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              className="bg-[#1e1e1e] border border-[#3c3c3c] overflow-hidden flex flex-col h-full"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
             >
               {/* Toolbar */}
               <div className="bg-[#252526] px-4 py-2 flex items-center justify-between border-b border-[#3c3c3c] flex-shrink-0">
-                {/* Language selector */}
+                {/* Left side with logo and language selector */}
                 <div className="flex items-center space-x-4">
+                  <div className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
+                    AlgoAtlas Compiler
+                  </div>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value as keyof typeof LANGUAGES)}
@@ -599,13 +548,13 @@ ${actualOutput}
               <div className="flex flex-col md:flex-row flex-1 min-h-0 h-full">
                 {/* Main content - Left side */}
                 <div className="flex flex-col min-h-0" style={{ flex: "1 1 67%" }}>
-                  {/* Code editor */}
-                  <div className="h-[300px] overflow-hidden min-h-0">
+                  {/* Code editor - Increased height */}
+                  <div className="flex-1 overflow-hidden min-h-0">
                     <CodeEditor value={code} language={language} onChange={setCode} disableAutoFocus={disableAutoFocus} />
                   </div>
 
                   {/* Console Output and Expected Output panels */}
-                  <div className="h-[200px] border-t border-[#3c3c3c] flex-shrink-0 flex">
+                  <div className="h-[250px] border-t border-[#3c3c3c] flex-shrink-0 flex">
                     {/* Console Output panel */}
                     <div className="h-full w-1/2 border-r border-[#3c3c3c] flex flex-col">
                       <div className="flex items-center justify-between bg-[#252526] px-4 py-2 border-b border-[#3c3c3c]">
