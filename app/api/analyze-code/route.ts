@@ -19,22 +19,20 @@ interface AnalyzerError {
  */
 async function analyzeCodeWithAI(code: string, language: string): Promise<string> {
   try {
-    // In production, we would use Groq API here
-    // This is a simplified implementation that provides more detailed analysis
+    // Revised implementation that focuses only on critical issues for competitive programming
     
     const lines = code.split('\n');
     const analysis = [];
     let hasErrors = false;
-    let hasWarnings = false;
     
     // Check for header includes if C++
     if (language === 'cpp') {
-      // Check for headers
+      // Check only for critical missing headers based on code content
       const headerLines = lines
         .map((line, index) => ({ line, index }))
         .filter(({ line }) => line.includes('#include'));
       
-      // Direct feedback on actual issues without headers section
+      // Direct feedback on critical missing headers only
       const codeHasVectors = code.includes('vector<') || code.includes('vector >');
       const codeHasSort = code.includes('sort(') || code.includes('std::sort');
       const hasIOStream = headerLines.some(({ line }) => line.includes('<iostream>'));
@@ -43,44 +41,15 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
       const hasAlgorithm = headerLines.some(({ line }) => line.includes('<algorithm>'));
       
       if (codeHasVectors && !hasVector) {
-        hasWarnings = true;
-        analysis.push(`<p class="text-orange-400 mt-2">⚠️ Missing <code>&lt;vector&gt;</code> header for vector usage.</p>`);
+        hasErrors = true;
+        analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;vector&gt;</code> header but using vector</p>`);
       }
       
       if (codeHasSort && !hasAlgorithm) {
-        hasWarnings = true;
-        analysis.push(`<p class="text-orange-400 mt-2">⚠️ Missing <code>&lt;algorithm&gt;</code> header for sort functions.</p>`);
+        hasErrors = true;
+        analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;algorithm&gt;</code> header but using sort</p>`);
       }
       
-      if ((!hasIOStream && !hasStdIO) && (code.includes('cout') || code.includes('cin') || code.includes('printf') || code.includes('scanf'))) {
-        hasWarnings = true;
-        analysis.push(`<p class="text-orange-400 mt-2">⚠️ Missing I/O headers for input/output operations.</p>`);
-      }
-      
-      if (headerLines.length === 0 && code.trim().length > 0) {
-        hasWarnings = true;
-        analysis.push(`<p class="text-orange-400">⚠️ No header files detected in your C++ code.</p>`);
-      }
-      
-      // Function detection and analysis - just return actual issues
-      const functionPattern = /\b(\w+)\s+(\w+)\s*\(([^)]*)\)\s*\{/g;
-      let match;
-      const functions = [];
-      
-      // Reset regex
-      const functionPatternForLoop = /\b(\w+)\s+(\w+)\s*\(([^)]*)\)\s*\{/g;
-      while ((match = functionPatternForLoop.exec(code)) !== null) {
-        const returnType = match[1];
-        const name = match[2];
-        const params = match[3];
-        functions.push({ returnType, name, params });
-      }
-      
-      if (functions.length === 0 && !code.includes('int main') && code.trim().length > 0) {
-        hasWarnings = true;
-        analysis.push(`<p class="text-orange-400 mt-3">⚠️ No function definitions detected in your code.</p>`);
-      }
-
       // Missing semicolons check (improved to avoid false positives)
       const potentialSemicolonMissing = lines
         .map((line, index) => ({ line, index }))
@@ -100,33 +69,21 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
       
       if (potentialSemicolonMissing.length > 0) {
         hasErrors = true;
-        analysis.push(`<p class="text-red-400 mt-3">🚫 Potential missing semicolons on lines: ${potentialSemicolonMissing.map(x => x.index + 1).join(', ')}</p>`);
+        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Missing semicolons on lines: ${potentialSemicolonMissing.map(x => x.index + 1).join(', ')}</p>`);
+      }
+      
+      // Check for unbalanced braces 
+      const openBraces = (code.match(/\{/g) || []).length;
+      const closeBraces = (code.match(/\}/g) || []).length;
+      
+      if (openBraces !== closeBraces) {
+        hasErrors = true;
+        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Unbalanced braces ({ and }). Found ${openBraces} opening and ${closeBraces} closing braces.</p>`);
       }
     } else if (language === 'python') {
-      // Python-specific checks
-      const importLines = lines
-        .map((line, index) => ({ line, index }))
-        .filter(({ line }) => line.trim().startsWith('import') || line.trim().startsWith('from'));
+      // Only check for critical Python syntax issues
       
-      if (importLines.length > 0) {
-        analysis.push(`<h3 class="text-blue-400">📚 Imports:</h3>`);
-        analysis.push(`<ul>${importLines.map(({ line, index }) => 
-          `<li class="mb-1"><span class="text-blue-400">Line ${index + 1}:</span> ${line.trim()}</li>`
-        ).join('')}</ul>`);
-      }
-      
-      // Function detection in Python
-      const functionLines = lines
-        .map((line, index) => ({ line, index }))
-        .filter(({ line }) => line.trim().startsWith('def '));
-      
-      if (functionLines.length > 0) {
-        analysis.push(`<ul>${functionLines.map(({ line, index }) => 
-          `<li class="mb-1"><span class="text-blue-400">Line ${index + 1}:</span> ${line.trim()}</li>`
-        ).join('')}</ul>`);
-      }
-      
-      // Check for indentation issues
+      // Indentation issues (critical for Python)
       interface IndentationIssue {
         line: string;
         index: number;
@@ -152,36 +109,25 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
       
       if (indentationIssues.length > 0) {
         hasErrors = true;
-        analysis.push(`<h3 class="text-red-400 mt-3">🔍 Indentation Issues:</h3>`);
-        analysis.push(`<ul>${indentationIssues.map(({ line, index, issue }) => 
-          `<li class="mb-2"><span class="text-red-400">Line ${index + 1}:</span> ${issue}: <pre class="bg-[#252526] p-2 mt-1 rounded text-xs">${line}</pre></li>`
-        ).join('')}</ul>`);
+        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Python indentation issues on lines: ${indentationIssues.map(x => x.index + 1).join(', ')}</p>`);
+      }
+      
+      // Check for unbalanced parentheses
+      const openParens = (code.match(/\(/g) || []).length;
+      const closeParens = (code.match(/\)/g) || []).length;
+      
+      if (openParens !== closeParens) {
+        hasErrors = true;
+        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Unbalanced parentheses. Found ${openParens} opening and ${closeParens} closing parentheses.</p>`);
       }
     }
     
-    // Generic code quality checks
-    const longLines = lines
-      .map((line, index) => ({ line, index }))
-      .filter(({ line }) => line.length > 80);
-    
-    if (longLines.length > 0) {
-      analysis.push(`<h3 class="text-orange-400 mt-3">⚠️ Code Style Suggestions:</h3>`);
-      analysis.push(`<p>Found ${longLines.length} lines longer than 80 characters. Consider breaking these into shorter lines for better readability.</p>`);
-    }
-    
-    const commentCount = lines.filter(line => line.trim().startsWith('//') || line.includes('/*') || line.trim().startsWith('#')).length;
-    const codeToCommentRatio = commentCount / lines.length;
-    
-    if (codeToCommentRatio < 0.1 && lines.length > 10) {
-      analysis.push(`<p class="mt-2">Your code has few comments (${commentCount} comment lines out of ${lines.length} total lines). Adding more comments can improve readability.</p>`);
-    }
-    
     // Add general feedback
-    if (!hasErrors && !hasWarnings && analysis.length === 0) {
-      analysis.push(`<p class="text-green-400">✅ Your code looks good with no obvious issues.</p>`);
+    if (!hasErrors && analysis.length === 0) {
+      analysis.push(`<p class="text-green-400">✅ No syntax errors detected</p>`);
     }
     
-    // Use Groq API if available
+    // Use Groq API for detailed analysis if available
     if (process.env.GROQ_API_KEY && code.trim().length > 0) {
       try {
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -195,22 +141,24 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
             messages: [
               {
                 role: 'system',
-                content: 'You are a code analyzer that checks code for bugs, issues, and provides specific, detailed feedback. Focus on actual problems and don\'t add unnecessary comments when the code is good. Be concise but thorough about actual problems.'
+                content: 'You are a competitive programming code analyzer. Focus ONLY on syntax errors and bugs that would prevent the code from running correctly in a competitive programming context. DO NOT comment on code readability, style, or performance optimizations unless they would cause the solution to fail. Be extremely concise and direct about errors.'
               },
               {
                 role: 'user',
-                content: `Analyze this ${language} code and provide detailed feedback about what's wrong. Be specific about actual problems and don't mention minor style issues unless they're significant:\n\n${code}`
+                content: `Analyze this ${language} code for syntax errors and bugs only. This is for competitive programming, so ignore style and readability:\n\n${code}`
               }
             ],
-            temperature: 0.2,
+            temperature: 0.1,
             max_tokens: 1000
           })
         });
         
         const data = await response.json();
         if (data.choices && data.choices[0].message.content) {
-          // Return the AI-generated analysis along with our basic checks
-          return `${analysis.join('\n')}\n\n<h3 class="text-blue-400 mt-4">🧠 Detailed Analysis:</h3>\n<div class="bg-[#252526] p-3 rounded">${data.choices[0].message.content.replace(/\n/g, '<br>')}</div>`;
+          // Only show AI analysis if there are errors or the basic analysis didn't find anything
+          if (hasErrors || analysis.length <= 1) {
+            return `${analysis.join('\n')}\n\n<div class="bg-[#252526] p-3 rounded mt-3">${data.choices[0].message.content.replace(/\n/g, '<br>')}</div>`;
+          }
         }
       } catch (groqError) {
         console.error('Groq API error:', groqError);
