@@ -86,8 +86,6 @@ export function PerformanceMetrics({
       animate={{ opacity: 1, y: 0 }} 
       className="text-xs"
     >
-      <h3 className="text-purple-400 font-semibold mb-3">Performance Metrics</h3>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {/* Execution Time */}
         <div className="bg-[#252526] rounded-md p-3 border border-[#3c3c3c]">
