@@ -32,53 +32,62 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
         .map((line, index) => ({ line, index }))
         .filter(({ line }) => line.includes('#include'));
       
-      // Direct feedback on critical missing headers only
-      const codeHasVectors = code.includes('vector<') || code.includes('vector >');
-      const codeHasSort = code.includes('sort(') || code.includes('std::sort');
-      const hasIOStream = headerLines.some(({ line }) => line.includes('<iostream>'));
-      const hasStdIO = headerLines.some(({ line }) => line.includes('<stdio.h>'));
-      const hasVector = headerLines.some(({ line }) => line.includes('<vector>'));
-      const hasAlgorithm = headerLines.some(({ line }) => line.includes('<algorithm>'));
+      // Check if bits/stdc++.h is included (common in competitive programming)
+      const hasBitsHeader = headerLines.some(({ line }) => line.includes('<bits/stdc++.h>'));
       
-      if (codeHasVectors && !hasVector) {
-        hasErrors = true;
-        analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;vector&gt;</code> header but using vector</p>`);
-      }
-      
-      if (codeHasSort && !hasAlgorithm) {
-        hasErrors = true;
-        analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;algorithm&gt;</code> header but using sort</p>`);
-      }
-      
-      // Missing semicolons check (improved to avoid false positives)
-      const potentialSemicolonMissing = lines
-        .map((line, index) => ({ line, index }))
-        .filter(({ line }) => {
-          const trimmed = line.trim();
-          return !trimmed.startsWith('//') && 
-                 !trimmed.startsWith('#') && 
-                 !trimmed.endsWith('{') && 
-                 !trimmed.endsWith('}') && 
-                 !trimmed.endsWith(';') &&
-                 !trimmed.startsWith('for') &&
-                 !trimmed.startsWith('if') &&
-                 !trimmed.startsWith('while') &&
-                 !trimmed.endsWith(':') &&
-                 trimmed.length > 0;
-        });
-      
-      if (potentialSemicolonMissing.length > 0) {
-        hasErrors = true;
-        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Missing semicolons on lines: ${potentialSemicolonMissing.map(x => x.index + 1).join(', ')}</p>`);
-      }
-      
-      // Check for unbalanced braces 
-      const openBraces = (code.match(/\{/g) || []).length;
-      const closeBraces = (code.match(/\}/g) || []).length;
-      
-      if (openBraces !== closeBraces) {
-        hasErrors = true;
-        analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Unbalanced braces ({ and }). Found ${openBraces} opening and ${closeBraces} closing braces.</p>`);
+      // Only check for specific headers if bits/stdc++.h is not included
+      if (!hasBitsHeader) {
+        // Direct feedback on critical missing headers only
+        const codeHasVectors = code.includes('vector<') || code.includes('vector >');
+        const codeHasSort = code.includes('sort(') || code.includes('std::sort');
+        const hasIOStream = headerLines.some(({ line }) => line.includes('<iostream>'));
+        const hasStdIO = headerLines.some(({ line }) => line.includes('<stdio.h>'));
+        const hasVector = headerLines.some(({ line }) => line.includes('<vector>'));
+        const hasAlgorithm = headerLines.some(({ line }) => line.includes('<algorithm>'));
+        
+        if (codeHasVectors && !hasVector) {
+          hasErrors = true;
+          analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;vector&gt;</code> header but using vector</p>`);
+        }
+        
+        if (codeHasSort && !hasAlgorithm) {
+          hasErrors = true;
+          analysis.push(`<p class="text-red-400 mt-2">🚫 Syntax error: Missing <code>&lt;algorithm&gt;</code> header but using sort</p>`);
+        }
+        
+        // Missing semicolons check (improved to avoid false positives)
+        const potentialSemicolonMissing = lines
+          .map((line, index) => ({ line, index }))
+          .filter(({ line }) => {
+            const trimmed = line.trim();
+            return !trimmed.startsWith('//') && 
+                   !trimmed.startsWith('#') && 
+                   !trimmed.endsWith('{') && 
+                   !trimmed.endsWith('}') && 
+                   !trimmed.endsWith(';') &&
+                   !trimmed.startsWith('for') &&
+                   !trimmed.startsWith('if') &&
+                   !trimmed.startsWith('while') &&
+                   !trimmed.endsWith(':') &&
+                   !trimmed.endsWith('>') && // Avoid flagging template closing brackets
+                   !trimmed.endsWith('>>') && // C++11 nested templates
+                   !trimmed.endsWith(')') && // Avoid flagging function calls in certain contexts
+                   trimmed.length > 0;
+          });
+        
+        if (potentialSemicolonMissing.length > 0) {
+          hasErrors = true;
+          analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Missing semicolons on lines: ${potentialSemicolonMissing.map(x => x.index + 1).join(', ')}</p>`);
+        }
+        
+        // Check for unbalanced braces 
+        const openBraces = (code.match(/\{/g) || []).length;
+        const closeBraces = (code.match(/\}/g) || []).length;
+        
+        if (openBraces !== closeBraces) {
+          hasErrors = true;
+          analysis.push(`<p class="text-red-400 mt-3">🚫 Syntax error: Unbalanced braces ({ and }). Found ${openBraces} opening and ${closeBraces} closing braces.</p>`);
+        }
       }
     } else if (language === 'python') {
       // Only check for critical Python syntax issues
@@ -141,11 +150,11 @@ async function analyzeCodeWithAI(code: string, language: string): Promise<string
             messages: [
               {
                 role: 'system',
-                content: 'You are a competitive programming code analyzer. Focus ONLY on syntax errors and bugs that would prevent the code from running correctly in a competitive programming context. DO NOT comment on code readability, style, or performance optimizations unless they would cause the solution to fail. Be extremely concise and direct about errors.'
+                content: 'You are a competitive programming code analyzer. Focus ONLY on syntax errors and bugs that would prevent the code from running correctly in a competitive programming context. DO NOT comment on code readability, style, or performance optimizations unless they would cause the solution to fail. Be extremely concise and direct about errors. Recognize that bits/stdc++.h includes most necessary headers for competitive programming and is completely valid in that context. Assume code is using C++17 or C++20 standards.'
               },
               {
                 role: 'user',
-                content: `Analyze this ${language} code for syntax errors and bugs only. This is for competitive programming, so ignore style and readability:\n\n${code}`
+                content: `Analyze this ${language} code for syntax errors and bugs only. This is for competitive programming, so ignore style and readability. Using bits/stdc++.h is acceptable:\n\n${code}`
               }
             ],
             temperature: 0.1,
