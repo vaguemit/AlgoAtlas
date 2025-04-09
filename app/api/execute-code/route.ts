@@ -102,6 +102,17 @@ export async function POST(req: NextRequest) {
       status = 'Time Limit Exceeded';
     }
 
+    // Estimate memory usage based on output size and code complexity
+    // This is just an estimation since Piston doesn't provide memory metrics
+    const outputLength = (result.run?.stdout || '').length;
+    const codeLength = submissionCode.length;
+    const estimatedMemory = Math.min(
+      // Base memory + proportional to code size and output size
+      10000 + (codeLength * 2) + (outputLength * 5),
+      // Cap at reasonable limit to avoid unrealistic values
+      512000
+    );
+
     // Analyze code complexity if requested
     const complexityAnalysis = shouldAnalyzeComplexity 
       ? analyzeComplexity(code, language)
@@ -113,7 +124,7 @@ export async function POST(req: NextRequest) {
       error: result.run?.stderr || result.compile?.stderr || '',
       status: status,
       executionTime: result.run?.time || executionTime,
-      memoryUsed: -1, // Piston doesn't provide exact memory usage
+      memoryUsed: estimatedMemory, // Use estimated memory
       complexityAnalysis
     };
 
