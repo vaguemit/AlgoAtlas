@@ -208,7 +208,7 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const runCode = async () => {
     setIsRunning(true)
     setOutput([])
-    setOutput([{ type: "info", content: "Running code using Piston API...", timestamp: new Date() }])
+    setOutput([{ type: "info", content: "Running code...", timestamp: new Date() }])
     
     // Reset performance metrics
     setExecutionTime(0)
@@ -216,7 +216,6 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     setComplexityAnalysis(null)
 
     try {
-      console.log("Executing code with Piston API integration")
       const response = await fetch("/api/execute-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
