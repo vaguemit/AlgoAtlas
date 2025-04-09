@@ -13,7 +13,9 @@ export default function PistonTestPage() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/execute-code/test')
+      const response = await fetch('/api/execute-code/test', {
+        method: 'POST'
+      })
       const data = await response.json()
       
       setTestResult(data)

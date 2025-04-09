@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 // Piston API configuration
 const PISTON_API_URL = 'https://emkc.org/api/v2/piston';
 
-export async function GET() {
+// This is now a POST endpoint to avoid conflicts with the page.tsx file in the same directory
+export async function POST() {
   try {
     // Test C++ code that prints "Hello, World!"
     const testCode = `#include <iostream>
