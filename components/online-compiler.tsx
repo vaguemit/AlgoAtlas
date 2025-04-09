@@ -78,6 +78,27 @@ interface FileTab {
   content: string;
 }
 
+// Update the output state type
+interface OutputState {
+  stdout: string;
+  stderr: string;
+  time: string;
+  memory: string;
+}
+
+// Add error code mapping
+const ONLINE_COMPILER_ERRORS = {
+  400: 'Bad Request - Your request is invalid',
+  401: 'Unauthorized - Your API key is wrong',
+  403: 'Forbidden - The compiler is hidden for administrators only',
+  404: 'Not Found - The specified compiler could not be found',
+  405: 'Method Not Allowed - Invalid request method',
+  406: 'Not Acceptable - Requested format is not supported',
+  429: 'Too Many Requests - Please try again later',
+  500: 'Internal Server Error - Try again later',
+  503: 'Service Unavailable - We are temporarily offline'
+};
+
 export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps) {
   const router = useRouter()
   const { user, loading } = useAuth()
@@ -103,7 +124,12 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const [input, setInput] = useState(defaultInput)
   const [expectedOutput, setExpectedOutput] = useState("")
   const [isRunning, setIsRunning] = useState(false)
-  const [output, setOutput] = useState<OutputMessage[]>([])
+  const [output, setOutput] = useState<OutputState>({
+    stdout: '',
+    stderr: '',
+    time: '0.00',
+    memory: '0'
+  })
   const [showPerformanceMetrics, setShowPerformanceMetrics] = useState(false)
   const [executionTime, setExecutionTime] = useState(0)
   const [memoryUsed, setMemoryUsed] = useState(0)
@@ -115,6 +141,13 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
   const outputRef = useRef<HTMLDivElement>(null)
   const consoleContainerRef = useRef<HTMLDivElement>(null)
   const editorSectionRef = useRef<HTMLDivElement>(null)
+
+  // Add rate limiting state
+  const [lastExecutionTime, setLastExecutionTime] = useState<number>(0);
+  const [isRateLimited, setIsRateLimited] = useState<boolean>(false);
+
+  // Add new state for tracking API source
+  const [apiSource, setApiSource] = useState<'judge0' | 'onlinecompiler'>('judge0');
 
   // Auto-save code changes with debounce
   const debouncedSaveCode = useCallback(
@@ -204,118 +237,193 @@ export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps
     }
   }, [output])
 
-  // Function to run code
-  const runCode = async () => {
-    setIsRunning(true)
-    setOutput([])
-    setOutput([{ type: "info", content: "Running code...", timestamp: new Date() }])
+  // Add rate limit helper function
+  const checkRateLimit = () => {
+    const now = Date.now();
+    const timeSinceLastExecution = now - lastExecutionTime;
+    const minTimeBetweenExecutions = 2000; // 2 seconds minimum between executions
     
-    // Reset performance metrics
-    setExecutionTime(0)
-    setMemoryUsed(0)
-    setComplexityAnalysis(null)
+    if (timeSinceLastExecution < minTimeBetweenExecutions) {
+      const remainingTime = Math.ceil((minTimeBetweenExecutions - timeSinceLastExecution) / 1000);
+      setIsRateLimited(true);
+      setOutput(prev => ({
+        ...prev,
+        stdout: `Please wait ${remainingTime} seconds before running again.\nRate limiting is in place to prevent server overload.`,
+        stderr: '',
+        time: '0.00',
+        memory: '0'
+      }));
+      return true;
+    }
+    
+    setIsRateLimited(false);
+    setLastExecutionTime(now);
+    return false;
+  };
+
+  // Update handleRunCode function
+  const handleRunCode = async () => {
+    if (!code.trim()) {
+      setOutput(prev => ({
+        ...prev,
+        stdout: 'Please enter some code to run.',
+        stderr: '',
+        time: '0.00',
+        memory: '0'
+      }));
+      return;
+    }
+
+    if (checkRateLimit()) {
+      return;
+    }
+
+    setIsRunning(true);
+    setOutput(prev => ({
+      ...prev,
+      stdout: 'Running code...',
+      stderr: '',
+      time: '0.00',
+      memory: '0'
+    }));
 
     try {
-      const response = await fetch("/api/execute-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code, input, analyzeComplexity: true }),
-      })
-
-      const data = await response.json()
+      // Try Judge0 first
+      const response = await fetch('/api/execute-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language: language,
+          input: input
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error(data.error || "Execution failed")
-      }
+        const errorData = await response.json();
+        if (response.status === 429) {
+          // Switch to onlinecompiler.io API
+          setApiSource('onlinecompiler');
+          setOutput(prev => ({
+            ...prev,
+            stdout: 'Switching to alternative compiler service...',
+            stderr: '',
+            time: '0.00',
+            memory: '0'
+          }));
 
-      // Set performance metrics - ensure they're treated as numbers
-      const execTime = typeof data.executionTime === 'string' 
-        ? parseFloat(data.executionTime) 
-        : data.executionTime || 0;
-      
-      const memUsed = typeof data.memoryUsed === 'string'
-        ? parseFloat(data.memoryUsed)
-        : data.memoryUsed || 0;
-      
-      setExecutionTime(execTime)
-      setMemoryUsed(memUsed)
-      
-      if (data.complexityAnalysis) {
-        setComplexityAnalysis(data.complexityAnalysis)
-      }
+          // Map our language to onlinecompiler.io's compiler names
+          const compilerMap: Record<string, string> = {
+            'cpp': 'g++-4.9',
+            'python': 'python-3.9.7',
+            'java': 'openjdk-11'
+          };
 
-      if (data.output) {
-        setOutput((prev) => [...prev, { type: "success", content: data.output, timestamp: new Date() }])
-        
-        // Compare actual output with expected output if provided
-        if (expectedOutput.trim()) {
-          const actualOutput = data.output.trim();
-          const expected = expectedOutput.trim();
-          
-          if (actualOutput === expected) {
-            setOutput((prev) => [...prev, { 
-              type: "success", 
-              content: "✓ Output matches expected result", 
-              timestamp: new Date() 
-            }])
-          } else {
-            // Add a detailed comparison message
-            setOutput((prev) => [...prev, { 
-              type: "error", 
-              content: "✗ Output does not match expected result", 
-              timestamp: new Date() 
-            }])
-            
-            // Add detailed visual comparison
-            const comparisonMessage = `
-Comparison:
---------------------------
-Expected: 
-${expected}
---------------------------
-Actual: 
-${actualOutput}
---------------------------`;
-            
-            setOutput((prev) => [...prev, { 
-              type: "info", 
-              content: comparisonMessage, 
-              timestamp: new Date() 
-            }])
+          // Call onlinecompiler.io API
+          const onlineCompilerResponse = await fetch('https://onlinecompiler.io/api/v2/run-code/', {
+            method: 'POST',
+            headers: {
+              'Accept': '*/*',
+              'Authorization': `Bearer ${process.env.NEXT_PUBLIC_ONLINECOMPILER_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              code,
+              input,
+              compiler: compilerMap[language],
+              callback_url: `${window.location.origin}/api/webhook`
+            })
+          });
+
+          if (!onlineCompilerResponse.ok) {
+            const errorCode = onlineCompilerResponse.status;
+            const errorMessage = ONLINE_COMPILER_ERRORS[errorCode as keyof typeof ONLINE_COMPILER_ERRORS] || 'Unknown error occurred';
+            throw new Error(`OnlineCompiler.io Error (${errorCode}): ${errorMessage}`);
           }
+
+          const onlineCompilerData = await onlineCompilerResponse.json();
+          
+          setOutput(prev => ({
+            ...prev,
+            stdout: 'Code execution request sent. Waiting for results...',
+            stderr: '',
+            time: '0.00',
+            memory: '0'
+          }));
+
+          // Start polling for results
+          const pollInterval = setInterval(async () => {
+            try {
+              const resultResponse = await fetch('/api/webhook/result');
+              if (resultResponse.ok) {
+                const result = await resultResponse.json();
+                if (result.status === 'completed') {
+                  clearInterval(pollInterval);
+                  setOutput({
+                    stdout: result.stdout || '',
+                    stderr: result.stderr || '',
+                    time: result.time || '0.00',
+                    memory: result.memory || '0'
+                  });
+                }
+              }
+            } catch (error) {
+              console.error('Error polling for results:', error);
+            }
+          }, 2000);
+
+          // Clear polling after 30 seconds
+          setTimeout(() => {
+            clearInterval(pollInterval);
+            if (output.stdout === 'Code execution request sent. Waiting for results...') {
+              setOutput(prev => ({
+                ...prev,
+                stdout: '',
+                stderr: 'Timeout waiting for results. Please try again.',
+                time: '0.00',
+                memory: '0'
+              }));
+            }
+          }, 30000);
+
+          return;
         }
+        throw new Error(errorData.error || 'Failed to execute code');
       }
-      
-      if (data.error) {
-        setOutput((prev) => [...prev, { type: "error", content: data.error, timestamp: new Date() }])
-      }
-      
-      if (!data.output && !data.error) {
-        setOutput((prev) => [...prev, { type: "success", content: "Program executed successfully with no output", timestamp: new Date() }])
-        
-        // Check if expected output was provided but program produced no output
-        if (expectedOutput.trim()) {
-          setOutput((prev) => [...prev, { 
-            type: "error", 
-            content: "✗ Expected output was provided, but program produced no output", 
-            timestamp: new Date() 
-          }])
-        }
-      }
-    } catch (error) {
-      setOutput((prev) => [
+
+      const data = await response.json();
+      setOutput({
+        stdout: data.stdout || '',
+        stderr: data.stderr || '',
+        time: data.time || '0.00',
+        memory: data.memory || '0'
+      });
+      setApiSource('judge0');
+    } catch (error: any) {
+      setOutput(prev => ({
         ...prev,
-        { type: "error", content: error instanceof Error ? error.message : "An unknown error occurred", timestamp: new Date() },
-      ])
+        stdout: '',
+        stderr: `Error: ${error.message || 'Failed to execute code'}`,
+        time: '0.00',
+        memory: '0'
+      }));
     } finally {
-      setIsRunning(false)
+      setIsRunning(false);
     }
-  }
+  };
 
   // Copy code to clipboard
   const copyCode = () => {
     navigator.clipboard.writeText(code)
-    setOutput((prev) => [...prev, { type: "info", content: "Code copied to clipboard", timestamp: new Date() }])
+    setOutput((prev) => ({
+      ...prev,
+      stdout: prev.stdout + "\nCode copied to clipboard",
+      stderr: prev.stderr,
+      time: prev.time,
+      memory: prev.memory
+    }))
   }
   
   // Manual save function
@@ -329,14 +437,13 @@ ${actualOutput}
       localStorage.setItem('compiler_expected_output', expectedOutput)
       
       // Show success message
-      setOutput([
-        ...output,
-        {
-          type: "success",
-          content: "Code, input, and settings saved to browser storage",
-          timestamp: new Date()
-        }
-      ])
+      setOutput((prev) => ({
+        ...prev,
+        stdout: prev.stdout + "\nCode, input, and settings saved to browser storage",
+        stderr: prev.stderr,
+        time: prev.time,
+        memory: prev.memory
+      }))
       
       setTimeout(() => setSaveStatus('saved'), 500)
     }
@@ -351,7 +458,12 @@ ${actualOutput}
     setCode(LANGUAGES[language].defaultCode)
     setInput("")
     setExpectedOutput("")
-    setOutput([{ type: "info", content: "Compiler reset. All saved data cleared.", timestamp: new Date() }])
+    setOutput({
+      stdout: '',
+      stderr: '',
+      time: '0.00',
+      memory: '0'
+    })
   }
   
   // Clear all compiler data from local storage
@@ -365,7 +477,12 @@ ${actualOutput}
     setCode(LANGUAGES[language].defaultCode)
     setInput("")
     setExpectedOutput("")
-    setOutput([{ type: "info", content: "All compiler data cleared for all languages.", timestamp: new Date() }])
+    setOutput({
+      stdout: '',
+      stderr: '',
+      time: '0.00',
+      memory: '0'
+    })
   }
   
   // Download code as a file
@@ -395,23 +512,21 @@ ${actualOutput}
         URL.revokeObjectURL(url)
       }, 100)
       
-      setOutput([
-        ...output,
-        {
-          type: "success",
-          content: `Code downloaded as ${filename}`,
-          timestamp: new Date()
-        }
-      ])
+      setOutput((prev) => ({
+        ...prev,
+        stdout: prev.stdout + `\nCode downloaded as ${filename}`,
+        stderr: prev.stderr,
+        time: prev.time,
+        memory: prev.memory
+      }))
     } catch (error) {
-      setOutput([
-        ...output,
-        {
-          type: "error",
-          content: "Failed to download code",
-          timestamp: new Date()
-        }
-      ])
+      setOutput((prev) => ({
+        ...prev,
+        stdout: prev.stdout + "\nFailed to download code",
+        stderr: prev.stderr,
+        time: prev.time,
+        memory: prev.memory
+      }))
     }
   }
 
@@ -510,7 +625,7 @@ ${actualOutput}
     <section className="fixed inset-0 w-screen h-screen z-50 overflow-auto bg-[#1e1e1e]">
       <div className="h-full w-full flex flex-col">
         <div
-          ref={compilerRef}
+              ref={compilerRef}
           className="bg-[#1e1e1e] flex flex-col h-full w-full"
         >
           {/* Toolbar - Make more compact - Always visible */}
@@ -531,91 +646,103 @@ ${actualOutput}
                 AlgoAtlas Compiler
               </div>
               {user && (
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as keyof typeof LANGUAGES)}
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as keyof typeof LANGUAGES)}
                   className="bg-[#3c3c3c] text-white text-sm rounded-md border-0 py-1 pl-3 pr-8 focus:ring-2 focus:ring-purple-500"
-                >
-                  {Object.entries(LANGUAGES).map(([key, { name }]) => (
-                    <option key={key} value={key}>{name}</option>
-                  ))}
-                </select>
+                  >
+                    {Object.entries(LANGUAGES).map(([key, { name }]) => (
+                      <option key={key} value={key}>{name}</option>
+                    ))}
+                  </select>
               )}
 
               {/* File open button - Only shown when logged in */}
               {user && (
                 <div className="relative md:block hidden">
-                  <input
-                    type="file"
-                    id="file-upload"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setOutput([{ type: "info", content: `Loading file "${file.name}"...`, timestamp: new Date() }]);
-                        
-                        const reader = new FileReader();
-                        
-                        reader.onload = (event) => {
-                          try {
-                            if (event.target?.result) {
-                              const fileContent = event.target.result.toString();
-                              const fileName = file.name.toLowerCase();
-                              let newLang = language;
-                              
-                              if (fileName.endsWith('.cpp') || fileName.endsWith('.h') || fileName.endsWith('.c') || fileName.endsWith('.cc')) {
-                                newLang = 'cpp';
-                              } else if (fileName.endsWith('.py') || fileName.endsWith('.python')) {
-                                newLang = 'python';
-                              } else if (fileName.endsWith('.java')) {
-                                newLang = 'java';
+                    <input
+                      type="file"
+                      id="file-upload"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setOutput((prev) => ({
+                            ...prev,
+                            stdout: `Loading file "${file.name}"...`,
+                            stderr: '',
+                            time: '0.00',
+                            memory: '0'
+                          }));
+                          
+                          const reader = new FileReader();
+                          
+                          reader.onload = (event) => {
+                            try {
+                              if (event.target?.result) {
+                                const fileContent = event.target.result.toString();
+                                const fileName = file.name.toLowerCase();
+                                let newLang = language;
+                                
+                                if (fileName.endsWith('.cpp') || fileName.endsWith('.h') || fileName.endsWith('.c') || fileName.endsWith('.cc')) {
+                                  newLang = 'cpp';
+                                } else if (fileName.endsWith('.py') || fileName.endsWith('.python')) {
+                                  newLang = 'python';
+                                } else if (fileName.endsWith('.java')) {
+                                  newLang = 'java';
+                                }
+                                
+                                if (newLang !== language) {
+                                  setLanguage(newLang as keyof typeof LANGUAGES);
+                                }
+                                
+                                setCode(fileContent);
+                                
+                                setOutput((prev) => ({
+                                  ...prev,
+                                  stdout: `File "${file.name}" loaded successfully`,
+                                  stderr: '',
+                                  time: '0.00',
+                                  memory: '0'
+                                }));
                               }
-                              
-                              if (newLang !== language) {
-                                setLanguage(newLang as keyof typeof LANGUAGES);
-                              }
-                              
-                              setCode(fileContent);
-                              
-                              setOutput([{ 
-                                type: "success", 
-                                content: `File "${file.name}" loaded successfully`, 
-                                timestamp: new Date() 
-                              }]);
+                            } catch (error) {
+                              setOutput((prev) => ({
+                                ...prev,
+                                stdout: `Error processing file: ${error instanceof Error ? error.message : "Unknown error"}`,
+                                stderr: '',
+                                time: '0.00',
+                                memory: '0'
+                              }));
                             }
-                          } catch (error) {
-                            setOutput([{ 
-                              type: "error", 
-                              content: `Error processing file: ${error instanceof Error ? error.message : "Unknown error"}`, 
-                              timestamp: new Date() 
-                            }]);
-                          }
-                        };
-                        
-                        reader.onerror = () => {
-                          setOutput([{ 
-                            type: "error", 
-                            content: "Failed to read file. Please try again.", 
-                            timestamp: new Date() 
-                          }]);
-                        };
-                        
-                        reader.readAsText(file);
-                      }
-                      e.target.value = '';
-                    }}
-                    accept=".cpp,.py,.java,.txt,.js,.html,.css,.c,.h,.cc"
-                  />
-                  <button
+                          };
+                          
+                          reader.onerror = () => {
+                            setOutput((prev) => ({
+                              ...prev,
+                              stdout: "Failed to read file. Please try again.",
+                              stderr: '',
+                              time: '0.00',
+                              memory: '0'
+                            }));
+                          };
+                          
+                          reader.readAsText(file);
+                        }
+                        e.target.value = '';
+                      }}
+                      accept=".cpp,.py,.java,.txt,.js,.html,.css,.c,.h,.cc"
+                    />
+                    <button
                     className="flex items-center space-x-1 px-2 py-1 bg-[#3c3c3c] text-white text-sm rounded-md hover:bg-[#4c4c4c] transition-colors"
-                    title="Open file from your computer"
-                  >
+                      title="Open file from your computer"
+                    >
                     <Download className="h-3.5 w-3.5 rotate-180" />
                     <span className="hidden sm:inline">Open</span>
-                  </button>
-                </div>
+                    </button>
+                  </div>
               )}
-            </div>
+                </div>
 
             {/* Actions - Only shown when logged in */}
             {user && (
@@ -636,42 +763,42 @@ ${actualOutput}
                   )}
                 </div>
                 
-                <button
+                  <button
                   onClick={analyzeCodeWithAI}
                   className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-purple-400 transition-colors flex items-center"
                   title="Analyze Code with AI"
                 >
                   <Brain className="h-4 w-4" />
-                </button>
+                  </button>
                 
-                <button
-                  onClick={downloadCode}
+                  <button
+                    onClick={downloadCode}
                   className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                  title="Download code as file"
-                >
-                  <Download className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={copyCode}
+                    title="Download code as file"
+                  >
+                    <Download className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={copyCode}
                   className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                  title="Copy code"
-                >
-                  <Copy className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={resetCompiler}
+                    title="Copy code"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={resetCompiler}
                   className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors flex items-center"
-                  title="Reset current language"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={clearAllCompilerData}
+                    title="Reset current language"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={clearAllCompilerData}
                   className="p-1 rounded-md text-red-500/70 hover:bg-[#3c3c3c] hover:text-red-500 transition-colors flex items-center"
-                  title="Clear ALL compiler data"
-                >
-                  <AlertCircle className="h-4 w-4" />
-                </button>
+                    title="Clear ALL compiler data"
+                  >
+                    <AlertCircle className="h-4 w-4" />
+                  </button>
               </div>
             )}
           </div>
@@ -702,12 +829,12 @@ ${actualOutput}
                         >
                           <span className="text-xs mr-2">{tab.name}</span>
                           {tabs.length > 1 && (
-                            <button
+                  <button
                               onClick={(e) => removeTab(tab.id, e)}
                               className="opacity-0 group-hover:opacity-100 p-0.5 rounded-sm hover:bg-[#3c3c3c]"
-                            >
+                  >
                               <X className="h-3 w-3" />
-                            </button>
+                  </button>
                           )}
                         </div>
                       ))}
@@ -730,8 +857,8 @@ ${actualOutput}
                     onChange={setCode} 
                     disableAutoFocus={disableAutoFocus} 
                   />
-                </div>
-                
+              </div>
+
                 {/* Bottom analysis panels - Always visible on desktop, collapsible on mobile */}
                 <div className="h-[200px] md:h-[200px] border-t border-[#3c3c3c] bg-[#1e1e1e] overflow-auto">
                   <div className="flex h-full flex-col md:flex-row">
@@ -784,8 +911,8 @@ ${actualOutput}
                           </div>
                         )}
                       </div>
-                    </div>
-                    
+                  </div>
+
                     {/* Performance Metrics panel */}
                     <div className="flex-1 flex flex-col hidden md:flex">
                       <div className="px-3 py-1.5 bg-[#252526] border-b border-[#3c3c3c] flex items-center justify-between sticky top-0 z-10">
@@ -820,9 +947,9 @@ ${actualOutput}
                     onClick={() => setInputPanelCollapsed(!inputPanelCollapsed)}
                   >
                     <div className="flex items-center">
-                      <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
-                      <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
-                    </div>
+                        <TerminalSquare className="h-3.5 w-3.5 mr-2 text-purple-400" />
+                        <span className="text-xs text-[#f0f0f0] font-medium">Input</span>
+                      </div>
                     <div className="flex items-center">
                       <button className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white">
                         {inputPanelCollapsed ? (
@@ -848,7 +975,7 @@ ${actualOutput}
                     </div>
                   )}
                 </div>
-                
+
                 {/* Console Output panel */}
                 <div className={cn(
                   "flex flex-col border-b border-[#3c3c3c] transition-all duration-300",
@@ -863,14 +990,19 @@ ${actualOutput}
                       <span className="text-xs text-[#f0f0f0] font-medium">Console Output</span>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <button
+                    <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setOutput([]);
+                          setOutput({
+                            stdout: '',
+                            stderr: '',
+                            time: '0.00',
+                            memory: '0'
+                          });
                         }}
                         className="p-0.5 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white transition-colors"
-                        title="Clear console"
-                      >
+                      title="Clear console"
+                    >
                         <X className="h-3.5 w-3.5" />
                       </button>
                       <button className="p-1 rounded-md text-[#8f8f8f] hover:bg-[#3c3c3c] hover:text-white">
@@ -883,59 +1015,71 @@ ${actualOutput}
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                           </svg>
                         )}
-                      </button>
-                    </div>
+                    </button>
+                  </div>
                   </div>
                   {!outputPanelCollapsed && (
-                    <div
-                      ref={outputRef}
+                  <div
+                    ref={outputRef}
                       className="flex-1 bg-[#1e1e1e] p-3 overflow-y-auto scrollbar-thin scrollbar-thumb-[#3c3c3c] scrollbar-track-transparent font-mono text-xs"
-                    >
-                      <AnimatePresence>
-                        {output.length === 0 ? (
-                          <motion.div 
-                            initial={{ opacity: 0 }} 
-                            animate={{ opacity: 1 }} 
-                            className="text-[#8f8f8f] italic flex items-center"
+                  >
+                    <AnimatePresence>
+                      {output.stdout === '' && output.stderr === '' ? (
+                        <motion.div 
+                          initial={{ opacity: 0 }} 
+                          animate={{ opacity: 1 }} 
+                          className="text-[#8f8f8f] italic flex items-center"
+                        >
+                          <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
+                          Write code and click Run to execute it
+                        </motion.div>
+                      ) : (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
                           >
-                            <Play className="h-3 w-3 mr-2 text-[#8f8f8f]" />
-                            Write code and click Run to execute it
-                          </motion.div>
-                        ) : (
-                          output.map((msg, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
-                            >
-                              <div className="flex items-start">
-                                {msg.type === "success" && (
-                                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                            <div className="flex items-start">
+                              {output.stderr !== '' && (
+                                <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+                              )}
+                              <div
+                                className={cn(
+                                  "break-words whitespace-pre-wrap font-mono",
+                                  output.stderr !== '' && "text-red-400",
                                 )}
-                                {msg.type === "error" && (
-                                  <AlertCircle className="h-4 w-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
-                                )}
-                                {msg.type === "info" && (
-                                  <span className="flex-shrink-0 text-blue-400 mr-2">{">"}</span>
-                                )}
-                                <div
-                                  className={cn(
-                                    "break-words whitespace-pre-wrap font-mono",
-                                    msg.type === "success" && "text-green-400",
-                                    msg.type === "error" && "text-red-400",
-                                    msg.type === "info" && "text-blue-400",
-                                  )}
-                                >
-                                  {msg.content}
-                                </div>
+                              >
+                                {output.stderr}
                               </div>
-                              <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{msg.timestamp.toLocaleTimeString()}</div>
-                            </motion.div>
-                          ))
-                        )}
-                      </AnimatePresence>
+                            </div>
+                            <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{new Date(output.time).toLocaleTimeString()}</div>
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="mb-3 pb-2 border-b border-[#3c3c3c] last:border-b-0"
+                          >
+                            <div className="flex items-start">
+                              {output.stdout !== '' && (
+                                <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                              )}
+                              <div
+                                className={cn(
+                                  "break-words whitespace-pre-wrap font-mono",
+                                  output.stdout !== '' && "text-green-400",
+                                )}
+                              >
+                                {output.stdout}
+                              </div>
+                            </div>
+                            <div className="text-[#8f8f8f] text-[10px] mt-1 ml-6">{new Date(output.time).toLocaleTimeString()}</div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                     </div>
                   )}
                 </div>
@@ -972,41 +1116,30 @@ ${actualOutput}
                         language="plaintext"
                         onChange={setExpectedOutput}
                         disableAutoFocus={disableAutoFocus}
-                      />
-                    </div>
-                  )}
-                </div>
-                
+                        />
+                      </div>
+                    )}
+                  </div>
+
                 {/* Run button - Fixed at bottom */}
                 <div className="p-3 bg-[#252526] border-t border-[#3c3c3c] sticky bottom-0 z-10">
-                  <motion.button
-                    onClick={runCode}
-                    disabled={isRunning}
-                    className={cn(
-                      "w-full flex items-center justify-center py-2 px-3 rounded-md text-white font-medium transition-all",
-                      isRunning
-                        ? "bg-purple-700/50 cursor-not-allowed"
-                        : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg shadow-purple-600/20",
-                    )}
-                    whileHover={isRunning ? {} : { scale: 1.02 }}
-                    whileTap={isRunning ? {} : { scale: 0.98 }}
-                  >
-                    {isRunning ? (
-                      <>
-                        <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                        Running...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="h-4 w-4 mr-2" />
-                        Run Code
-                      </>
-                    )}
-                  </motion.button>
+                    <motion.button
+                      onClick={handleRunCode}
+                      disabled={isRunning || isRateLimited}
+                      className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${
+                        isRunning || isRateLimited
+                          ? 'bg-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      }`}
+                      whileHover={isRunning ? {} : { scale: 1.02 }}
+                      whileTap={isRunning ? {} : { scale: 0.98 }}
+                    >
+                      {isRunning ? 'Running...' : isRateLimited ? 'Wait...' : 'Run Code'}
+                    </motion.button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+        )}
         </div>
       </div>
     </section>
