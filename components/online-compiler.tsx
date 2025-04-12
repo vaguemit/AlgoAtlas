@@ -473,31 +473,51 @@ ${actualOutput}
   }
   
   // Download code as a file
+  const getFileExtension = (language: string): string => {
+    const extensionMap: Record<string, string> = {
+      'cpp': 'cpp',
+      'python': 'py',
+      'java': 'java',
+      'javascript': 'js',
+      'c': 'c',
+      'rust': 'rs',
+      'go': 'go',
+      'ruby': 'rb',
+      'kotlin': 'kt',
+      'swift': 'swift',
+      'php': 'php',
+      'typescript': 'ts',
+      'scala': 'scala',
+      'csharp': 'cs'
+    };
+    return extensionMap[language] || 'txt';
+  };
+
   const downloadCode = () => {
     try {
-      const fileExt = language === 'cpp' ? '.cpp' : language === 'python' ? '.py' : '.java'
-      const filename = `algoatlas_code${fileExt}`
+      const fileExt = getFileExtension(language);
+      const filename = `main.${fileExt}`;
       
       // Create a blob with the code content
-      const blob = new Blob([code], { type: 'text/plain;charset=utf-8' })
+      const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
       
       // Create a URL for the blob
-      const url = URL.createObjectURL(blob)
+      const url = URL.createObjectURL(blob);
       
       // Create a temporary link element to trigger the download
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
       
       // Append to body, click, and clean up
-      document.body.appendChild(link)
-      link.click()
+      document.body.appendChild(link);
+      link.click();
       
       // Clean up
       setTimeout(() => {
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-      }, 100)
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
       
       setOutput([
         ...output,
@@ -506,7 +526,7 @@ ${actualOutput}
           content: `Code downloaded as ${filename}`,
           timestamp: new Date()
         }
-      ])
+      ]);
     } catch (error) {
       setOutput([
         ...output,
@@ -515,9 +535,9 @@ ${actualOutput}
           content: "Failed to download code",
           timestamp: new Date()
         }
-      ])
+      ]);
     }
-  }
+  };
 
   // Function to analyze code with AI (Update to check whole code including boilerplate)
   const analyzeCodeWithAI = async () => {
@@ -528,7 +548,11 @@ ${actualOutput}
       const response = await fetch("/api/analyze-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ language, code }),
+        body: JSON.stringify({ 
+          language, 
+          code,
+          languageName: LANGUAGES[language].name // Send the full language name
+        }),
       })
 
       const data = await response.json()
@@ -610,6 +634,56 @@ ${actualOutput}
     );
   }, [language, activeTabId]);
 
+  // Update the file upload handling
+  const handleFileUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      
+      // Map file extension to language
+      const extensionToLanguage: Record<string, string> = {
+        'cpp': 'cpp',
+        'c': 'c',
+        'py': 'python',
+        'java': 'java',
+        'js': 'javascript',
+        'rs': 'rust',
+        'go': 'go',
+        'rb': 'ruby',
+        'kt': 'kotlin',
+        'swift': 'swift',
+        'php': 'php',
+        'ts': 'typescript',
+        'scala': 'scala',
+        'cs': 'csharp'
+      };
+      
+      if (extension && extensionToLanguage[extension]) {
+        setLanguage(extensionToLanguage[extension] as keyof typeof LANGUAGES);
+        setCode(content);
+        setOutput([
+          ...output,
+          {
+            type: "success",
+            content: `File ${file.name} loaded successfully`,
+            timestamp: new Date()
+          }
+        ]);
+      } else {
+        setOutput([
+          ...output,
+          {
+            type: "error",
+            content: `Unsupported file type: ${extension}`,
+            timestamp: new Date()
+          }
+        ]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <section className="fixed inset-0 w-screen h-screen z-50 overflow-auto bg-[#1e1e1e]">
       <div className="h-full w-full flex flex-col">
@@ -658,53 +732,7 @@ ${actualOutput}
                         if (file) {
                           setOutput([{ type: "info", content: `Loading file "${file.name}"...`, timestamp: new Date() }]);
                           
-                          const reader = new FileReader();
-                          
-                          reader.onload = (event) => {
-                            try {
-                              if (event.target?.result) {
-                                const fileContent = event.target.result.toString();
-                                const fileName = file.name.toLowerCase();
-                                let newLang = language;
-                                
-                                if (fileName.endsWith('.cpp') || fileName.endsWith('.h') || fileName.endsWith('.c') || fileName.endsWith('.cc')) {
-                                  newLang = 'cpp';
-                                } else if (fileName.endsWith('.py') || fileName.endsWith('.python')) {
-                                  newLang = 'python';
-                                } else if (fileName.endsWith('.java')) {
-                                  newLang = 'java';
-                                }
-                                
-                                if (newLang !== language) {
-                                  setLanguage(newLang as keyof typeof LANGUAGES);
-                                }
-                                
-                                setCode(fileContent);
-                                
-                                setOutput([{ 
-                                  type: "success", 
-                                  content: `File "${file.name}" loaded successfully`, 
-                                  timestamp: new Date() 
-                                }]);
-                              }
-                            } catch (error) {
-                              setOutput([{ 
-                                type: "error", 
-                                content: `Error processing file: ${error instanceof Error ? error.message : "Unknown error"}`, 
-                                timestamp: new Date() 
-                              }]);
-                            }
-                          };
-                          
-                          reader.onerror = () => {
-                            setOutput([{ 
-                              type: "error", 
-                              content: "Failed to read file. Please try again.", 
-                              timestamp: new Date() 
-                            }]);
-                          };
-                          
-                          reader.readAsText(file);
+                          handleFileUpload(file);
                         }
                         e.target.value = '';
                       }}
