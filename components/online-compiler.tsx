@@ -182,6 +182,27 @@ interface FileTab {
   content: string;
 }
 
+// Utility function to get file extension for a language
+const getFileExtension = (language: string): string => {
+  const extensionMap: Record<string, string> = {
+    'cpp': 'cpp',
+    'python': 'py',
+    'java': 'java',
+    'javascript': 'js',
+    'c': 'c',
+    'rust': 'rs',
+    'go': 'go',
+    'ruby': 'rb',
+    'kotlin': 'kt',
+    'swift': 'swift',
+    'php': 'php',
+    'typescript': 'ts',
+    'scala': 'scala',
+    'csharp': 'cs'
+  };
+  return extensionMap[language] || 'txt';
+};
+
 export function OnlineCompiler({ disableAutoFocus = false }: OnlineCompilerProps) {
   const router = useRouter()
   const { user, loading } = useAuth()
@@ -473,47 +494,21 @@ ${actualOutput}
   }
   
   // Download code as a file
-  const getFileExtension = (language: string): string => {
-    const extensionMap: Record<string, string> = {
-      'cpp': 'cpp',
-      'python': 'py',
-      'java': 'java',
-      'javascript': 'js',
-      'c': 'c',
-      'rust': 'rs',
-      'go': 'go',
-      'ruby': 'rb',
-      'kotlin': 'kt',
-      'swift': 'swift',
-      'php': 'php',
-      'typescript': 'ts',
-      'scala': 'scala',
-      'csharp': 'cs'
-    };
-    return extensionMap[language] || 'txt';
-  };
-
   const downloadCode = () => {
     try {
-      const fileExt = getFileExtension(language);
-      const filename = `main.${fileExt}`;
+      const activeTab = tabs.find(tab => tab.id === activeTabId);
+      const filename = activeTab?.name || `main.${getFileExtension(language)}`;
       
       // Create a blob with the code content
       const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
-      
-      // Create a URL for the blob
       const url = URL.createObjectURL(blob);
-      
-      // Create a temporary link element to trigger the download
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       
-      // Append to body, click, and clean up
       document.body.appendChild(link);
       link.click();
       
-      // Clean up
       setTimeout(() => {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
@@ -572,13 +567,13 @@ ${actualOutput}
   // Function to add a new tab
   const addNewTab = () => {
     const newTabId = (tabs.length + 1).toString();
+    const fileExt = getFileExtension(language);
     
-    // Default to cpp but can be changed
     const newTab: FileTab = {
       id: newTabId,
-      name: `file${newTabId}.cpp`,
-      language: 'cpp',
-      content: LANGUAGES.cpp.defaultCode
+      name: `main.${fileExt}`,
+      language: language,
+      content: LANGUAGES[language].defaultCode
     };
     
     setTabs([...tabs, newTab]);
@@ -626,11 +621,17 @@ ${actualOutput}
   // Update tab language when language changes
   useEffect(() => {
     setTabs(prevTabs => 
-      prevTabs.map(tab => 
-        tab.id === activeTabId 
-          ? { ...tab, language } 
-          : tab
-      )
+      prevTabs.map(tab => {
+        if (tab.id === activeTabId) {
+          const fileExt = getFileExtension(language);
+          return { 
+            ...tab, 
+            language,
+            name: `main.${fileExt}` // Update the file name with correct extension
+          };
+        }
+        return tab;
+      })
     );
   }, [language, activeTabId]);
 
@@ -660,8 +661,22 @@ ${actualOutput}
       };
       
       if (extension && extensionToLanguage[extension]) {
-        setLanguage(extensionToLanguage[extension] as keyof typeof LANGUAGES);
+        const newLanguage = extensionToLanguage[extension] as keyof typeof LANGUAGES;
+        setLanguage(newLanguage);
+        
+        // Create a new tab with the original file name
+        const newTabId = (tabs.length + 1).toString();
+        const newTab: FileTab = {
+          id: newTabId,
+          name: file.name, // Use the original file name
+          language: newLanguage,
+          content: content
+        };
+        
+        setTabs([...tabs, newTab]);
+        setActiveTabId(newTabId);
         setCode(content);
+        
         setOutput([
           ...output,
           {
