@@ -29,10 +29,13 @@ function debounce<T extends (...args: any[]) => any>(
 const LANGUAGES = {
   cpp: {
     name: "C++",
-    defaultCode: `#include <iostream>
+    defaultCode: `#include <bits/stdc++.h>
 using namespace std;
 
 int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    
     // Your code here
     
     return 0;
@@ -40,11 +43,112 @@ int main() {
   },
   python: {
     name: "Python",
-    defaultCode: "",
+    defaultCode: `# Your Python code here
+def solve():
+    # Add your solution here
+    pass
+
+if __name__ == "__main__":
+    solve()`,
   },
   java: {
     name: "Java",
-    defaultCode: "",
+    defaultCode: `import java.util.*;
+import java.io.*;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        
+        // Your code here
+        
+        sc.close();
+    }
+}`,
+  },
+  c: {
+    name: "C",
+    defaultCode: `#include <stdio.h>
+
+int main() {
+    // Your code here
+    
+    return 0;
+}`,
+  },
+  rust: {
+    name: "Rust",
+    defaultCode: `fn main() {
+    // Your code here
+}`,
+  },
+  go: {
+    name: "Go",
+    defaultCode: `package main
+
+import "fmt"
+
+func main() {
+    // Your code here
+}`,
+  },
+  ruby: {
+    name: "Ruby",
+    defaultCode: `# Your Ruby code here
+def solve
+    # Add your solution here
+end
+
+solve`,
+  },
+  kotlin: {
+    name: "Kotlin",
+    defaultCode: `fun main() {
+    // Your code here
+}`,
+  },
+  swift: {
+    name: "Swift",
+    defaultCode: `// Your Swift code here
+func solve() {
+    // Add your solution here
+}
+
+solve()`,
+  },
+  php: {
+    name: "PHP",
+    defaultCode: `<?php
+// Your PHP code here
+function solve() {
+    // Add your solution here
+}
+
+solve();`,
+  },
+  typescript: {
+    name: "TypeScript",
+    defaultCode: `function solve(): void {
+    // Your code here
+}
+
+solve();`,
+  },
+  scala: {
+    name: "Scala",
+    defaultCode: `object Main extends App {
+    // Your code here
+}`,
+  },
+  csharp: {
+    name: "C#",
+    defaultCode: `using System;
+
+class Program {
+    static void Main(string[] args) {
+        // Your code here
+    }
+}`,
   },
 }
 

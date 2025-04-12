@@ -12,6 +12,16 @@ const PISTON_LANGUAGE_MAP: Record<string, { language: string, version: string }>
   'python': { language: 'python', version: '3.10.0' },
   'java': { language: 'java', version: '17.0.5' },
   'javascript': { language: 'nodejs', version: '18.15.0' },
+  'c': { language: 'c', version: '10.2.0' },
+  'rust': { language: 'rust', version: '1.68.2' },
+  'go': { language: 'go', version: '1.19.5' },
+  'ruby': { language: 'ruby', version: '3.2.1' },
+  'kotlin': { language: 'kotlin', version: '1.8.20' },
+  'swift': { language: 'swift', version: '5.8' },
+  'php': { language: 'php', version: '8.2.3' },
+  'typescript': { language: 'typescript', version: '5.0.3' },
+  'scala': { language: 'scala', version: '3.2.2' },
+  'csharp': { language: 'csharp', version: '6.12.0' }
 };
 
 export async function POST(req: NextRequest) {
@@ -49,6 +59,27 @@ export async function POST(req: NextRequest) {
     // Start execution timestamp for performance metrics
     const startTime = performance.now();
 
+    // Update file extension mapping in the execute function
+    const getFileExtension = (lang: string): string => {
+      const extensionMap: Record<string, string> = {
+        'cpp': 'cpp',
+        'python': 'py',
+        'java': 'java',
+        'javascript': 'js',
+        'c': 'c',
+        'rust': 'rs',
+        'go': 'go',
+        'ruby': 'rb',
+        'kotlin': 'kt',
+        'swift': 'swift',
+        'php': 'php',
+        'typescript': 'ts',
+        'scala': 'scala',
+        'csharp': 'cs'
+      };
+      return extensionMap[lang] || 'txt';
+    };
+
     // Submit code to Piston API
     const executionResponse = await fetch(`${PISTON_API_URL}/execute`, {
       method: 'POST',
@@ -60,10 +91,7 @@ export async function POST(req: NextRequest) {
         version: pistonLang.version,
         files: [
           {
-            name: language === 'cpp' ? 'main.cpp' : 
-                  language === 'python' ? 'main.py' :
-                  language === 'java' ? 'Main.java' :
-                  language === 'javascript' ? 'main.js' : 'main.txt',
+            name: `main.${getFileExtension(language)}`,
             content: submissionCode,
           }
         ],
