@@ -47,10 +47,10 @@ export function PerformanceMetrics({
       if (execTime > 1.0) {
         category = 'Slow'
         color = '#f87171' // Red
-      } else if (execTime > 0.5) {
+      } else if (execTime > 0.1) {
         category = 'Average'
         color = '#fbbf24' // Yellow
-      } else if (execTime > 0.1) {
+      } else if (execTime > 0.01) {
         category = 'Good'
         color = '#60a5fa' // Blue
       }

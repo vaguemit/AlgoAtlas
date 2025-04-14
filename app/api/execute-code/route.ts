@@ -120,6 +120,9 @@ export async function POST(req: NextRequest) {
     const endTime = performance.now();
     const executionTime = (endTime - startTime) / 1000; // Convert to seconds
 
+    // Use the actual execution time from Piston API if available
+    const actualExecutionTime = result.run?.time || 0;
+
     // Determine execution status
     let status = 'Accepted';
     if (result.compile && result.compile.stderr) {
@@ -151,8 +154,8 @@ export async function POST(req: NextRequest) {
       output: result.run?.stdout || '',
       error: result.run?.stderr || result.compile?.stderr || '',
       status: status,
-      executionTime: result.run?.time || executionTime,
-      memoryUsed: estimatedMemory, // Use estimated memory
+      executionTime: actualExecutionTime, // Use the actual execution time from Piston
+      memoryUsed: result.run?.memory || estimatedMemory, // Use actual memory if available, fallback to estimate
       complexityAnalysis
     };
 

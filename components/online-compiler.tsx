@@ -511,7 +511,7 @@ ${actualOutput}
       
       setTimeout(() => {
         document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
       }, 100);
       
       setOutput([
@@ -722,7 +722,7 @@ ${actualOutput}
             
               <div className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-blue-300">
                 AlgoAtlas Compiler
-              </div>
+            </div>
               {user && (
                   <select
                     value={language}
