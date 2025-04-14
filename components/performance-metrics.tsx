@@ -76,7 +76,8 @@ export function PerformanceMetrics({
   const safeNumberFormat = (value: number | string | null | undefined, decimals = 3, suffix = ''): string => {
     if (value === null || value === undefined) return 'N/A'
     const numValue = typeof value === 'string' ? parseFloat(value) : value
-    if (isNaN(numValue) || numValue === 0) return 'N/A'
+    if (isNaN(numValue)) return 'N/A'
+    // Always show the value, even if it's 0
     return `${numValue.toFixed(decimals)}${suffix}`
   }
 
