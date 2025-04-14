@@ -149,13 +149,16 @@ export async function POST(req: NextRequest) {
       ? analyzeComplexity(code, language)
       : undefined;
 
+    // Ensure we have a valid execution time
+    const actualExecutionTime = result.run?.time || 0.001; // Default to 1ms if no time reported
+
     // Build response
     const response: CompilerResponse = {
       output: result.run?.stdout || '',
       error: result.run?.stderr || result.compile?.stderr || '',
       status: status,
-      executionTime: actualExecutionTime, // Use the actual execution time from Piston
-      memoryUsed: result.run?.memory || estimatedMemory, // Use actual memory if available, fallback to estimate
+      executionTime: actualExecutionTime,
+      memoryUsed: result.run?.memory || estimatedMemory,
       complexityAnalysis
     };
 

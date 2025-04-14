@@ -38,27 +38,24 @@ export function PerformanceMetrics({
       ])
     }
     
-    // Prepare execution time data for visualization
-    if (execTime > 0) {
-      // Categorize execution time for comparison
-      let category = 'Excellent'
-      let color = '#4ade80' // Green
-      
-      if (execTime > 1.0) {
-        category = 'Slow'
-        color = '#f87171' // Red
-      } else if (execTime > 0.1) {
-        category = 'Average'
-        color = '#fbbf24' // Yellow
-      } else if (execTime > 0.01) {
-        category = 'Good'
-        color = '#60a5fa' // Blue
-      }
-      
-      setTimeData([
-        { name: 'Execution Time', value: execTime, category, color }
-      ])
+    // Always prepare execution time data
+    let category = 'Excellent'
+    let color = '#4ade80' // Green
+    
+    if (execTime > 1.0) {
+      category = 'Slow'
+      color = '#f87171' // Red
+    } else if (execTime > 0.1) {
+      category = 'Average'
+      color = '#fbbf24' // Yellow
+    } else if (execTime > 0.01) {
+      category = 'Good'
+      color = '#60a5fa' // Blue
     }
+    
+    setTimeData([
+      { name: 'Execution Time', value: execTime, category, color }
+    ])
   }, [execTime, memUsed])
   
   // Helper function to format bytes to readable format
@@ -77,7 +74,6 @@ export function PerformanceMetrics({
     if (value === null || value === undefined) return 'N/A'
     const numValue = typeof value === 'string' ? parseFloat(value) : value
     if (isNaN(numValue)) return 'N/A'
-    // Always show the value, even if it's 0
     return `${numValue.toFixed(decimals)}${suffix}`
   }
 
