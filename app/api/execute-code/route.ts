@@ -120,8 +120,8 @@ export async function POST(req: NextRequest) {
     const endTime = performance.now();
     const executionTime = (endTime - startTime) / 1000; // Convert to seconds
 
-    // Use the actual execution time from Piston API if available
-    const actualExecutionTime = result.run?.time || 0;
+    // Use the actual execution time from Piston API if available, with a minimum of 1ms
+    const actualExecutionTime = result.run?.time || 0.001;
 
     // Determine execution status
     let status = 'Accepted';
@@ -148,9 +148,6 @@ export async function POST(req: NextRequest) {
     const complexityAnalysis = shouldAnalyzeComplexity 
       ? analyzeComplexity(code, language)
       : undefined;
-
-    // Ensure we have a valid execution time
-    const actualExecutionTime = result.run?.time || 0.001; // Default to 1ms if no time reported
 
     // Build response
     const response: CompilerResponse = {
