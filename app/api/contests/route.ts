@@ -60,7 +60,11 @@ async function fetchCodeforcesContests(): Promise<Contest[]> {
 
     // Get upcoming contests
     const upcomingContests = data.result
-      .filter((contest) => contest.phase === "BEFORE")
+      .filter((contest) => {
+        const contestStartTime = contest.startTimeSeconds * 1000
+        const contestEndTime = contestStartTime + (contest.durationSeconds * 1000)
+        return contestStartTime > now
+      })
       .slice(0, 10) // Limit to 10 contests
       .map((contest) => ({
         id: `cf-${contest.id}`,
@@ -76,8 +80,9 @@ async function fetchCodeforcesContests(): Promise<Contest[]> {
     // Get recently ended contests
     const endedContests = data.result
       .filter((contest) => {
-        const contestTime = contest.startTimeSeconds * 1000
-        return contest.phase === "FINISHED" && contestTime > oneWeekAgo
+        const contestStartTime = contest.startTimeSeconds * 1000
+        const contestEndTime = contestStartTime + (contest.durationSeconds * 1000)
+        return contestEndTime < now && contestStartTime > oneWeekAgo
       })
       .slice(0, 5) // Limit to 5 contests
       .map((contest) => ({
@@ -101,8 +106,6 @@ async function fetchCodeforcesContests(): Promise<Contest[]> {
 // Fetch contests from CodeChef
 async function fetchCodechefContests(): Promise<Contest[]> {
   try {
-    // This is a simplified approach - in a production app, you might want to use
-    // server-side scraping or a more robust solution
     const response = await fetch(
       "https://www.codechef.com/api/list/contests/all?sort_by=START&sorting_order=asc&offset=0&mode=all",
     )
@@ -115,6 +118,7 @@ async function fetchCodechefContests(): Promise<Contest[]> {
     // Add upcoming contests
     if (data.future_contests) {
       const upcomingContests = data.future_contests
+        .filter((contest) => new Date(contest.contest_start_date_iso).getTime() > now)
         .slice(0, 10) // Limit to 10 contests
         .map((contest) => ({
           id: `cc-${contest.contest_code}`,
@@ -135,7 +139,10 @@ async function fetchCodechefContests(): Promise<Contest[]> {
     // Add recently ended contests
     if (data.past_contests) {
       const endedContests = data.past_contests
-        .filter((contest) => new Date(contest.contest_end_date_iso).getTime() > oneWeekAgo)
+        .filter((contest) => {
+          const endTime = new Date(contest.contest_end_date_iso).getTime()
+          return endTime < now && endTime > oneWeekAgo
+        })
         .slice(0, 5) // Limit to 5 contests
         .map((contest) => ({
           id: `cc-${contest.contest_code}`,
