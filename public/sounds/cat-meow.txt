@@ -1,0 +1,12 @@
+To complete this feature, you'll need to download a cat meow sound effect:
+
+1. Download a cat meow sound from one of these sources:
+   - https://soundbible.com/1290-Cat-Meowing.html
+   - https://mixkit.co/free-sound-effects/cat/ (Sweet kitty meow)
+   - Or search for "free cat meow sound effect" on Google
+
+2. Convert the sound file to MP3 format if needed
+
+3. Place the MP3 file in this directory with the filename "cat-meow.mp3"
+
+The cursor-following-character.tsx component is already configured to use this sound file when the 3D cat is clicked. 
